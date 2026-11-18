@@ -1,0 +1,13 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DropCut.App/DropCut.App.csproj" />
+    <Project Path="src/DropCut.Core/DropCut.Core.csproj" />
+    <Project Path="src/DropCut.Infrastructure/DropCut.Infrastructure.csproj" />
+    <Project Path="src/DropCut.Modules/DropCut.Modules.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/DropCut.App.Tests/DropCut.App.Tests.csproj" />
+    <Project Path="tests/DropCut.Core.Tests/DropCut.Core.Tests.csproj" />
+    <Project Path="tests/DropCut.Modules.Tests/DropCut.Modules.Tests.csproj" />
+  </Folder>
+</Solution>

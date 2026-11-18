@@ -1,0 +1,78 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "stop-running-app",
+            "type": "shell",
+            "command": "powershell -NoProfile -Command \"Stop-Process -Name 'DropCut.App', 'netcoredbg' -Force -ErrorAction SilentlyContinue\"",
+            "presentation": {
+                "reveal": "silent"
+            }
+        },
+        {
+            "label": "build",
+            "dependsOn": "stop-running-app",
+            "command": "dotnet",
+            "type": "shell",
+            "args": [
+                "build"
+            ],
+            "options": {
+                "environmentVariables": {
+                    "DOTNET_ROOT": "C:\\Users\\ZAACO\\.dotnet",
+                    "PATH": "C:\\Users\\ZAACO\\.dotnet;${env:PATH}"
+                }
+            },
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            },
+            "problemMatcher": "$msCompile"
+        },
+        {
+            "label": "test",
+            "command": "dotnet",
+            "type": "shell",
+            "args": [
+                "test",
+                "--no-build"
+            ],
+            "options": {
+                "environmentVariables": {
+                    "DOTNET_ROOT": "C:\\Users\\ZAACO\\.dotnet",
+                    "PATH": "C:\\Users\\ZAACO\\.dotnet;${env:PATH}"
+                }
+            },
+            "group": {
+                "kind": "test",
+                "isDefault": true
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            }
+        },
+        {
+            "label": "restore",
+            "command": "dotnet",
+            "type": "shell",
+            "args": [
+                "restore"
+            ],
+            "options": {
+                "environmentVariables": {
+                    "DOTNET_ROOT": "C:\\Users\\ZAACO\\.dotnet",
+                    "PATH": "C:\\Users\\ZAACO\\.dotnet;${env:PATH}"
+                }
+            },
+            "presentation": {
+                "reveal": "always",
+                "panel": "new"
+            }
+        }
+    ]
+}

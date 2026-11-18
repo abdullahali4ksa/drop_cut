@@ -1,0 +1,47 @@
+# ============================================
+# .NET / C# / MSBuild
+# ============================================
+bin/
+obj/
+artifacts/
+
+# NuGet
+packages/
+*.nuget.props
+*.nuget.targets
+
+# Visual Studio & VS Code
+.vs/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+**/.vscode/*
+!**/.vscode/settings.json
+!**/.vscode/tasks.json
+!**/.vscode/launch.json
+!**/.vscode/extensions.json
+
+# Windows temporary / local files
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msm
+*.msp
+*.tmp
+*.log
+crash.log
+
+# WinUI / AppX / MSIX packaging output
+AppPackages/
+BundleArtifacts/
+Package.StoreAssociation.xml
+_pkginfo.txt
+*.appx
+*.appxbundle
+*.msix
+*.msixbundle

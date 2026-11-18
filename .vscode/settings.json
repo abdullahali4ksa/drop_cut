@@ -1,0 +1,32 @@
+{
+    "editor.formatOnSave": true,
+    "files.associations": {
+        "*.csproj": "xml",
+        "*.props": "xml",
+        "*.targets": "xml",
+        "*.sln": "xml",
+        "*.xaml": "xml"
+    },
+    "files.exclude": {
+        "**/bin": true,
+        "**/obj": true,
+        "**/*.user": true,
+        "**/*.cache": true,
+        "**/*.suo": true,
+        "**/.vs": true
+    },
+    "search.exclude": {
+        "**/bin": true,
+        "**/obj": true,
+        "**/*.cache": true
+    },
+    "search.useIgnoreFiles": true,
+    "search.useGlobalIgnoreFiles": true,
+    "search.useWorkspaceIgnoreFiles": true,
+    "breadcrumbs.enabled": true,
+    "breadcrumbs.filePath": "on",
+    "breadcrumbs.around": true,
+    "breadcrumbs.icons": true,
+    "telemetry.enableTelemetry": false,
+    "telemetry.enableCrashReporter": false
+}
