@@ -11,6 +11,8 @@ using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Shapes;
 using Windows.ApplicationModel.DataTransfer;
+using Windows.Foundation;
+using Windows.Storage;
 using Windows.Storage.Streams;
 using Windows.System;
 using Windows.UI;
@@ -20,7 +22,7 @@ namespace DropCut.App;
 
 /// <summary>
 /// Root application shell window hosting the multi-tab layout, Snipping Tool ribbon,
-/// interactive in-canvas drawing, OCR extraction, and background global hotkeys.
+/// interactive in-canvas drawing, in-tab image cropping, external Drag &amp; Drop sharing, and global hotkeys.
 /// </summary>
 public sealed partial class MainWindow : Window
 {
@@ -32,6 +34,14 @@ public sealed partial class MainWindow : Window
 
     private Polyline? _activePolyline;
     private Canvas? _activeDrawingCanvas;
+
+    // In-tab cropping state
+    private Point _tabCropStart;
+    private double _tabCropX;
+    private double _tabCropY;
+    private double _tabCropW;
+    private double _tabCropH;
+    private bool _isTabCropDragging;
 
     public MainWindow(
         ShellViewModel viewModel,
@@ -121,7 +131,7 @@ public sealed partial class MainWindow : Window
     }
 
     // ==========================================
-    // 2. Professional Sniper Overlay Launcher
+    // 2. Professional Sniper Overlay Launcher (Desktop Snip)
     // ==========================================
     private async void StartSnippingOverlayAsync(CaptureMode mode)
     {
@@ -177,6 +187,7 @@ public sealed partial class MainWindow : Window
                 tab.ImageBytes = bytes;
                 tab.ImageWidth = width;
                 tab.ImageHeight = height;
+                tab.IsCropping = false;
                 tab.AutoSaveStatus = $"تم أخذ لقطة الشاشة ({width} × {height} بكسل) وحفظها بالذاكرة";
             }
 
@@ -208,7 +219,293 @@ public sealed partial class MainWindow : Window
         StartSnippingOverlayAsync(CaptureMode.Freeform);
 
     // ==========================================
-    // 3. Ribbon Tools: Pen, Highlighter, Eraser, Ruler, OCR, Crop
+    // 3. External Drag & Drop Sharing to WhatsApp / Telegram / Explorer
+    // ==========================================
+    private async Task PrepareDataPackageForDragAsync(ShellTabModel? tab, DataPackage data)
+    {
+        if (tab?.ImageBytes is not { Length: > 0 } bytes)
+        {
+            return;
+        }
+
+        try
+        {
+            data.RequestedOperation = DataPackageOperation.Copy | DataPackageOperation.Link;
+
+            // 1. Create a persistent temporary PNG file so Windows File Explorer, WhatsApp, Telegram, Outlook, Discord receive real file drops!
+            var tempFolder = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "DropCut");
+            System.IO.Directory.CreateDirectory(tempFolder);
+            var safeTitle = string.Join("_", tab.Title.Split(System.IO.Path.GetInvalidFileNameChars()));
+            var fileName = $"{safeTitle}_{DateTime.Now:yyyyMMdd_HHmmss}.png";
+            var filePath = System.IO.Path.Combine(tempFolder, fileName);
+            System.IO.File.WriteAllBytes(filePath, bytes);
+
+            var storageFile = await StorageFile.GetFileFromPathAsync(filePath);
+            data.SetStorageItems(new[] { storageFile });
+
+            // 2. Also attach direct Bitmap RandomAccessStream for apps that accept bitmap drag/drop
+            var stream = new InMemoryRandomAccessStream();
+            using (var writer = new DataWriter(stream))
+            {
+                writer.WriteBytes(bytes);
+                await writer.StoreAsync();
+                writer.DetachStream();
+            }
+            stream.Seek(0);
+            data.SetBitmap(RandomAccessStreamReference.CreateFromStream(stream));
+
+            // 3. Text fallback
+            data.SetText(filePath);
+        }
+        catch (Exception)
+        {
+            // Protected Zero-Crash boundary
+        }
+    }
+
+    private async void TabItem_DragStarting(UIElement sender, DragStartingEventArgs args)
+    {
+        var deferral = args.GetDeferral();
+        try
+        {
+            var tab = (sender as FrameworkElement)?.DataContext as ShellTabModel ?? ViewModel.SelectedTab;
+            await PrepareDataPackageForDragAsync(tab, args.Data);
+            NotifyToolChange("جارٍ سحب الصورة ومشاركتها...");
+        }
+        catch (Exception) { }
+        finally
+        {
+            deferral.Complete();
+        }
+    }
+
+    private async void ImageContainer_DragStarting(UIElement sender, DragStartingEventArgs args)
+    {
+        var deferral = args.GetDeferral();
+        try
+        {
+            var tab = ViewModel.SelectedTab;
+            await PrepareDataPackageForDragAsync(tab, args.Data);
+            NotifyToolChange("جارٍ سحب الصورة ومشاركتها...");
+        }
+        catch (Exception) { }
+        finally
+        {
+            deferral.Complete();
+        }
+    }
+
+    private async void ShareButton_DragStarting(UIElement sender, DragStartingEventArgs args)
+    {
+        var deferral = args.GetDeferral();
+        try
+        {
+            var tab = ViewModel.SelectedTab;
+            await PrepareDataPackageForDragAsync(tab, args.Data);
+            NotifyToolChange("جارٍ سحب ومشاركة اللقطة إلى تطبيق خارجي...");
+        }
+        catch (Exception) { }
+        finally
+        {
+            deferral.Complete();
+        }
+    }
+
+    private void MainTabView_DragOver(object sender, DragEventArgs e)
+    {
+        try
+        {
+            if (e.DataView.Contains(StandardDataFormats.StorageItems))
+            {
+                e.AcceptedOperation = DataPackageOperation.Copy;
+            }
+        }
+        catch { }
+    }
+
+    private async void MainTabView_Drop(object sender, DragEventArgs e)
+    {
+        try
+        {
+            if (e.DataView.Contains(StandardDataFormats.StorageItems))
+            {
+                var items = await e.DataView.GetStorageItemsAsync();
+                foreach (var item in items)
+                {
+                    if (item is StorageFile file && (file.FileType.Equals(".png", StringComparison.OrdinalIgnoreCase) ||
+                                                    file.FileType.Equals(".jpg", StringComparison.OrdinalIgnoreCase) ||
+                                                    file.FileType.Equals(".bmp", StringComparison.OrdinalIgnoreCase)))
+                    {
+                        using var stream = await file.OpenStreamForReadAsync();
+                        using var ms = new MemoryStream();
+                        await stream.CopyToAsync(ms);
+                        var bytes = ms.ToArray();
+
+                        ViewModel.AddNewTab();
+                        if (ViewModel.SelectedTab != null)
+                        {
+                            ViewModel.SelectedTab.Title = file.Name;
+                            ViewModel.SelectedTab.ImageBytes = bytes;
+                            ViewModel.SelectedTab.AutoSaveStatus = $"تم تحميل الصورة من {file.Name}";
+                        }
+                    }
+                }
+            }
+        }
+        catch (Exception)
+        {
+            // Protected Zero-Crash boundary
+        }
+    }
+
+    // ==========================================
+    // 4. In-Tab Crop Feature (Crops the Current Tab Image)
+    // ==========================================
+    private void ToolCrop_Click(object sender, RoutedEventArgs e)
+    {
+        var tab = ViewModel.SelectedTab;
+        if (tab?.ImageBytes is not { Length: > 0 })
+        {
+            NotifyToolChange("يرجى أخذ لقطة شاشة أولاً أو اختيار لسان يحتوي على صورة لاقتصاصها");
+            return;
+        }
+
+        tab.IsCropping = !tab.IsCropping;
+        if (tab.IsCropping)
+        {
+            NotifyToolChange("وضع اقتصاص الصورة الحالية: اسحب بالفأرة فوق الصورة لتحديد منطقة القص ثم اضغط 'تطبيق القص'");
+        }
+        else
+        {
+            NotifyToolChange("تم إغلاق وضع الاقتصاص");
+        }
+    }
+
+    private void CropCanvas_PointerPressed(object sender, PointerRoutedEventArgs e)
+    {
+        try
+        {
+            if (sender is not Canvas canvas) return;
+            _tabCropStart = e.GetCurrentPoint(canvas).Position;
+            _isTabCropDragging = true;
+
+            var box = FindChildByTag<Border>(canvas, "InTabCropBox");
+            var bar = FindChildByTag<StackPanel>(canvas, "InTabCropActionBar");
+            if (box != null)
+            {
+                box.Visibility = Visibility.Visible;
+                Canvas.SetLeft(box, _tabCropStart.X);
+                Canvas.SetTop(box, _tabCropStart.Y);
+                box.Width = 0;
+                box.Height = 0;
+            }
+            if (bar != null)
+            {
+                bar.Visibility = Visibility.Collapsed;
+            }
+        }
+        catch (Exception) { }
+    }
+
+    private void CropCanvas_PointerMoved(object sender, PointerRoutedEventArgs e)
+    {
+        try
+        {
+            if (!_isTabCropDragging || sender is not Canvas canvas) return;
+            var cur = e.GetCurrentPoint(canvas).Position;
+            _tabCropX = Math.Min(_tabCropStart.X, cur.X);
+            _tabCropY = Math.Min(_tabCropStart.Y, cur.Y);
+            _tabCropW = Math.Abs(cur.X - _tabCropStart.X);
+            _tabCropH = Math.Abs(cur.Y - _tabCropStart.Y);
+
+            var box = FindChildByTag<Border>(canvas, "InTabCropBox");
+            if (box != null)
+            {
+                Canvas.SetLeft(box, _tabCropX);
+                Canvas.SetTop(box, _tabCropY);
+                box.Width = _tabCropW;
+                box.Height = _tabCropH;
+            }
+        }
+        catch (Exception) { }
+    }
+
+    private void CropCanvas_PointerReleased(object sender, PointerRoutedEventArgs e)
+    {
+        try
+        {
+            if (!_isTabCropDragging || sender is not Canvas canvas) return;
+            _isTabCropDragging = false;
+
+            var bar = FindChildByTag<StackPanel>(canvas, "InTabCropActionBar");
+            if (bar != null && _tabCropW > 15 && _tabCropH > 15)
+            {
+                Canvas.SetLeft(bar, _tabCropX);
+                Canvas.SetTop(bar, Math.Max(0, _tabCropY + _tabCropH + 8));
+                bar.Visibility = Visibility.Visible;
+            }
+        }
+        catch (Exception) { }
+    }
+
+    private void BtnApplyInTabCrop_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var tab = ViewModel.SelectedTab;
+            if (tab?.ImageBytes is not { Length: > 0 } bytes || _tabCropW <= 10 || _tabCropH <= 10)
+            {
+                return;
+            }
+
+            var cropped = _screenCaptureService.CropBitmap(bytes, (int)_tabCropX, (int)_tabCropY, (int)_tabCropW, (int)_tabCropH);
+            if (cropped is { Length: > 0 })
+            {
+                tab.ImageBytes = cropped;
+                tab.ImageWidth = (int)_tabCropW;
+                tab.ImageHeight = (int)_tabCropH;
+                tab.IsCropping = false;
+                NotifyToolChange($"تم اقتصاص الصورة الحالية بنجاح إلى ({tab.ImageWidth} × {tab.ImageHeight} بكسل)");
+                CopyCurrentTabImage();
+            }
+        }
+        catch (Exception)
+        {
+            // Protected Zero-Crash boundary
+        }
+    }
+
+    private void BtnCancelInTabCrop_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            if (ViewModel.SelectedTab is not null)
+            {
+                ViewModel.SelectedTab.IsCropping = false;
+                NotifyToolChange("تم إلغاء الاقتصاص");
+            }
+        }
+        catch (Exception) { }
+    }
+
+    private static T? FindChildByTag<T>(DependencyObject parent, string tag) where T : FrameworkElement
+    {
+        var count = VisualTreeHelper.GetChildrenCount(parent);
+        for (int i = 0; i < count; i++)
+        {
+            var child = VisualTreeHelper.GetChild(parent, i);
+            if (child is T element && string.Equals(element.Tag?.ToString(), tag, StringComparison.OrdinalIgnoreCase))
+            {
+                return element;
+            }
+            var deeper = FindChildByTag<T>(child, tag);
+            if (deeper != null) return deeper;
+        }
+        return null;
+    }
+
+    // ==========================================
+    // 5. Ribbon Tools: Pen, Highlighter, Eraser, Ruler, OCR
     // ==========================================
     private void PenRed_Click(object sender, RoutedEventArgs e)
     {
@@ -304,12 +601,6 @@ public sealed partial class MainWindow : Window
         }
     }
 
-    private void ToolCrop_Click(object sender, RoutedEventArgs e)
-    {
-        ViewModel.ActiveTool = ToolType.Crop;
-        StartSnippingOverlayAsync(CaptureMode.Rectangular);
-    }
-
     private void NotifyToolChange(string message)
     {
         if (ViewModel.SelectedTab is not null)
@@ -319,12 +610,13 @@ public sealed partial class MainWindow : Window
     }
 
     // ==========================================
-    // 4. In-Canvas Interactive Drawing Handlers
+    // 6. In-Canvas Interactive Drawing Handlers
     // ==========================================
     private void AnnotationCanvas_PointerPressed(object sender, PointerRoutedEventArgs e)
     {
         try
         {
+            if (ViewModel.SelectedTab?.IsCropping == true) return;
             if (sender is not Canvas canvas) return;
             _activeDrawingCanvas = canvas;
 
@@ -357,7 +649,7 @@ public sealed partial class MainWindow : Window
     {
         try
         {
-            if (_activePolyline != null && sender is Canvas canvas)
+            if (_activePolyline != null && sender is Canvas canvas && ViewModel.SelectedTab?.IsCropping != true)
             {
                 var pt = e.GetCurrentPoint(canvas).Position;
                 _activePolyline.Points.Add(pt);
@@ -407,7 +699,7 @@ public sealed partial class MainWindow : Window
     }
 
     // ==========================================
-    // 5. Actions: Undo, Redo, Save, Copy, Share
+    // 7. Actions: Undo, Redo, Save, Copy, Share
     // ==========================================
     private void ActionUndo_Click(object sender, RoutedEventArgs e)
     {
@@ -426,10 +718,8 @@ public sealed partial class MainWindow : Window
         catch (Exception) { }
     }
 
-    private void ActionRedo_Click(object sender, RoutedEventArgs e)
-    {
+    private void ActionRedo_Click(object sender, RoutedEventArgs e) =>
         NotifyToolChange("إعادة (Redo)");
-    }
 
     private void ActionSave_Click(object sender, RoutedEventArgs e) => SaveCurrentTabImage();
 
@@ -440,7 +730,7 @@ public sealed partial class MainWindow : Window
         try
         {
             CopyCurrentTabImage();
-            NotifyToolChange("تم النسخ للحافظة — جاهز للمشاركة واللصق المباشر في أي برنامج");
+            NotifyToolChange("تم النسخ للحافظة — يمكنك أيضاً سحب التاب أو الصورة مباشرة إلى WhatsApp أو Telegram أو المستكشف");
         }
         catch (Exception) { }
     }
@@ -521,7 +811,7 @@ public sealed partial class MainWindow : Window
     }
 
     // ==========================================
-    // 6. TabView Management & Context Menus
+    // 8. TabView Management & Context Menus
     // ==========================================
     private void MainTabView_TabCloseRequested(TabView sender, TabViewTabCloseRequestedEventArgs args)
     {

@@ -142,11 +142,11 @@
                         </ToolTipService.ToolTip>
                     </Button>
 
-                    <!-- Crop Tool -->
+                    <!-- Crop Tool (Crops current open image) -->
                     <Button Width="36" Height="36" Padding="0" Click="ToolCrop_Click">
                         <FontIcon Glyph="&#xE7A8;" FontSize="14" />
                         <ToolTipService.ToolTip>
-                            <ToolTip Content="قص أبعاد الصورة / Image Crop" />
+                            <ToolTip Content="اقتصاص الصورة الحالية في اللسان / Crop Current Image" />
                         </ToolTipService.ToolTip>
                     </Button>
                 </StackPanel>
@@ -183,10 +183,14 @@
                         </ToolTipService.ToolTip>
                     </Button>
 
-                    <Button Width="36" Height="36" Padding="0" Click="ActionShare_Click">
+                    <!-- Drag & Share button: draggable directly into external apps -->
+                    <Button Width="36" Height="36" Padding="0"
+                            Click="ActionShare_Click"
+                            CanDrag="True"
+                            DragStarting="ShareButton_DragStarting">
                         <FontIcon Glyph="&#xE72D;" FontSize="14" />
                         <ToolTipService.ToolTip>
-                            <ToolTip Content="سحب ومشاركة / Drag &amp; Share" />
+                            <ToolTip Content="اسحب إلى WhatsApp / Telegram / Explorer أو انقر للنسخ والمشاركة" />
                         </ToolTipService.ToolTip>
                     </Button>
 
@@ -208,19 +212,25 @@
             </Grid>
         </Border>
 
-        <!-- 3. Multi-Tab Document Layout (TabView) -->
+        <!-- 3. Multi-Tab Document Layout (TabView) with External Drag Support -->
         <TabView x:Name="MainTabView"
                  Grid.Row="2"
                  CanReorderTabs="True"
                  CanDragTabs="True"
+                 AllowDrop="True"
+                 DragOver="MainTabView_DragOver"
+                 Drop="MainTabView_Drop"
                  TabItemsSource="{x:Bind ViewModel.Tabs, Mode=OneWay}"
                  SelectedItem="{x:Bind ViewModel.SelectedTab, Mode=TwoWay}"
                  AddTabButtonCommand="{x:Bind ViewModel.AddNewTabCommand}"
                  TabCloseRequested="MainTabView_TabCloseRequested">
             <TabView.TabItemTemplate>
                 <DataTemplate x:DataType="models:ShellTabModel">
+                    <!-- Tab Item with external drag capability -->
                     <TabViewItem Header="{x:Bind Title, Mode=OneWay}"
-                                 IsClosable="{x:Bind IsClosable, Mode=OneWay}">
+                                 IsClosable="{x:Bind IsClosable, Mode=OneWay}"
+                                 CanDrag="True"
+                                 DragStarting="TabItem_DragStarting">
                         <TabViewItem.IconSource>
                             <FontIconSource Glyph="&#xE8B9;" />
                         </TabViewItem.IconSource>
@@ -271,7 +281,8 @@
                                             BorderThickness="1"
                                             CornerRadius="4"
                                             Background="{ThemeResource AppBackgroundBrush}">
-                                        <Grid>
+                                        <!-- Draggable image container -->
+                                        <Grid CanDrag="True" DragStarting="ImageContainer_DragStarting">
                                             <!-- Captured Screenshot Display -->
                                             <Image Source="{Binding ImageBytes, Converter={StaticResource BytesToBitmapImageConverter}}"
                                                    Stretch="None"
@@ -283,33 +294,77 @@
                                                     PointerPressed="AnnotationCanvas_PointerPressed"
                                                     PointerMoved="AnnotationCanvas_PointerMoved"
                                                     PointerReleased="AnnotationCanvas_PointerReleased" />
+
+                                            <!-- In-Tab Interactive Crop Overlay Layer -->
+                                            <Canvas Background="#40000000"
+                                                    Visibility="{Binding IsCropping, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                    PointerPressed="CropCanvas_PointerPressed"
+                                                    PointerMoved="CropCanvas_PointerMoved"
+                                                    PointerReleased="CropCanvas_PointerReleased">
+                                                <!-- Interactive Selection Box -->
+                                                <Border BorderBrush="#0078D7"
+                                                        BorderThickness="2"
+                                                        Background="#100078D7"
+                                                        Tag="InTabCropBox"
+                                                        Visibility="Collapsed" />
+
+                                                <!-- Apply / Cancel Crop Actions Floating Pill -->
+                                                <StackPanel Tag="InTabCropActionBar"
+                                                            Orientation="Horizontal"
+                                                            Spacing="6"
+                                                            Background="#EE1E1E1E"
+                                                            BorderBrush="#44FFFFFF"
+                                                            BorderThickness="1"
+                                                            CornerRadius="6"
+                                                            Padding="6,4"
+                                                            Visibility="Collapsed">
+                                                    <Button Click="BtnApplyInTabCrop_Click" Style="{ThemeResource AccentButtonStyle}">
+                                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                                            <FontIcon Glyph="&#xE73E;" FontSize="12" />
+                                                            <TextBlock Text="تطبيق القص" FontSize="11" />
+                                                        </StackPanel>
+                                                    </Button>
+                                                    <Button Click="BtnCancelInTabCrop_Click">
+                                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                                            <FontIcon Glyph="&#xE711;" FontSize="12" />
+                                                            <TextBlock Text="إلغاء" FontSize="11" />
+                                                        </StackPanel>
+                                                    </Button>
+                                                </StackPanel>
+                                            </Canvas>
                                         </Grid>
                                     </Border>
                                 </Grid>
                             </ScrollViewer>
 
-                            <!-- State 2: When no screenshot yet (Landing Prompt with Instant Snip Button) -->
+                            <!-- State 2: When no screenshot yet (Subtle, elegant placeholder) -->
                             <Grid Padding="32"
                                   HorizontalAlignment="Center"
                                   VerticalAlignment="Center"
                                   Visibility="{Binding HasImage, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=Invert}">
-                                <StackPanel Spacing="16" HorizontalAlignment="Center">
-                                    <Button Click="LandingSnip_Click"
-                                            Width="80" Height="80"
-                                            CornerRadius="40"
-                                            HorizontalAlignment="Center"
-                                            Background="{ThemeResource AppAccentBrush}">
-                                        <FontIcon Glyph="&#xE722;" FontSize="32" Foreground="White" />
-                                    </Button>
+                                <Border BorderBrush="{ThemeResource AppBorderBrush}"
+                                        BorderThickness="2"
+                                        CornerRadius="12"
+                                        Padding="32,24"
+                                        Background="{ThemeResource AppBorderBrush}">
+                                    <StackPanel Spacing="12" HorizontalAlignment="Center">
+                                        <Button Click="LandingSnip_Click"
+                                                Width="64" Height="64"
+                                                CornerRadius="32"
+                                                HorizontalAlignment="Center"
+                                                Background="{ThemeResource AppAccentBrush}">
+                                            <FontIcon Glyph="&#xE722;" FontSize="24" Foreground="White" />
+                                        </Button>
 
-                                    <TextBlock Text="انقر هنا لبدء القص أو اضغط الاختصار Ctrl + B + B"
-                                               FontSize="18" FontWeight="SemiBold"
-                                               HorizontalAlignment="Center" />
+                                        <TextBlock Text="اسحب صورة إلى هنا أو انقر جديد (+) لبدء القص"
+                                                   FontSize="15" FontWeight="SemiBold"
+                                                   HorizontalAlignment="Center" />
 
-                                    <TextBlock Text="أو استخدم مفتاح PrintScreen لفتح شريط القص الشفاف في أي وقت حتى بالخلفية"
-                                               FontSize="13" Foreground="{ThemeResource AppSecondaryTextBrush}"
-                                               HorizontalAlignment="Center" />
-                                </StackPanel>
+                                        <TextBlock Text="اختصار الخلفية العام: Ctrl + B + B أو PrintScreen"
+                                                   FontSize="12" Foreground="{ThemeResource AppSecondaryTextBrush}"
+                                                   HorizontalAlignment="Center" />
+                                    </StackPanel>
+                                </Border>
                             </Grid>
                         </Grid>
                     </TabViewItem>

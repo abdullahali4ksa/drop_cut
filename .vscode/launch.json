@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "DropCut - تشغيل مع تصحيح الأخطاء (Debug)",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build",
+            "program": "${workspaceFolder}/src/DropCut.App/bin/x64/Debug/net10.0-windows10.0.26100.0/win-x64/DropCut.App.exe",
+            "args": [],
+            "cwd": "${workspaceFolder}/src/DropCut.App",
+            "stopAtEntry": false,
+            "console": "internalConsole"
+        }
+    ]
+}

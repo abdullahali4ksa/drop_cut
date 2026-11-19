@@ -17,6 +17,7 @@ public class ShellTabModel : ObservableObject
     private string? _imagePath;
     private int _imageWidth = 1920;
     private int _imageHeight = 1080;
+    private bool _isCropping;
 
     public Guid Id { get; } = Guid.NewGuid();
 
@@ -86,6 +87,12 @@ public class ShellTabModel : ObservableObject
     {
         get => _imageHeight;
         set => SetProperty(ref _imageHeight, value);
+    }
+
+    public bool IsCropping
+    {
+        get => _isCropping;
+        set => SetProperty(ref _isCropping, value);
     }
 
     public Guid? SnippetId { get; set; }
