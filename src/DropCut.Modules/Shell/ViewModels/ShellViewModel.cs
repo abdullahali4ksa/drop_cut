@@ -22,6 +22,7 @@ public partial class ShellViewModel : ObservableObject
     private readonly IServiceProvider _serviceProvider;
     private readonly IEventBus _eventBus;
     private readonly ILocalizationService _localizationService;
+    private readonly SynchronizationContext? _syncContext;
     private int _tabCounter = 0;
 
     private ShellTabModel? _selectedTab;
@@ -100,6 +101,7 @@ public partial class ShellViewModel : ObservableObject
         _localizationService = Guard.AgainstNull(localizationService, nameof(localizationService));
 
         _isRtl = _localizationService.IsRtl;
+        _syncContext = SynchronizationContext.Current;
 
         _eventBus.Subscribe<LanguageChangedEvent>((e, ct) =>
         {
@@ -110,6 +112,21 @@ public partial class ShellViewModel : ObservableObject
 
         // Initialize with default studio tab
         AddNewTab();
+    }
+
+    private void RunOnUi(Action action)
+    {
+        if (_syncContext != null && SynchronizationContext.Current != _syncContext)
+        {
+            _syncContext.Send(_ =>
+            {
+                try { action(); } catch { }
+            }, null);
+        }
+        else
+        {
+            action();
+        }
     }
 
     [RelayCommand]
@@ -125,8 +142,11 @@ public partial class ShellViewModel : ObservableObject
             AutoSaveStatus = _localizationService.GetString("Status_Ready")
         };
 
-        Tabs.Add(tab);
-        SelectedTab = tab;
+        RunOnUi(() =>
+        {
+            Tabs.Add(tab);
+            SelectedTab = tab;
+        });
     }
 
     [RelayCommand]
@@ -168,8 +188,11 @@ public partial class ShellViewModel : ObservableObject
                 AutoSaveStatus = _localizationService.GetString("Status_Saved")
             };
 
-            Tabs.Add(newTab);
-            SelectedTab = newTab;
+            RunOnUi(() =>
+            {
+                Tabs.Add(newTab);
+                SelectedTab = newTab;
+            });
         }
         finally
         {
@@ -215,18 +238,21 @@ public partial class ShellViewModel : ObservableObject
             return;
         }
 
-        var index = Tabs.IndexOf(tab);
-        if (index >= 0)
+        RunOnUi(() =>
         {
-            Tabs.RemoveAt(index);
-
-            if (SelectedTab == tab)
+            var index = Tabs.IndexOf(tab);
+            if (index >= 0)
             {
-                SelectedTab = Tabs.Count > 0
-                    ? Tabs[Math.Clamp(index - 1, 0, Tabs.Count - 1)]
-                    : null;
+                Tabs.RemoveAt(index);
+
+                if (SelectedTab == tab)
+                {
+                    SelectedTab = Tabs.Count > 0
+                        ? Tabs[Math.Clamp(index - 1, 0, Tabs.Count - 1)]
+                        : null;
+                }
             }
-        }
+        });
     }
 
     [RelayCommand]
@@ -237,13 +263,16 @@ public partial class ShellViewModel : ObservableObject
             return;
         }
 
-        var toRemove = Tabs.Where(t => t != currentTab && !t.IsPinned).ToList();
-        foreach (var t in toRemove)
+        RunOnUi(() =>
         {
-            Tabs.Remove(t);
-        }
+            var toRemove = Tabs.Where(t => t != currentTab && !t.IsPinned).ToList();
+            foreach (var t in toRemove)
+            {
+                Tabs.Remove(t);
+            }
 
-        SelectedTab = currentTab;
+            SelectedTab = currentTab;
+        });
     }
 
     [RelayCommand]
@@ -254,29 +283,35 @@ public partial class ShellViewModel : ObservableObject
             return;
         }
 
-        var currentIndex = Tabs.IndexOf(currentTab);
-        if (currentIndex < 0)
+        RunOnUi(() =>
         {
-            return;
-        }
+            var currentIndex = Tabs.IndexOf(currentTab);
+            if (currentIndex < 0)
+            {
+                return;
+            }
 
-        var toRemove = Tabs.Skip(currentIndex + 1).Where(t => !t.IsPinned).ToList();
-        foreach (var t in toRemove)
-        {
-            Tabs.Remove(t);
-        }
+            var toRemove = Tabs.Skip(currentIndex + 1).Where(t => !t.IsPinned).ToList();
+            foreach (var t in toRemove)
+            {
+                Tabs.Remove(t);
+            }
+        });
     }
 
     [RelayCommand]
     public void CloseAllTabs()
     {
-        var toRemove = Tabs.Where(t => !t.IsPinned).ToList();
-        foreach (var t in toRemove)
+        RunOnUi(() =>
         {
-            Tabs.Remove(t);
-        }
+            var toRemove = Tabs.Where(t => !t.IsPinned).ToList();
+            foreach (var t in toRemove)
+            {
+                Tabs.Remove(t);
+            }
 
-        SelectedTab = Tabs.FirstOrDefault();
+            SelectedTab = Tabs.FirstOrDefault();
+        });
     }
 
     [RelayCommand]
