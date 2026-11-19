@@ -25,35 +25,36 @@
 ## Phase 1: Core Kernel, Event Bus & Domain Contracts (`DropCut.Core`)
 
 ### [P01-T001] Domain Base Types, Result Pattern & Value Objects (Linear: `JMD-42`)
-- **STATUS:** `READY`
+- **STATUS:** `DONE`
 - **POLICY_REF:** `docs/PROJECT_RULES.md (One-Class-Per-File, Pure C# Kernel)`
 - **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Guard Clauses, Safe Nullability)`
-- **DESCRIPTION:** Implement base types in `DropCut.Core/Domain/`: `Entity.cs`, `Result.cs`, `ResultOfT.cs`, `Guard.cs`, `ValueObject.cs`.
-- **VERIFICATION:** `dotnet test tests/DropCut.Core.Tests` passes.
+- **DESCRIPTION:** Implement base types in `DropCut.Core/Domain/`: `Entity.cs`, `Result.cs`, `ResultOfT.cs`, `Guard.cs`, `ValueObject.cs`, `CaptureMode.cs`, `ExportFormat.cs`, `ToolType.cs`.
+- **VERIFICATION:** `dotnet test tests/DropCut.Core.Tests` passes (10 tests).
 
 ### [P01-T002] In-Process Strongly-Typed Domain Event Bus (Linear: `JMD-42`)
-- **STATUS:** `READY`
+- **STATUS:** `DONE`
 - **POLICY_REF:** `docs/PROJECT_RULES.md (Compile-Time Propagation, Event-Driven Decoupling)`
 - **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Safe Try/Catch in Handler Execution)`
-- **DESCRIPTION:** Implement `IEventBus.cs`, `IDomainEvent.cs`, and core domain events:
+- **DESCRIPTION:** Implement `IEventBus.cs`, `IDomainEvent.cs`, `InMemoryEventBus.cs`, and core domain events:
   - `SnippetCapturedEvent.cs`
   - `ImageAnnotatedEvent.cs`
   - `FileAutoSavedEvent.cs`
-- **VERIFICATION:** Unit tests verify event publishing and multiple subscriber invocations.
+  - `LanguageChangedEvent.cs`
+- **VERIFICATION:** Unit tests verify event publishing and multiple subscriber invocations with crash isolation.
 
 ### [P01-T003] Security Contracts & AI Abstraction Layer (Linear: `JMD-42`)
-- **STATUS:** `READY`
+- **STATUS:** `DONE`
 - **POLICY_REF:** `docs/PROJECT_RULES.md (AI Independence, Security Guard Contracts)`
 - **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Strict Policy Evaluation)`
-- **DESCRIPTION:** Define `IPermissionService.cs`, `ISecurityPolicy.cs`, `IAICommandHandler.cs`, `IAIProvider.cs`, and `AISecurityPolicy.cs`.
-- **VERIFICATION:** Compiles with zero warnings.
+- **DESCRIPTION:** Define `IPermissionService.cs`, `ISecurityPolicy.cs`, `SecurityClaim.cs`, `SecurityPolicyResult.cs`, `IAICommandHandler.cs`, `IAIProvider.cs`, `AICommandRegistry.cs`, and `AISecurityPolicy.cs`.
+- **VERIFICATION:** Compiles with zero warnings; security unit tests pass.
 
 ---
 
 ## Phase 2: Infrastructure & Persistence (`DropCut.Infrastructure`)
 
 ### [P02-T001] SQLite Database Context & EF Core Repositories (Linear: `JMD-43`)
-- **STATUS:** `BACKLOG`
+- **STATUS:** `READY`
 - **POLICY_REF:** `docs/PROJECT_RULES.md (Separation of Concerns, SQLite Persistence)`
 - **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (WAL Mode, Connection Fault Tolerance)`
 - **DESCRIPTION:** Implement `DropCutDbContext.cs`, entity type configurations, repository implementations, and transaction `IUnitOfWork`.

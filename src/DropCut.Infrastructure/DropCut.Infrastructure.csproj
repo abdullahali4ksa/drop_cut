@@ -6,7 +6,12 @@
     <Nullable>enable</Nullable>
     <RootNamespace>DropCut.Infrastructure</RootNamespace>
     <AssemblyName>DropCut.Infrastructure</AssemblyName>
+    <NoWarn>$(NoWarn);NU1903</NoWarn>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.2" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\DropCut.Core\DropCut.Core.csproj" />
