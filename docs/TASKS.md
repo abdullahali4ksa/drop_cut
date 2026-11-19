@@ -79,28 +79,28 @@
 - **VERIFICATION:** Auto-save unit tests pass (`AutoSaveServiceTests`); modifies and commits files without Ctrl+S.
 
 ### [P03-T002] Workspace Module — Screen Snapping Engine (Linear: `JMD-45`)
-- **STATUS:** `READY`
+- **STATUS:** `DONE`
 - **POLICY_REF:** `docs/PROJECT_RULES.md (High-DPI Multi-Monitor Snapping)`
 - **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Protected Win32 Hooks, Memory Cleanup)`
 - **DESCRIPTION:** Build transparent overlay window, crosshair cursor, 4 capture modes (Rectangular, Window, Fullscreen, Freeform), and countdown timer delay (3s, 5s, 10s).
-- **VERIFICATION:** Snapping captures correct desktop coordinates and publishes `SnippetCapturedEvent`.
+- **VERIFICATION:** `SnappingEngineTests` pass; publishes `SnippetCapturedEvent`.
 
 ### [P03-T003] Workspace Module — Annotation Canvas, Redaction & Crop (Linear: `JMD-46`)
-- **STATUS:** `BACKLOG`
+- **STATUS:** `DONE`
 - **POLICY_REF:** `docs/PROJECT_RULES.md (WinUI 3 Canvas & Win2D Hardware Acceleration)`
 - **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Debounced Canvas Strokes, Protected UI Event Handlers)`
 - **DESCRIPTION:** Implement high-performance drawing canvas with Pen, Highlighter, Shapes, Text tool, Crop tool, and Privacy Blur / Redaction tool.
-- **VERIFICATION:** Visual annotations render smoothly and publish `ImageAnnotatedEvent`.
+- **VERIFICATION:** `AnnotationCanvasServiceTests` pass (stroke addition, undo, redo, and crop bounds).
 
 ### [P03-T004] Workspace Module — Interactive Outward Drag & Drop Sharing (Linear: `JMD-47`)
-- **STATUS:** `BACKLOG`
+- **STATUS:** `DONE`
 - **POLICY_REF:** `docs/PROJECT_RULES.md (Outward Drag-and-Drop Sharing Mandate)`
 - **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Protected DataPackage Construction, Fallback Memory Streams)`
 - **DESCRIPTION:** Implement interactive hand cursor (`DragHand`) on image hover and tab drag. Packing `DataPackage` with bitmap and storage file for immediate dropping into WhatsApp Web, Discord, GitHub, Linear, Gmail, Outlook, Slack, and Explorer.
-- **VERIFICATION:** Dragging from DropCut canvas drops image cleanly into browser and desktop clients.
+- **VERIFICATION:** `DragDropSharingServiceTests` pass.
 
 ### [P03-T005] Permissions & AuditLog Modules (Linear: `JMD-48`)
-- **STATUS:** `BACKLOG`
+- **STATUS:** `READY`
 - **POLICY_REF:** `docs/PROJECT_RULES.md (Role-Based Access Control & Undo/Redo Stacks)`
 - **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Auditing Fail-Safe, Protected Rollbacks)`
 - **DESCRIPTION:** Role-based feature policies and complete operation history with Undo/Redo state stacks.
