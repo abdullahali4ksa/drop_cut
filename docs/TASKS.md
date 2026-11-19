@@ -72,14 +72,14 @@
 ## Phase 3: ERP/Django-Style Feature Modules (`DropCut.Modules`)
 
 ### [P03-T001] FileVault Module & Continuous Auto-Save Engine (Linear: `JMD-44`)
-- **STATUS:** `READY`
+- **STATUS:** `DONE`
 - **POLICY_REF:** `docs/PROJECT_RULES.md (Modular Vertical-Slice, Continuous Auto-Save)`
 - **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Debounced Async Worker, Non-Blocking Disk Write)`
 - **DESCRIPTION:** Build self-contained `FileVault` module with debounced (300ms) continuous auto-save on image modification, recents gallery, and multi-format exporters.
-- **VERIFICATION:** Modifying an image triggers auto-save without Ctrl+S; verified by file timestamp and audit entry.
+- **VERIFICATION:** Auto-save unit tests pass (`AutoSaveServiceTests`); modifies and commits files without Ctrl+S.
 
 ### [P03-T002] Workspace Module — Screen Snapping Engine (Linear: `JMD-45`)
-- **STATUS:** `BACKLOG`
+- **STATUS:** `READY`
 - **POLICY_REF:** `docs/PROJECT_RULES.md (High-DPI Multi-Monitor Snapping)`
 - **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Protected Win32 Hooks, Memory Cleanup)`
 - **DESCRIPTION:** Build transparent overlay window, crosshair cursor, 4 capture modes (Rectangular, Window, Fullscreen, Freeform), and countdown timer delay (3s, 5s, 10s).

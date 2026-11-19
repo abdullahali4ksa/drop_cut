@@ -8,5 +8,7 @@ namespace DropCut.Modules.Workspace.Contracts;
 /// </summary>
 public interface ISnappingEngine
 {
-    Task<Result<SnipRequest>> TriggerCaptureAsync(SnipRequest request, CancellationToken cancellationToken = default);
+    Task<Result<byte[]>> CaptureDesktopAsync(SnipRequest request, CancellationToken cancellationToken = default);
+
+    Task<Result<PixelBounds>> DetectWindowBoundsAsync(int screenX, int screenY, CancellationToken cancellationToken = default);
 }
