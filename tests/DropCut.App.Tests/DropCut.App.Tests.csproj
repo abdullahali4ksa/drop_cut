@@ -23,6 +23,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\DropCut.Core\DropCut.Core.csproj" />
+    <ProjectReference Include="..\..\src\DropCut.Modules\DropCut.Modules.csproj" />
+    <ProjectReference Include="..\..\src\DropCut.Infrastructure\DropCut.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

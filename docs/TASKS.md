@@ -118,7 +118,7 @@
 ## Phase 4: WinUI 3 Shell & Release Packaging (`DropCut.App`)
 
 ### [P04-T001] MainWindow Shell, Tab Context Menu & MSIX Packaging (Linear: `JMD-50`)
-- **STATUS:** `BACKLOG`
+- **STATUS:** `DONE`
 - **POLICY_REF:** `docs/PROJECT_RULES.md (Fluent Design, Tab Lifecycle, Store Standards)`
 - **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Global Unhandled Exception Boundaries, Multi-Arch x64/arm64)`
 - **DESCRIPTION:** Build root `MainWindow` with `TabView`, right-click / touch long-press context menu (Pin, Favorites, Close), bilingual tooltips, global exception logging, and MSIX packaging for x64 and arm64.

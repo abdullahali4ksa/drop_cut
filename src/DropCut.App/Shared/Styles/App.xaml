@@ -1,6 +1,11 @@
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:converters="using:DropCut.App.Shared.Converters">
+
+    <!-- Global Value Converters -->
+    <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
+    <converters:BoolToFlowDirectionConverter x:Key="BoolToFlowDirectionConverter" />
 
     <!-- Fallback default palette for custom themes -->
     <ResourceDictionary.ThemeDictionaries>
