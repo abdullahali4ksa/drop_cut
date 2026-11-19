@@ -1,12 +1,13 @@
+using DropCut.Core.Contracts;
 using DropCut.Infrastructure.Persistence.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace DropCut.Infrastructure.Persistence.Repositories;
 
 /// <summary>
-/// Repository for persistent user preferences.
+/// Repository for persistent user preferences backed by SQLite EF Core.
 /// </summary>
-public class UserPreferenceRepository
+public class UserPreferenceRepository : IUserPreferenceRepository
 {
     private readonly DropCutDbContext _context;
 

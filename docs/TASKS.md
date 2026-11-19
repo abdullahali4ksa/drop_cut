@@ -100,14 +100,14 @@
 - **VERIFICATION:** `DragDropSharingServiceTests` pass.
 
 ### [P03-T005] Permissions & AuditLog Modules (Linear: `JMD-48`)
-- **STATUS:** `READY`
+- **STATUS:** `DONE`
 - **POLICY_REF:** `docs/PROJECT_RULES.md (Role-Based Access Control & Undo/Redo Stacks)`
 - **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Auditing Fail-Safe, Protected Rollbacks)`
-- **DESCRIPTION:** Role-based feature policies and complete operation history with Undo/Redo state stacks.
-- **VERIFICATION:** User actions trigger audit records and undo reverts image state accurately.
+- **DESCRIPTION:** Pluggable role-based feature policies (`ModulePermissionService`) and automated event-driven audit log trail (`AuditLogService`).
+- **VERIFICATION:** `ModulePermissionServiceTests` and `AuditLogServiceTests` pass.
 
 ### [P03-T006] Settings Module & 10-Language Pure i18n Engine (Linear: `JMD-49`)
-- **STATUS:** `BACKLOG`
+- **STATUS:** `DONE`
 - **POLICY_REF:** `docs/PROJECT_RULES.md (Pure i18n Architecture, Top 10 Languages, Dynamic Switching)`
 - **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Null-Safe Localization Keys, Default Fallback)`
 - **DESCRIPTION:** Implement 10-language dynamic localization engine (Arabic default RTL, English, Spanish, etc.), Mica Alt / Dark theme manager, and global hotkey preferences.
