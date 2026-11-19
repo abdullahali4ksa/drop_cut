@@ -139,7 +139,7 @@ public sealed partial class MainWindow : Window
         {
             // Hide main window so desktop is completely clear for the snip
             this.AppWindow.Hide();
-            await Task.Delay(130);
+            await Task.Delay(180);
 
             // Capture pristine full desktop snapshot
             var fullDesktopBmp = await _screenCaptureService.CapturePrimaryScreenAsync();
@@ -221,7 +221,7 @@ public sealed partial class MainWindow : Window
     // ==========================================
     // 3. External Drag & Drop Sharing to WhatsApp / Telegram / Explorer
     // ==========================================
-    private async Task PrepareDataPackageForDragAsync(ShellTabModel? tab, DataPackage data)
+    private void PrepareDataPackageForDragSync(ShellTabModel? tab, DataPackage data)
     {
         if (tab?.ImageBytes is not { Length: > 0 } bytes)
         {
@@ -230,7 +230,7 @@ public sealed partial class MainWindow : Window
 
         try
         {
-            data.RequestedOperation = DataPackageOperation.Copy | DataPackageOperation.Link;
+            data.RequestedOperation = DataPackageOperation.Copy | DataPackageOperation.Move | DataPackageOperation.Link;
 
             // 1. Create a persistent temporary PNG file so Windows File Explorer, WhatsApp, Telegram, Outlook, Discord receive real file drops!
             var tempFolder = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "DropCut");
@@ -240,7 +240,7 @@ public sealed partial class MainWindow : Window
             var filePath = System.IO.Path.Combine(tempFolder, fileName);
             System.IO.File.WriteAllBytes(filePath, bytes);
 
-            var storageFile = await StorageFile.GetFileFromPathAsync(filePath);
+            var storageFile = StorageFile.GetFileFromPathAsync(filePath).AsTask().GetAwaiter().GetResult();
             data.SetStorageItems(new[] { storageFile });
 
             // 2. Also attach direct Bitmap RandomAccessStream for apps that accept bitmap drag/drop
@@ -248,7 +248,7 @@ public sealed partial class MainWindow : Window
             using (var writer = new DataWriter(stream))
             {
                 writer.WriteBytes(bytes);
-                await writer.StoreAsync();
+                writer.StoreAsync().AsTask().GetAwaiter().GetResult();
                 writer.DetachStream();
             }
             stream.Seek(0);
@@ -263,13 +263,32 @@ public sealed partial class MainWindow : Window
         }
     }
 
-    private async void TabItem_DragStarting(UIElement sender, DragStartingEventArgs args)
+    private void MainTabView_TabDragStarting(TabView sender, TabViewTabDragStartingEventArgs args)
+    {
+        try
+        {
+            var tab = args.Item as ShellTabModel ?? ViewModel.SelectedTab;
+            PrepareDataPackageForDragSync(tab, args.Data);
+            NotifyToolChange("جارٍ سحب اللسان ومشاركة الصورة...");
+        }
+        catch (Exception)
+        {
+            // Zero-Crash Mandate
+        }
+    }
+
+    private void MainTabView_AddTabButtonClick(TabView sender, object args)
+    {
+        StartSnippingOverlayAsync(CaptureMode.Rectangular);
+    }
+
+    private void TabItem_DragStarting(UIElement sender, DragStartingEventArgs args)
     {
         var deferral = args.GetDeferral();
         try
         {
             var tab = (sender as FrameworkElement)?.DataContext as ShellTabModel ?? ViewModel.SelectedTab;
-            await PrepareDataPackageForDragAsync(tab, args.Data);
+            PrepareDataPackageForDragSync(tab, args.Data);
             NotifyToolChange("جارٍ سحب الصورة ومشاركتها...");
         }
         catch (Exception) { }
@@ -279,13 +298,13 @@ public sealed partial class MainWindow : Window
         }
     }
 
-    private async void ImageContainer_DragStarting(UIElement sender, DragStartingEventArgs args)
+    private void ImageContainer_DragStarting(UIElement sender, DragStartingEventArgs args)
     {
         var deferral = args.GetDeferral();
         try
         {
             var tab = ViewModel.SelectedTab;
-            await PrepareDataPackageForDragAsync(tab, args.Data);
+            PrepareDataPackageForDragSync(tab, args.Data);
             NotifyToolChange("جارٍ سحب الصورة ومشاركتها...");
         }
         catch (Exception) { }
@@ -295,13 +314,13 @@ public sealed partial class MainWindow : Window
         }
     }
 
-    private async void ShareButton_DragStarting(UIElement sender, DragStartingEventArgs args)
+    private void ShareButton_DragStarting(UIElement sender, DragStartingEventArgs args)
     {
         var deferral = args.GetDeferral();
         try
         {
             var tab = ViewModel.SelectedTab;
-            await PrepareDataPackageForDragAsync(tab, args.Data);
+            PrepareDataPackageForDragSync(tab, args.Data);
             NotifyToolChange("جارٍ سحب ومشاركة اللقطة إلى تطبيق خارجي...");
         }
         catch (Exception) { }

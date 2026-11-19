@@ -220,9 +220,10 @@
                  AllowDrop="True"
                  DragOver="MainTabView_DragOver"
                  Drop="MainTabView_Drop"
+                 TabDragStarting="MainTabView_TabDragStarting"
+                 AddTabButtonClick="MainTabView_AddTabButtonClick"
                  TabItemsSource="{x:Bind ViewModel.Tabs, Mode=OneWay}"
                  SelectedItem="{x:Bind ViewModel.SelectedTab, Mode=TwoWay}"
-                 AddTabButtonCommand="{x:Bind ViewModel.AddNewTabCommand}"
                  TabCloseRequested="MainTabView_TabCloseRequested">
             <TabView.TabItemTemplate>
                 <DataTemplate x:DataType="models:ShellTabModel">
@@ -289,6 +290,30 @@
                                                    HorizontalAlignment="Center"
                                                    VerticalAlignment="Center" />
 
+                                            <!-- Floating Quick Drag & Drop Sharing Pill -->
+                                            <Border HorizontalAlignment="Right"
+                                                    VerticalAlignment="Top"
+                                                    Margin="12"
+                                                    Background="#E01E1E1E"
+                                                    BorderBrush="#44FFFFFF"
+                                                    BorderThickness="1"
+                                                    CornerRadius="16"
+                                                    Padding="12,6"
+                                                    CanDrag="True"
+                                                    DragStarting="ImageContainer_DragStarting">
+                                                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                                    <FontIcon Glyph="&#xE72D;" FontSize="13" Foreground="{ThemeResource AppAccentBrush}" />
+                                                    <TextBlock Text="اسحب الصورة من هنا إلى WhatsApp / Telegram / Explorer"
+                                                               FontSize="11"
+                                                               Foreground="White"
+                                                               FontWeight="SemiBold"
+                                                               VerticalAlignment="Center" />
+                                                </StackPanel>
+                                                <ToolTipService.ToolTip>
+                                                    <ToolTip Content="اضغط واسحب هذا الزر وأفلته مباشرة داخل أي تطبيق (واتساب، تيليجرام، مستكشف الملفات، إلخ)" />
+                                                </ToolTipService.ToolTip>
+                                            </Border>
+
                                             <!-- Interactive Inking & Annotation Canvas Layer -->
                                             <Canvas Background="Transparent"
                                                     PointerPressed="AnnotationCanvas_PointerPressed"
@@ -343,25 +368,25 @@
                                   VerticalAlignment="Center"
                                   Visibility="{Binding HasImage, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=Invert}">
                                 <Border BorderBrush="{ThemeResource AppBorderBrush}"
-                                        BorderThickness="2"
+                                        BorderThickness="1"
                                         CornerRadius="12"
-                                        Padding="32,24"
+                                        Padding="36,28"
                                         Background="{ThemeResource AppBorderBrush}">
-                                    <StackPanel Spacing="12" HorizontalAlignment="Center">
-                                        <Button Click="LandingSnip_Click"
-                                                Width="64" Height="64"
-                                                CornerRadius="32"
-                                                HorizontalAlignment="Center"
-                                                Background="{ThemeResource AppAccentBrush}">
-                                            <FontIcon Glyph="&#xE722;" FontSize="24" Foreground="White" />
-                                        </Button>
+                                    <StackPanel Spacing="10" HorizontalAlignment="Center">
+                                        <FontIcon Glyph="&#xE722;" FontSize="32" Foreground="{ThemeResource AppSecondaryTextBrush}" HorizontalAlignment="Center" />
 
-                                        <TextBlock Text="اسحب صورة إلى هنا أو انقر جديد (+) لبدء القص"
-                                                   FontSize="15" FontWeight="SemiBold"
+                                        <TextBlock Text="انقر فوق «جديد» في الأعلى أو اضغط PrintScreen لأخذ لقطة شاشة"
+                                                   FontSize="14" FontWeight="SemiBold"
+                                                   Foreground="{ThemeResource AppForegroundBrush}"
                                                    HorizontalAlignment="Center" />
 
-                                        <TextBlock Text="اختصار الخلفية العام: Ctrl + B + B أو PrintScreen"
+                                        <TextBlock Text="يمكنك أيضاً سحب وإفلات أي صورة إلى هنا لفتحها ومشاركتها"
                                                    FontSize="12" Foreground="{ThemeResource AppSecondaryTextBrush}"
+                                                   HorizontalAlignment="Center" />
+
+                                        <TextBlock Text="الاختصار العام بالخلفية: Ctrl + B + B أو PrintScreen"
+                                                   FontSize="11" Foreground="{ThemeResource AppSecondaryTextBrush}"
+                                                   Opacity="0.7"
                                                    HorizontalAlignment="Center" />
                                     </StackPanel>
                                 </Border>
