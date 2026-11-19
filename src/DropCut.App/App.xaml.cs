@@ -5,6 +5,7 @@ using DropCut.Core.Events;
 using DropCut.Infrastructure.FileSystem;
 using DropCut.Infrastructure.Persistence;
 using DropCut.Infrastructure.Persistence.Repositories;
+using DropCut.Infrastructure.Win32;
 using DropCut.Modules.AuditLog;
 using DropCut.Modules.FileVault;
 using DropCut.Modules.Permissions;
@@ -29,6 +30,7 @@ public partial class App : Application
 
     public App()
     {
+        LogDiagnosticCrash("APP_CONSTRUCTOR_ENTER", "App constructor entered", null);
         InitializeComponent();
 
         ConfigureServices();
@@ -61,6 +63,7 @@ public partial class App : Application
         // 2. Infrastructure & Persistence
         services.AddDbContext<DropCutDbContext>();
         services.AddSingleton<ISafeFileStorage, SafeFileStorageService>();
+        services.AddSingleton<IScreenCaptureService, ScreenCaptureService>();
         services.AddScoped<SnippetRepository>();
         services.AddScoped<AuditLogRepository>();
         services.AddScoped<IUserPreferenceRepository, UserPreferenceRepository>();
@@ -81,10 +84,12 @@ public partial class App : Application
 
     protected override void OnLaunched(LaunchActivatedEventArgs args)
     {
+        LogDiagnosticCrash("ON_LAUNCHED_ENTER", "Entering OnLaunched", null);
         try
         {
             MainWindow = Services.GetRequiredService<MainWindow>();
             MainWindow.Activate();
+            LogDiagnosticCrash("ON_LAUNCHED_SUCCESS", "MainWindow activated", null);
         }
         catch (Exception ex)
         {

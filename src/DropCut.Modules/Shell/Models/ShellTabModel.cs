@@ -13,6 +13,10 @@ public class ShellTabModel : ObservableObject
     private bool _isFavorite;
     private bool _isClosable = true;
     private string _autoSaveStatus = string.Empty;
+    private byte[]? _imageBytes;
+    private string? _imagePath;
+    private int _imageWidth = 1920;
+    private int _imageHeight = 1080;
 
     public Guid Id { get; } = Guid.NewGuid();
 
@@ -50,6 +54,38 @@ public class ShellTabModel : ObservableObject
     {
         get => _autoSaveStatus;
         set => SetProperty(ref _autoSaveStatus, value);
+    }
+
+    public byte[]? ImageBytes
+    {
+        get => _imageBytes;
+        set
+        {
+            if (SetProperty(ref _imageBytes, value))
+            {
+                OnPropertyChanged(nameof(HasImage));
+            }
+        }
+    }
+
+    public bool HasImage => _imageBytes is not null && _imageBytes.Length > 0;
+
+    public string? ImagePath
+    {
+        get => _imagePath;
+        set => SetProperty(ref _imagePath, value);
+    }
+
+    public int ImageWidth
+    {
+        get => _imageWidth;
+        set => SetProperty(ref _imageWidth, value);
+    }
+
+    public int ImageHeight
+    {
+        get => _imageHeight;
+        set => SetProperty(ref _imageHeight, value);
     }
 
     public Guid? SnippetId { get; set; }

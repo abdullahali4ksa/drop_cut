@@ -15,7 +15,8 @@
     </Window.SystemBackdrop>
 
     <Grid Background="{ThemeResource AppBackgroundBrush}"
-          FlowDirection="{x:Bind GetFlowDirection(ViewModel.IsRtl), Mode=OneWay}">
+          FlowDirection="{x:Bind GetFlowDirection(ViewModel.IsRtl), Mode=OneWay}"
+          KeyDown="Grid_KeyDown">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -26,56 +27,206 @@
         <!-- 1. Window TitleBar -->
         <TitleBar x:Name="AppTitleBar" Title="DropCut" />
 
-        <!-- 2. Fluent Command Toolbar with Bilingual ToolTips & Shortcuts -->
-        <CommandBar Grid.Row="1" DefaultLabelPosition="Right" Background="Transparent" IsDynamicOverflowEnabled="True">
-            <AppBarButton Icon="Add" Label="New Snip" Command="{x:Bind ViewModel.AddNewTabCommand}">
-                <ToolTipService.ToolTip>
-                    <ToolTip Content="New Snip / لقطة جديدة (Ctrl+N)" />
-                </ToolTipService.ToolTip>
-            </AppBarButton>
+        <!-- 2. Windows 11 Snipping Tool Style Ribbon Toolbar -->
+        <Border Grid.Row="1" Background="{ThemeResource AppBorderBrush}" Padding="8,4" BorderThickness="0,0,0,1" BorderBrush="{ThemeResource AppBorderBrush}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
 
-            <AppBarSeparator />
+                <!-- Section 1: Capture Mode & New Snip (Matching Snipping Tool Left/Right) -->
+                <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                    <!-- New Snip SplitButton with Mode Dropdown -->
+                    <SplitButton Command="{x:Bind ViewModel.CaptureScreenCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <FontIcon Glyph="&#xE710;" FontSize="14" />
+                            <TextBlock Text="جديد (New)" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <SplitButton.Flyout>
+                            <MenuFlyout>
+                                <MenuFlyoutItem Text="مستطيل (Rectangle)" Click="ModeRectangle_Click">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xE8B9;" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem Text="النافذة (Window)" Click="ModeWindow_Click">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xE7C3;" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem Text="ملء الشاشة (Full Screen)" Click="ModeFullscreen_Click">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xE740;" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem Text="شكل حر (Freeform)" Click="ModeFreeform_Click">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xE8C0;" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                            </MenuFlyout>
+                        </SplitButton.Flyout>
+                        <ToolTipService.ToolTip>
+                            <ToolTip Content="قص لقطة جديدة / New Snip (Ctrl+N أو PrintScreen)" />
+                        </ToolTipService.ToolTip>
+                    </SplitButton>
 
-            <AppBarButton Icon="Undo" Label="Undo">
-                <ToolTipService.ToolTip>
-                    <ToolTip Content="Undo / تراجع (Ctrl+Z)" />
-                </ToolTipService.ToolTip>
-            </AppBarButton>
+                    <!-- Camera / Video Mode Toggles -->
+                    <ToggleButton IsChecked="True" Width="36" Height="36" Padding="0">
+                        <FontIcon Glyph="&#xE722;" FontSize="14" />
+                        <ToolTipService.ToolTip>
+                            <ToolTip Content="وضع التقاط لقطة الشاشة / Screenshot Mode" />
+                        </ToolTipService.ToolTip>
+                    </ToggleButton>
 
-            <AppBarButton Icon="Redo" Label="Redo">
-                <ToolTipService.ToolTip>
-                    <ToolTip Content="Redo / إعادة (Ctrl+Y)" />
-                </ToolTipService.ToolTip>
-            </AppBarButton>
+                    <ToggleButton Width="36" Height="36" Padding="0">
+                        <FontIcon Glyph="&#xE714;" FontSize="14" />
+                        <ToolTipService.ToolTip>
+                            <ToolTip Content="وضع تسجيل الشاشة / Screen Recording Mode" />
+                        </ToolTipService.ToolTip>
+                    </ToggleButton>
 
-            <AppBarSeparator />
+                    <!-- Delay Timer Dropdown -->
+                    <DropDownButton Width="36" Height="36" Padding="0">
+                        <FontIcon Glyph="&#xE823;" FontSize="14" />
+                        <DropDownButton.Flyout>
+                            <MenuFlyout>
+                                <MenuFlyoutItem Text="بدون تأخير / No Delay" Click="Delay0_Click" />
+                                <MenuFlyoutItem Text="تأخير 3 ثوانٍ / 3 Seconds" Click="Delay3_Click" />
+                                <MenuFlyoutItem Text="تأخير 5 ثوانٍ / 5 Seconds" Click="Delay5_Click" />
+                                <MenuFlyoutItem Text="تأخير 10 ثوانٍ / 10 Seconds" Click="Delay10_Click" />
+                            </MenuFlyout>
+                        </DropDownButton.Flyout>
+                        <ToolTipService.ToolTip>
+                            <ToolTip Content="مؤقت التأخير قبل الالتقاط / Delay Timer" />
+                        </ToolTipService.ToolTip>
+                    </DropDownButton>
+                </StackPanel>
 
-            <AppBarButton Icon="Save" Label="Save">
-                <ToolTipService.ToolTip>
-                    <ToolTip Content="Save / حفظ (Ctrl+S)" />
-                </ToolTipService.ToolTip>
-            </AppBarButton>
+                <!-- Section 2: Drawing & Editing Tools (Center Snipping Tool Ribbon) -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="4">
+                    <!-- Pen Tool with Color Flyout -->
+                    <DropDownButton Height="36" Padding="8,0">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <FontIcon Glyph="&#xED63;" FontSize="14" Foreground="#FF0000" />
+                            <TextBlock Text="القلم" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <DropDownButton.Flyout>
+                            <MenuFlyout>
+                                <MenuFlyoutItem Text="أحمر / Red" Click="PenRed_Click" />
+                                <MenuFlyoutItem Text="أزرق / Blue" Click="PenBlue_Click" />
+                                <MenuFlyoutItem Text="أسود / Black" Click="PenBlack_Click" />
+                                <MenuFlyoutItem Text="أخضر / Green" Click="PenGreen_Click" />
+                                <MenuFlyoutItem Text="أصفر / Yellow" Click="PenYellow_Click" />
+                            </MenuFlyout>
+                        </DropDownButton.Flyout>
+                        <ToolTipService.ToolTip>
+                            <ToolTip Content="قلم الرسم / Ballpoint Pen" />
+                        </ToolTipService.ToolTip>
+                    </DropDownButton>
 
-            <AppBarButton Icon="Copy" Label="Copy">
-                <ToolTipService.ToolTip>
-                    <ToolTip Content="Copy / نسخ (Ctrl+C)" />
-                </ToolTipService.ToolTip>
-            </AppBarButton>
+                    <!-- Highlighter Tool -->
+                    <Button Height="36" Padding="8,0" Click="ToolHighlighter_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <FontIcon Glyph="&#xE7E6;" FontSize="14" Foreground="#FFD700" />
+                            <TextBlock Text="التمييز" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <ToolTipService.ToolTip>
+                            <ToolTip Content="قلم التمييز الفسفوري / Highlighter" />
+                        </ToolTipService.ToolTip>
+                    </Button>
 
-            <AppBarButton Icon="Share" Label="Share">
-                <ToolTipService.ToolTip>
-                    <ToolTip Content="Drag &amp; Share / سحب ومشاركة" />
-                </ToolTipService.ToolTip>
-            </AppBarButton>
+                    <!-- Eraser Tool -->
+                    <Button Width="36" Height="36" Padding="0" Click="ToolEraser_Click">
+                        <FontIcon Glyph="&#xE75C;" FontSize="14" />
+                        <ToolTipService.ToolTip>
+                            <ToolTip Content="ممحاة التعديلات / Eraser" />
+                        </ToolTipService.ToolTip>
+                    </Button>
 
-            <CommandBar.SecondaryCommands>
-                <AppBarButton Icon="Setting" Label="Settings">
-                    <ToolTipService.ToolTip>
-                        <ToolTip Content="Settings / الإعدادات" />
-                    </ToolTipService.ToolTip>
-                </AppBarButton>
-            </CommandBar.SecondaryCommands>
-        </CommandBar>
+                    <!-- Ruler Tool -->
+                    <Button Width="36" Height="36" Padding="0" Click="ToolRuler_Click">
+                        <FontIcon Glyph="&#xED5E;" FontSize="14" />
+                        <ToolTipService.ToolTip>
+                            <ToolTip Content="مسطرة القياس / Ruler" />
+                        </ToolTipService.ToolTip>
+                    </Button>
+
+                    <!-- Text Actions / OCR -->
+                    <Button Width="36" Height="36" Padding="0" Click="ToolText_Click">
+                        <FontIcon Glyph="&#xE8D2;" FontSize="14" />
+                        <ToolTipService.ToolTip>
+                            <ToolTip Content="استخراج وقراءة النصوص / Text Actions (OCR)" />
+                        </ToolTipService.ToolTip>
+                    </Button>
+
+                    <!-- Crop Tool -->
+                    <Button Width="36" Height="36" Padding="0" Click="ToolCrop_Click">
+                        <FontIcon Glyph="&#xE7A8;" FontSize="14" />
+                        <ToolTipService.ToolTip>
+                            <ToolTip Content="قص أبعاد الصورة / Image Crop" />
+                        </ToolTipService.ToolTip>
+                    </Button>
+                </StackPanel>
+
+                <!-- Section 3: Actions & Sharing (Right Side) -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+                    <Button Width="36" Height="36" Padding="0" Click="ActionUndo_Click">
+                        <FontIcon Glyph="&#xE7A7;" FontSize="14" />
+                        <ToolTipService.ToolTip>
+                            <ToolTip Content="تراجع / Undo (Ctrl+Z)" />
+                        </ToolTipService.ToolTip>
+                    </Button>
+
+                    <Button Width="36" Height="36" Padding="0" Click="ActionRedo_Click">
+                        <FontIcon Glyph="&#xE7A6;" FontSize="14" />
+                        <ToolTipService.ToolTip>
+                            <ToolTip Content="إعادة / Redo (Ctrl+Y)" />
+                        </ToolTipService.ToolTip>
+                    </Button>
+
+                    <AppBarSeparator />
+
+                    <Button Width="36" Height="36" Padding="0" Click="ActionSave_Click">
+                        <FontIcon Glyph="&#xE74E;" FontSize="14" />
+                        <ToolTipService.ToolTip>
+                            <ToolTip Content="حفظ اللقطة / Save (Ctrl+S)" />
+                        </ToolTipService.ToolTip>
+                    </Button>
+
+                    <Button Width="36" Height="36" Padding="0" Click="ActionCopy_Click">
+                        <FontIcon Glyph="&#xE8C8;" FontSize="14" />
+                        <ToolTipService.ToolTip>
+                            <ToolTip Content="نسخ الصورة للحافظة / Copy (Ctrl+C)" />
+                        </ToolTipService.ToolTip>
+                    </Button>
+
+                    <Button Width="36" Height="36" Padding="0" Click="ActionShare_Click">
+                        <FontIcon Glyph="&#xE72D;" FontSize="14" />
+                        <ToolTipService.ToolTip>
+                            <ToolTip Content="سحب ومشاركة / Drag &amp; Share" />
+                        </ToolTipService.ToolTip>
+                    </Button>
+
+                    <Button Width="36" Height="36" Padding="0">
+                        <FontIcon Glyph="&#xE712;" FontSize="14" />
+                        <Button.Flyout>
+                            <MenuFlyout>
+                                <MenuFlyoutItem Text="الإعدادات / Settings" Click="MenuSettings_Click" />
+                                <MenuFlyoutItem Text="فتح مجلد اللقطات / Open Vault Folder" Click="MenuOpenVault_Click" />
+                                <MenuFlyoutSeparator />
+                                <MenuFlyoutItem Text="حول البرنامج / About DropCut" Click="MenuAbout_Click" />
+                            </MenuFlyout>
+                        </Button.Flyout>
+                        <ToolTipService.ToolTip>
+                            <ToolTip Content="المزيد من الخيارات / More Options" />
+                        </ToolTipService.ToolTip>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
 
         <!-- 3. Multi-Tab Document Layout (TabView) -->
         <TabView x:Name="MainTabView"
@@ -84,7 +235,7 @@
                  CanDragTabs="True"
                  TabItemsSource="{x:Bind ViewModel.Tabs, Mode=OneWay}"
                  SelectedItem="{x:Bind ViewModel.SelectedTab, Mode=TwoWay}"
-                 AddTabButtonCommand="{x:Bind ViewModel.AddNewTabCommand}"
+                 AddTabButtonCommand="{x:Bind ViewModel.CaptureScreenCommand}"
                  TabCloseRequested="MainTabView_TabCloseRequested">
             <TabView.TabItemTemplate>
                 <DataTemplate x:DataType="models:ShellTabModel">
@@ -110,7 +261,7 @@
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
                                 <MenuFlyoutSeparator />
-                                <MenuFlyoutItem Text="Close / إغلاق"
+                                <MenuFlyoutItem Text="Close / إغلاق (Ctrl+W)"
                                                 Click="ContextClose_Click">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xE711;" />
@@ -126,25 +277,52 @@
                             </MenuFlyout>
                         </TabViewItem.ContextFlyout>
 
-                        <!-- Tab Body: Drawing Canvas & Drag Hand Zone -->
-                        <Grid Background="{ThemeResource AppBackgroundBrush}" Padding="16">
-                            <Border BorderBrush="{ThemeResource AppBorderBrush}"
-                                    BorderThickness="1"
-                                    CornerRadius="8"
-                                    Background="{ThemeResource AppBackgroundBrush}">
-                                <Grid>
-                                    <!-- In-canvas Interactive Hand Drag Zone -->
-                                    <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="16">
-                                        <FontIcon Glyph="&#xE768;" FontSize="48" Foreground="{ThemeResource AppAccentBrush}" />
-                                        <TextBlock Text="{x:Bind Title, Mode=OneWay}"
-                                                   FontSize="18" FontWeight="SemiBold"
-                                                   HorizontalAlignment="Center" />
-                                        <TextBlock Text="Drag from here to WhatsApp, Discord, Browser, or Outlook"
-                                                   FontSize="12" Foreground="{ThemeResource AppSecondaryTextBrush}"
-                                                   HorizontalAlignment="Center" />
-                                    </StackPanel>
+                        <!-- Tab Body: Drawing Canvas & Real Captured Desktop Snapshot Area -->
+                        <Grid Background="{ThemeResource AppBackgroundBrush}">
+                            <!-- State 1: When real screenshot image is present -->
+                            <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                                          VerticalScrollBarVisibility="Auto"
+                                          ZoomMode="Enabled"
+                                          MinZoomFactor="0.2"
+                                          MaxZoomFactor="4.0"
+                                          Visibility="{Binding HasImage, Converter={StaticResource BoolToVisibilityConverter}}">
+                                <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Margin="24">
+                                    <Border BorderBrush="{ThemeResource AppBorderBrush}"
+                                            BorderThickness="1"
+                                            CornerRadius="4"
+                                            Background="{ThemeResource AppBackgroundBrush}">
+                                        <!-- Captured Screenshot Display -->
+                                        <Image Source="{Binding ImageBytes, Converter={StaticResource BytesToBitmapImageConverter}}"
+                                               Stretch="None"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center" />
+                                    </Border>
                                 </Grid>
-                            </Border>
+                            </ScrollViewer>
+
+                            <!-- State 2: When no screenshot yet (Landing Prompt with Instant Snip Button) -->
+                            <Grid Padding="32"
+                                  HorizontalAlignment="Center"
+                                  VerticalAlignment="Center"
+                                  Visibility="{Binding HasImage, Converter={StaticResource BoolToVisibilityConverter}, ConverterParameter=Invert}">
+                                <StackPanel Spacing="16" HorizontalAlignment="Center">
+                                    <Button Click="LandingSnip_Click"
+                                            Width="80" Height="80"
+                                            CornerRadius="40"
+                                            HorizontalAlignment="Center"
+                                            Background="{ThemeResource AppAccentBrush}">
+                                        <FontIcon Glyph="&#xE722;" FontSize="32" Foreground="White" />
+                                    </Button>
+
+                                    <TextBlock Text="انقر هنا أو اضغط PrintScreen لالتقاط لقطة لسطح المكتب"
+                                               FontSize="18" FontWeight="SemiBold"
+                                               HorizontalAlignment="Center" />
+
+                                    <TextBlock Text="أو استخدم الاختصار Ctrl + N لبدء قص فوري لشاشتك الحالية"
+                                               FontSize="13" Foreground="{ThemeResource AppSecondaryTextBrush}"
+                                               HorizontalAlignment="Center" />
+                                </StackPanel>
+                            </Grid>
                         </Grid>
                     </TabViewItem>
                 </DataTemplate>
@@ -166,10 +344,10 @@
                                FontSize="12" Foreground="{ThemeResource AppSecondaryTextBrush}" />
                 </StackPanel>
 
-                <TextBlock Grid.Column="1" Text="100% | 1920x1080 px" Margin="16,0"
+                <TextBlock Grid.Column="1" Text="100% | سطح المكتب" Margin="16,0"
                            FontSize="12" Foreground="{ThemeResource AppSecondaryTextBrush}" />
 
-                <TextBlock Grid.Column="2" Text="DropCut v1.0 • .NET 10 LTS"
+                <TextBlock Grid.Column="2" Text="DropCut • Windows Snipping Engine"
                            FontSize="12" Foreground="{ThemeResource AppSecondaryTextBrush}" />
             </Grid>
         </Border>

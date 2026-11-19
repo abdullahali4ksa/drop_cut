@@ -6,6 +6,7 @@
     <!-- Global Value Converters -->
     <converters:BoolToVisibilityConverter x:Key="BoolToVisibilityConverter" />
     <converters:BoolToFlowDirectionConverter x:Key="BoolToFlowDirectionConverter" />
+    <converters:BytesToBitmapImageConverter x:Key="BytesToBitmapImageConverter" />
 
     <!-- Fallback default palette for custom themes -->
     <ResourceDictionary.ThemeDictionaries>

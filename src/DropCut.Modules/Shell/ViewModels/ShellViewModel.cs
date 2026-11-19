@@ -6,14 +6,16 @@ using DropCut.Core.Domain;
 using DropCut.Core.Events;
 using DropCut.Modules.Settings.Contracts;
 using DropCut.Modules.Shell.Models;
+using DropCut.Modules.Workspace.Contracts;
+using DropCut.Modules.Workspace.Models;
 using DropCut.Modules.Workspace.ViewModels;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace DropCut.Modules.Shell.ViewModels;
 
 /// <summary>
-/// Presentation ViewModel governing the multi-tab layout, tab lifecycle, context menu actions,
-/// and dynamic RTL/LTR flow direction of the Shell window.
+/// Presentation ViewModel governing the multi-tab layout, screen capture trigger,
+/// Windows Snipping Tool feature toolbar, and dynamic RTL/LTR flow direction of the Shell window.
 /// </summary>
 public partial class ShellViewModel : ObservableObject
 {
@@ -25,6 +27,12 @@ public partial class ShellViewModel : ObservableObject
     private ShellTabModel? _selectedTab;
     private bool _isRtl;
     private string _appTitle = "DropCut";
+    private CaptureMode _selectedMode = CaptureMode.Fullscreen;
+    private bool _isVideoMode;
+    private int _delaySeconds;
+    private ToolType _activeTool = ToolType.Pen;
+    private string _penColor = "#FF0000";
+    private bool _isCapturing;
 
     public ObservableCollection<ShellTabModel> Tabs { get; } = new();
 
@@ -44,6 +52,42 @@ public partial class ShellViewModel : ObservableObject
     {
         get => _appTitle;
         set => SetProperty(ref _appTitle, value);
+    }
+
+    public CaptureMode SelectedMode
+    {
+        get => _selectedMode;
+        set => SetProperty(ref _selectedMode, value);
+    }
+
+    public bool IsVideoMode
+    {
+        get => _isVideoMode;
+        set => SetProperty(ref _isVideoMode, value);
+    }
+
+    public int DelaySeconds
+    {
+        get => _delaySeconds;
+        set => SetProperty(ref _delaySeconds, value);
+    }
+
+    public ToolType ActiveTool
+    {
+        get => _activeTool;
+        set => SetProperty(ref _activeTool, value);
+    }
+
+    public string PenColor
+    {
+        get => _penColor;
+        set => SetProperty(ref _penColor, value);
+    }
+
+    public bool IsCapturing
+    {
+        get => _isCapturing;
+        set => SetProperty(ref _isCapturing, value);
     }
 
     public ShellViewModel(
@@ -83,6 +127,84 @@ public partial class ShellViewModel : ObservableObject
 
         Tabs.Add(tab);
         SelectedTab = tab;
+    }
+
+    [RelayCommand]
+    public async Task CaptureScreenAsync()
+    {
+        if (IsCapturing)
+        {
+            return;
+        }
+
+        IsCapturing = true;
+        try
+        {
+            var snappingEngine = _serviceProvider.GetService<ISnappingEngine>();
+            byte[]? imageBytes = null;
+            var width = 1920;
+            var height = 1080;
+
+            if (snappingEngine is not null)
+            {
+                var request = new SnipRequest(Guid.NewGuid(), SelectedMode, DelaySeconds, null);
+                var captureResult = await snappingEngine.CaptureDesktopAsync(request).ConfigureAwait(false);
+                if (captureResult.IsSuccess && captureResult.Value is not null)
+                {
+                    imageBytes = captureResult.Value;
+                }
+            }
+
+            _tabCounter++;
+            var workspaceVm = _serviceProvider.GetService<WorkspaceViewModel>();
+
+            var newTab = new ShellTabModel
+            {
+                Title = _localizationService.GetString("Tab_NewSnippet", _tabCounter),
+                Workspace = workspaceVm,
+                ImageBytes = imageBytes,
+                ImageWidth = width,
+                ImageHeight = height,
+                AutoSaveStatus = _localizationService.GetString("Status_Saved")
+            };
+
+            Tabs.Add(newTab);
+            SelectedTab = newTab;
+        }
+        finally
+        {
+            IsCapturing = false;
+        }
+    }
+
+    [RelayCommand]
+    public void SetCaptureMode(string modeName)
+    {
+        if (Enum.TryParse<CaptureMode>(modeName, true, out var mode))
+        {
+            SelectedMode = mode;
+        }
+    }
+
+    [RelayCommand]
+    public void SetActiveTool(string toolName)
+    {
+        if (Enum.TryParse<ToolType>(toolName, true, out var tool))
+        {
+            ActiveTool = tool;
+        }
+    }
+
+    [RelayCommand]
+    public void ToggleVideoMode()
+    {
+        IsVideoMode = !IsVideoMode;
+    }
+
+    [RelayCommand]
+    public void SetDelay(int seconds)
+    {
+        DelaySeconds = seconds;
     }
 
     [RelayCommand]

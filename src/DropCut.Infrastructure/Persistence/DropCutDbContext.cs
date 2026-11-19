@@ -46,7 +46,14 @@ public class DropCutDbContext : DbContext
     public DropCutDbContext(DbContextOptions<DropCutDbContext> options)
         : base(options)
     {
-        DatabasePath = string.Empty;
+        var localAppData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        var dir = Path.Combine(localAppData, "DropCut");
+        if (!Directory.Exists(dir))
+        {
+            Directory.CreateDirectory(dir);
+        }
+
+        DatabasePath = Path.Combine(dir, "dropcut.db");
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)

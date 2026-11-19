@@ -7,6 +7,19 @@ namespace DropCut.Modules.Workspace.Models;
 /// </summary>
 public class SnipRequest
 {
+    public SnipRequest()
+    {
+    }
+
+    public SnipRequest(Guid id, CaptureMode mode, int delaySeconds = 0, PixelBounds? bounds = null, double dpiScale = 1.0)
+    {
+        Id = id;
+        Mode = mode;
+        DelaySeconds = delaySeconds;
+        Bounds = bounds;
+        DpiScale = dpiScale;
+    }
+
     public Guid Id { get; set; } = Guid.NewGuid();
 
     public CaptureMode Mode { get; set; } = CaptureMode.Rectangular;
