@@ -1,3 +1,4 @@
+using DropCut.App.Services;
 using DropCut.Modules.Shell;
 using DropCut.Modules.Shell.ViewModels;
 using DropCut.Core.Contracts;
@@ -64,6 +65,8 @@ public partial class App : Application
         services.AddDbContext<DropCutDbContext>();
         services.AddSingleton<ISafeFileStorage, SafeFileStorageService>();
         services.AddSingleton<IScreenCaptureService, ScreenCaptureService>();
+        services.AddSingleton<IGlobalHotkeyService, GlobalHotkeyService>();
+        services.AddSingleton<IOcrService, WindowsOcrService>();
         services.AddScoped<SnippetRepository>();
         services.AddScoped<AuditLogRepository>();
         services.AddScoped<IUserPreferenceRepository, UserPreferenceRepository>();

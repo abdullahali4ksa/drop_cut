@@ -39,7 +39,7 @@
                 <!-- Section 1: Capture Mode & New Snip (Matching Snipping Tool Left/Right) -->
                 <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                     <!-- New Snip SplitButton with Mode Dropdown -->
-                    <SplitButton Command="{x:Bind ViewModel.CaptureScreenCommand}">
+                    <SplitButton Click="NewSnip_Click">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <FontIcon Glyph="&#xE710;" FontSize="14" />
                             <TextBlock Text="جديد (New)" FontWeight="SemiBold" VerticalAlignment="Center" />
@@ -69,40 +69,20 @@
                             </MenuFlyout>
                         </SplitButton.Flyout>
                         <ToolTipService.ToolTip>
-                            <ToolTip Content="قص لقطة جديدة / New Snip (Ctrl+N أو PrintScreen)" />
+                            <ToolTip Content="قص لقطة جديدة / New Snip (Ctrl+N أو PrintScreen أو Ctrl+B+B)" />
                         </ToolTipService.ToolTip>
                     </SplitButton>
 
-                    <!-- Camera / Video Mode Toggles -->
-                    <ToggleButton IsChecked="True" Width="36" Height="36" Padding="0">
-                        <FontIcon Glyph="&#xE722;" FontSize="14" />
-                        <ToolTipService.ToolTip>
-                            <ToolTip Content="وضع التقاط لقطة الشاشة / Screenshot Mode" />
-                        </ToolTipService.ToolTip>
-                    </ToggleButton>
-
-                    <ToggleButton Width="36" Height="36" Padding="0">
-                        <FontIcon Glyph="&#xE714;" FontSize="14" />
-                        <ToolTipService.ToolTip>
-                            <ToolTip Content="وضع تسجيل الشاشة / Screen Recording Mode" />
-                        </ToolTipService.ToolTip>
-                    </ToggleButton>
-
-                    <!-- Delay Timer Dropdown -->
-                    <DropDownButton Width="36" Height="36" Padding="0">
-                        <FontIcon Glyph="&#xE823;" FontSize="14" />
-                        <DropDownButton.Flyout>
-                            <MenuFlyout>
-                                <MenuFlyoutItem Text="بدون تأخير / No Delay" Click="Delay0_Click" />
-                                <MenuFlyoutItem Text="تأخير 3 ثوانٍ / 3 Seconds" Click="Delay3_Click" />
-                                <MenuFlyoutItem Text="تأخير 5 ثوانٍ / 5 Seconds" Click="Delay5_Click" />
-                                <MenuFlyoutItem Text="تأخير 10 ثوانٍ / 10 Seconds" Click="Delay10_Click" />
-                            </MenuFlyout>
-                        </DropDownButton.Flyout>
-                        <ToolTipService.ToolTip>
-                            <ToolTip Content="مؤقت التأخير قبل الالتقاط / Delay Timer" />
-                        </ToolTipService.ToolTip>
-                    </DropDownButton>
+                    <!-- Camera Mode Indicator -->
+                    <Border Background="{ThemeResource AppAccentBrush}"
+                            CornerRadius="4"
+                            Padding="8,6"
+                            VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <FontIcon Glyph="&#xE722;" FontSize="13" Foreground="White" />
+                            <TextBlock Text="لقطة" FontSize="11" Foreground="White" FontWeight="SemiBold" />
+                        </StackPanel>
+                    </Border>
                 </StackPanel>
 
                 <!-- Section 2: Drawing & Editing Tools (Center Snipping Tool Ribbon) -->
@@ -158,7 +138,7 @@
                     <Button Width="36" Height="36" Padding="0" Click="ToolText_Click">
                         <FontIcon Glyph="&#xE8D2;" FontSize="14" />
                         <ToolTipService.ToolTip>
-                            <ToolTip Content="استخراج وقراءة النصوص / Text Actions (OCR)" />
+                            <ToolTip Content="استخراج وقراءة النصوص الذكية / Text Actions (OCR)" />
                         </ToolTipService.ToolTip>
                     </Button>
 
@@ -235,7 +215,7 @@
                  CanDragTabs="True"
                  TabItemsSource="{x:Bind ViewModel.Tabs, Mode=OneWay}"
                  SelectedItem="{x:Bind ViewModel.SelectedTab, Mode=TwoWay}"
-                 AddTabButtonCommand="{x:Bind ViewModel.CaptureScreenCommand}"
+                 AddTabButtonCommand="{x:Bind ViewModel.AddNewTabCommand}"
                  TabCloseRequested="MainTabView_TabCloseRequested">
             <TabView.TabItemTemplate>
                 <DataTemplate x:DataType="models:ShellTabModel">
@@ -291,11 +271,19 @@
                                             BorderThickness="1"
                                             CornerRadius="4"
                                             Background="{ThemeResource AppBackgroundBrush}">
-                                        <!-- Captured Screenshot Display -->
-                                        <Image Source="{Binding ImageBytes, Converter={StaticResource BytesToBitmapImageConverter}}"
-                                               Stretch="None"
-                                               HorizontalAlignment="Center"
-                                               VerticalAlignment="Center" />
+                                        <Grid>
+                                            <!-- Captured Screenshot Display -->
+                                            <Image Source="{Binding ImageBytes, Converter={StaticResource BytesToBitmapImageConverter}}"
+                                                   Stretch="None"
+                                                   HorizontalAlignment="Center"
+                                                   VerticalAlignment="Center" />
+
+                                            <!-- Interactive Inking & Annotation Canvas Layer -->
+                                            <Canvas Background="Transparent"
+                                                    PointerPressed="AnnotationCanvas_PointerPressed"
+                                                    PointerMoved="AnnotationCanvas_PointerMoved"
+                                                    PointerReleased="AnnotationCanvas_PointerReleased" />
+                                        </Grid>
                                     </Border>
                                 </Grid>
                             </ScrollViewer>
@@ -314,11 +302,11 @@
                                         <FontIcon Glyph="&#xE722;" FontSize="32" Foreground="White" />
                                     </Button>
 
-                                    <TextBlock Text="انقر هنا أو اضغط PrintScreen لالتقاط لقطة لسطح المكتب"
+                                    <TextBlock Text="انقر هنا لبدء القص أو اضغط الاختصار Ctrl + B + B"
                                                FontSize="18" FontWeight="SemiBold"
                                                HorizontalAlignment="Center" />
 
-                                    <TextBlock Text="أو استخدم الاختصار Ctrl + N لبدء قص فوري لشاشتك الحالية"
+                                    <TextBlock Text="أو استخدم مفتاح PrintScreen لفتح شريط القص الشفاف في أي وقت حتى بالخلفية"
                                                FontSize="13" Foreground="{ThemeResource AppSecondaryTextBrush}"
                                                HorizontalAlignment="Center" />
                                 </StackPanel>
@@ -347,7 +335,7 @@
                 <TextBlock Grid.Column="1" Text="100% | سطح المكتب" Margin="16,0"
                            FontSize="12" Foreground="{ThemeResource AppSecondaryTextBrush}" />
 
-                <TextBlock Grid.Column="2" Text="DropCut • Windows Snipping Engine"
+                <TextBlock Grid.Column="2" Text="DropCut • Windows Snipping Engine (Ctrl+B+B)"
                            FontSize="12" Foreground="{ThemeResource AppSecondaryTextBrush}" />
             </Grid>
         </Border>

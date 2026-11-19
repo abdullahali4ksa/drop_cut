@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Window
+    x:Class="DropCut.App.SnipOverlayWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Title="DropCut Snip Overlay">
+
+    <Grid x:Name="RootGrid"
+          PointerPressed="RootGrid_PointerPressed"
+          PointerMoved="RootGrid_PointerMoved"
+          PointerReleased="RootGrid_PointerReleased"
+          KeyDown="RootGrid_KeyDown"
+          Background="Black">
+
+        <!-- 1. Frozen Desktop Background Screenshot -->
+        <Image x:Name="FrozenDesktopImage" Stretch="Fill" />
+
+        <!-- 2. Dark translucent dimmer overlay -->
+        <Rectangle x:Name="DimmerOverlay" Fill="#70000000" />
+
+        <!-- 3. Canvas for active cutout and selection bounding box -->
+        <Canvas x:Name="SelectionCanvas">
+            <!-- Cutout viewbox: displays the bright, un-dimmed region from the frozen image -->
+            <Border x:Name="SelectionBox"
+                    BorderBrush="#0078D7"
+                    BorderThickness="2"
+                    Background="#100078D7"
+                    Visibility="Collapsed" />
+
+            <!-- Dimension badge (e.g. 840 × 460) -->
+            <Border x:Name="DimensionBadge"
+                    Background="#E61E1E1E"
+                    BorderBrush="#33FFFFFF"
+                    BorderThickness="1"
+                    CornerRadius="4"
+                    Padding="8,3"
+                    Visibility="Collapsed">
+                <TextBlock x:Name="DimensionText"
+                           Foreground="White"
+                           FontSize="12"
+                           FontWeight="SemiBold" />
+            </Border>
+        </Canvas>
+
+        <!-- 4. Windows 11 Style Floating Sniper Pill at Top Center -->
+        <Border HorizontalAlignment="Center"
+                VerticalAlignment="Top"
+                Margin="0,18,0,0"
+                Background="#EE1F1F1F"
+                BorderBrush="#44FFFFFF"
+                BorderThickness="1"
+                CornerRadius="8"
+                Padding="8,4">
+            <StackPanel Orientation="Horizontal" Spacing="4">
+                <!-- Rectangular mode button -->
+                <Button x:Name="BtnModeRect"
+                        Click="BtnModeRect_Click"
+                        Width="40" Height="36" Padding="0"
+                        Background="#330078D7">
+                    <FontIcon Glyph="&#xE8B9;" FontSize="15" Foreground="White" />
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="قص مستطيل (Rectangular Snip)" />
+                    </ToolTipService.ToolTip>
+                </Button>
+
+                <!-- Freeform mode button -->
+                <Button x:Name="BtnModeFreeform"
+                        Click="BtnModeFreeform_Click"
+                        Width="40" Height="36" Padding="0">
+                    <FontIcon Glyph="&#xE8C0;" FontSize="15" Foreground="White" />
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="قص شكل حر (Freeform Snip)" />
+                    </ToolTipService.ToolTip>
+                </Button>
+
+                <!-- Window mode button -->
+                <Button x:Name="BtnModeWindow"
+                        Click="BtnModeWindow_Click"
+                        Width="40" Height="36" Padding="0">
+                    <FontIcon Glyph="&#xE7C3;" FontSize="15" Foreground="White" />
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="قص نافذة (Window Snip)" />
+                    </ToolTipService.ToolTip>
+                </Button>
+
+                <!-- Fullscreen mode button -->
+                <Button x:Name="BtnModeFullscreen"
+                        Click="BtnModeFullscreen_Click"
+                        Width="40" Height="36" Padding="0">
+                    <FontIcon Glyph="&#xE740;" FontSize="15" Foreground="White" />
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="ملء الشاشة (Fullscreen Snip)" />
+                    </ToolTipService.ToolTip>
+                </Button>
+
+                <Rectangle Width="1" Height="20" Fill="#44FFFFFF" Margin="4,0" VerticalAlignment="Center" />
+
+                <!-- Cancel / Close button -->
+                <Button x:Name="BtnCancel"
+                        Click="BtnCancel_Click"
+                        Width="40" Height="36" Padding="0">
+                    <FontIcon Glyph="&#xE711;" FontSize="13" Foreground="#FF6B6B" />
+                    <ToolTipService.ToolTip>
+                        <ToolTip Content="إلغاء (Escape)" />
+                    </ToolTipService.ToolTip>
+                </Button>
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>

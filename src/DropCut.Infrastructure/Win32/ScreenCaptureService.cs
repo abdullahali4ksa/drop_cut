@@ -171,6 +171,54 @@ public class ScreenCaptureService : IScreenCaptureService
         }
     }
 
+    public byte[] CropBitmap(byte[] sourceBmpBytes, int x, int y, int width, int height)
+    {
+        if (sourceBmpBytes == null || sourceBmpBytes.Length < 54)
+        {
+            return Array.Empty<byte>();
+        }
+
+        try
+        {
+            var pixelDataOffset = BitConverter.ToInt32(sourceBmpBytes, 10);
+            var srcWidth = BitConverter.ToInt32(sourceBmpBytes, 18);
+            var rawHeight = BitConverter.ToInt32(sourceBmpBytes, 22);
+            var isTopDown = rawHeight < 0;
+            var srcHeight = Math.Abs(rawHeight);
+            var bpp = BitConverter.ToInt16(sourceBmpBytes, 28);
+
+            if (bpp != 32 || srcWidth <= 0 || srcHeight <= 0)
+            {
+                return sourceBmpBytes;
+            }
+
+            var safeX = Math.Clamp(x, 0, srcWidth - 1);
+            var safeY = Math.Clamp(y, 0, srcHeight - 1);
+            var safeWidth = Math.Clamp(width, 1, srcWidth - safeX);
+            var safeHeight = Math.Clamp(height, 1, srcHeight - safeY);
+
+            var croppedPixels = new byte[safeWidth * safeHeight * 4];
+
+            for (int row = 0; row < safeHeight; row++)
+            {
+                int srcRowIndex = isTopDown ? (safeY + row) : (srcHeight - 1 - (safeY + row));
+                int srcRowOffset = pixelDataOffset + (srcRowIndex * srcWidth + safeX) * 4;
+                int dstRowOffset = (row * safeWidth) * 4;
+
+                if (srcRowOffset + (safeWidth * 4) <= sourceBmpBytes.Length)
+                {
+                    Array.Copy(sourceBmpBytes, srcRowOffset, croppedPixels, dstRowOffset, safeWidth * 4);
+                }
+            }
+
+            return WrapInBmpContainer(croppedPixels, safeWidth, safeHeight);
+        }
+        catch
+        {
+            return sourceBmpBytes;
+        }
+    }
+
     private static byte[] WrapInBmpContainer(byte[] pixelData, int width, int height)
     {
         const int fileHeaderSize = 14;

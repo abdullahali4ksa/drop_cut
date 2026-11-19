@@ -19,4 +19,9 @@ public interface IScreenCaptureService
     /// Captures the currently active/foreground application window.
     /// </summary>
     Task<byte[]> CaptureActiveWindowAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Crops a rectangular sub-region from an existing 32-bit BMP byte stream in memory.
+    /// </summary>
+    byte[] CropBitmap(byte[] sourceBmpBytes, int x, int y, int width, int height);
 }

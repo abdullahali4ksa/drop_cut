@@ -148,7 +148,7 @@ public partial class ShellViewModel : ObservableObject
             if (snappingEngine is not null)
             {
                 var request = new SnipRequest(Guid.NewGuid(), SelectedMode, DelaySeconds, null);
-                var captureResult = await snappingEngine.CaptureDesktopAsync(request).ConfigureAwait(false);
+                var captureResult = await snappingEngine.CaptureDesktopAsync(request);
                 if (captureResult.IsSuccess && captureResult.Value is not null)
                 {
                     imageBytes = captureResult.Value;
