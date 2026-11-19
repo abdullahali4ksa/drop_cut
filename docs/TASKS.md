@@ -54,25 +54,25 @@
 ## Phase 2: Infrastructure & Persistence (`DropCut.Infrastructure`)
 
 ### [P02-T001] SQLite Database Context & EF Core Repositories (Linear: `JMD-43`)
-- **STATUS:** `READY`
+- **STATUS:** `DONE`
 - **POLICY_REF:** `docs/PROJECT_RULES.md (Separation of Concerns, SQLite Persistence)`
 - **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (WAL Mode, Connection Fault Tolerance)`
-- **DESCRIPTION:** Implement `DropCutDbContext.cs`, entity type configurations, repository implementations, and transaction `IUnitOfWork`.
-- **VERIFICATION:** In-memory / local SQLite tests pass.
+- **DESCRIPTION:** Implement `DropCutDbContext.cs`, entity configurations (`SnippetEntity`, `AnnotationEntity`, `AuditLogEntity`, `PermissionEntity`, `UserPreferenceEntity`), and repository implementations (`SnippetRepository`, `AuditLogRepository`, `UserPreferenceRepository`).
+- **VERIFICATION:** `dotnet test tests/DropCut.Modules.Tests` passes with in-memory SQLite integration tests.
 
 ### [P02-T002] Atomic Safe File System Adapter (Linear: `JMD-43`)
-- **STATUS:** `BACKLOG`
+- **STATUS:** `DONE`
 - **POLICY_REF:** `docs/PROJECT_RULES.md (File Storage Isolation)`
 - **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Non-Locking FileShare.ReadWrite, Staging .tmp Atomic Replacement)`
-- **DESCRIPTION:** Implement `SafeFileStorageService.cs` ensuring file integrity against sudden power loss.
-- **VERIFICATION:** File write / concurrent read tests pass.
+- **DESCRIPTION:** Implement `SafeFileStorageService.cs` ensuring file integrity against sudden power loss and concurrent non-locking access.
+- **VERIFICATION:** File write / read / delete unit tests pass.
 
 ---
 
 ## Phase 3: ERP/Django-Style Feature Modules (`DropCut.Modules`)
 
 ### [P03-T001] FileVault Module & Continuous Auto-Save Engine (Linear: `JMD-44`)
-- **STATUS:** `BACKLOG`
+- **STATUS:** `READY`
 - **POLICY_REF:** `docs/PROJECT_RULES.md (Modular Vertical-Slice, Continuous Auto-Save)`
 - **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Debounced Async Worker, Non-Blocking Disk Write)`
 - **DESCRIPTION:** Build self-contained `FileVault` module with debounced (300ms) continuous auto-save on image modification, recents gallery, and multi-format exporters.

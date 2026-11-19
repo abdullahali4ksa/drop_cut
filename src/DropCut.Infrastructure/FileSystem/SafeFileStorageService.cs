@@ -1,9 +1,11 @@
+using DropCut.Core.Contracts;
+
 namespace DropCut.Infrastructure.FileSystem;
 
 /// <summary>
 /// Safe file storage adapter enforcing non-locking reads and atomic staging writes.
 /// </summary>
-public class SafeFileStorageService
+public class SafeFileStorageService : ISafeFileStorage
 {
     public async Task WriteAtomicAsync(string destinationPath, byte[] content, CancellationToken cancellationToken = default)
     {
