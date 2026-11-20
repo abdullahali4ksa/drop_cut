@@ -245,10 +245,11 @@
 - **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Identity Manifest Integrity, Official Partner Center Binding)`
 - **DESCRIPTION:** Complete browser automation of Microsoft Partner Center submission for "DropCut":
   - Product Name reserved: `DropCut` (Product ID: `9NV7BZHXBCZ7`, MSA App ID: `af96190c-754d-4834-a3c0-0e46aaefc15b`)
-  - Pricing & Availability: Free ($0.00 USD) worldwide across 240+ countries.
-  - App Properties: Productivity, Utilities + tools, zero telemetry, offline-first.
-  - Age Ratings (IARC): Everyone / 3+ rating certified.
-  - Store Listings: English and Arabic localized titles, descriptions, features, and copyright.
-  - Certification Notes: 100% offline desktop utility, zero personal data collection, zero ads.
-  - Synchronize official Package Identity (`birotech.DropCut`, `CN=4B6200B3-DE4E-4F39-A6EA-B5DC049294B2`, `birotech.DropCut_4spa8h579ffz6`) into `Package.appxmanifest`.
-- **VERIFICATION:** Partner Center submission sections completed up to package upload; Package.appxmanifest identity verified.
+  - Pricing & Availability: Free ($0.00 USD) worldwide across 240+ countries (Complete).
+  - App Properties: Productivity, Utilities + tools, zero telemetry, offline-first (Complete).
+  - Age Ratings (IARC): Everyone / 3+ rating certified (Complete).
+  - Store Listings: English and Arabic localized titles, descriptions, features, 1920x1080 desktop screenshots, and 300x300 app tile icons uploaded (Complete).
+  - Packages: Official `DropCut_v1.0.0.0_x64.msix` built, uploaded, and successfully validated by Partner Center (Complete).
+  - Submission Options: `runFullTrust` capability justification and offline notes documented (Complete).
+  - Submit Button: "Submit for certification" active and ready for final release.
+- **VERIFICATION:** 100% of submission sections marked Complete and validated on Partner Center. Visual evidence captured in step_289.png.
