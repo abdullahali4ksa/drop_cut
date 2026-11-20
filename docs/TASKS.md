@@ -243,7 +243,8 @@
 
 ## Phase 8: Version 2.0 Feature Roadmap (خارطة طريق الإصدار الثاني v2.0)
 
-> **Mandate:** All tasks in Phase 8 are scheduled for Version 2.0 implementation upon explicit user authorization. No implementation code may be introduced until requested.
+> **Mandate:** All tasks in Phase 8 are scheduled for Version 2.0 implementation upon explicit user authorization. No implementation code may be introduced until requested.  
+> **Scope Rule:** Only the approved tasks below are part of Version 2.0. All other exploratory suggestions (macOS/Linux cross-platform, Chrome extension, scrolling capture, etc.) are strictly deferred until explicitly requested.
 
 ### [P08-T001] Smart Auto-Fit Viewport Scaling (احتواء ذكي للصورة داخل أبعاد التاب) (Linear: `JMD-65`)
 - **STATUS:** `READY`
@@ -284,7 +285,19 @@
     - Rasterizes cleanly into export bitmap upon save or drag & drop.
 - **VERIFICATION:** Selecting Arrow or Rectangle allows smooth click-and-drag drawing on the screenshot; shapes render with crisp anti-aliased geometry, undoable via `Ctrl + Z`, and cleanly rasterized into the export bitmap.
 
-### [P08-T004] Dual Architecture Packaging: Native Arm64 & Universal Store Bundle (حزم x64 و Arm64 المزدوجة) (Linear: `JMD-68`)
+### [P08-T004] Step Numbering Badges Tool (أداة الترقيم المتسلسل التلقائي للشروحات ①, ②, ③...) (Linear: `JMD-68`)
+- **STATUS:** `READY`
+- **POLICY_REF:** `docs/PROJECT_RULES.md (Clean Fluent Ribbon, Educational Annotation Suite)`
+- **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Stateful Badge Counter, Undo-Stack Synchronization)`
+- **DESCRIPTION:** Introduce an auto-incrementing Step Numbering Badge tool (`&#xE735;` / Badge Number Tool) in Section 2 of the ribbon toolbar:
+  - Each mouse click on the screenshot stamps an attractive, high-contrast circular badge displaying a sequential step number (`①`, `②`, `③`...).
+  - Customizable badge background color (Accent Cyan, Red, Orange, Green, Purple) and diameter (24px, 32px, 40px).
+  - Stateful sequential counter that auto-increments on placement and automatically decrements on Undo (`Ctrl + Z`).
+  - Option in flyout or double-click to reset counter back to 1.
+  - Renders as high-DPI vector graphics, fully undoable, and rasterized into export PNG.
+- **VERIFICATION:** Clicking sequentially on 3 areas stamps badges 1, 2, 3; pressing `Ctrl + Z` removes badge 3 and sets next counter to 3; exporting image preserves clean numbers.
+
+### [P08-T005] Dual Architecture Packaging: Native Arm64 & Universal Store Bundle (حزم x64 و Arm64 المزدوجة) (Linear: `JMD-69`)
 - **STATUS:** `READY`
 - **POLICY_REF:** `docs/PROJECT_RULES.md (Microsoft Store Standards, Future-Proof Architecture)`
 - **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Cross-Platform Native Binaries, Multi-Target MSBuild)`
