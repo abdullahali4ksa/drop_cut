@@ -186,12 +186,29 @@ PROPOSED_SOLUTION:
 
 ---
 
-## 14. Microsoft Store & MSIX Sandbox Compliance
+## 14. Universal Microsoft Store Certification & Developer Account Protection Laws
+(قوانين الاعتماد وحماية حساب المطور لمتجر مايكروسوفت)
 
-1. **Multi-Architecture Native Binaries**:
-   - Every release build must support both `x64` (Intel/AMD) and `arm64` (Snapdragon / Copilot+ PCs).
-2. **Isolated Storage Paths**:
+> **Supreme Mandate:** Adherence to `docs/MICROSOFT_STORE_POLICY_CONSTITUTION.md` is mandatory for **DropCut and every software project authored or generated**. Never risk developer account suspension, embarrassment, or store rejection.
+
+1. **Zero-Account-Risk Policy**:
+   - Zero telemetry, zero cloud data transfer, 100% offline-first execution, and zero unapproved background activity.
+2. **Mandatory 5-Asset Suite Pre-Flight Verification**:
+   - No package may be generated or submitted without verifying the physical presence of all 5 required visual assets:
+     - `Assets\Square44x44Logo.png` (44×44 px)
+     - `Assets\Square150x150Logo.png` (150×150 px)
+     - `Assets\Wide310x150Logo.png` (310×150 px)
+     - `Assets\SplashScreen.png` (620×300 px)
+     - `Assets\StoreLogo.png` (50×50 px)
+3. **Mandatory Published Privacy Policy**:
+   - Every project must maintain a complete, valid `PRIVACY_POLICY.md` at root and online on GitHub.
+4. **Standardized `runFullTrust` Justification**:
+   - Whenever `runFullTrust` capability is declared, always provide the approved justification in Store submission notes:
+     > *"This is a native WinUI 3 desktop application requiring runFullTrust capability to access Windows screen clipping APIs and global hotkeys."*
+5. **Multi-Architecture Native Binaries (x64 + Arm64)**:
+   - Release builds must support `win-x64` (Intel/AMD) and `win-arm64` (Snapdragon X Elite / Copilot+ PCs).
+6. **Isolated Storage Paths**:
    - Respect MSIX read-only install directories (`C:\Program Files\WindowsApps\...`).
-   - Write all working files, drafts, and caches into `%LocalAppData%\DropCut\` and user captures into `%USERPROFILE%\Pictures\DropCut\`.
-3. **100% Offline & Local-First**:
-   - Zero telemetry, zero analytics, zero external network calls.
+   - Write working files and caches to `%LocalAppData%\[AppName]\` and user exports strictly to user-designated personal folders (`%USERPROFILE%\Pictures\[AppName]`).
+7. **Global Polish & Identity Neutrality**:
+   - Detect OS language automatically; if non-Arabic, launch 100% in English (or selected language) without any lingering developer-language artifacts. Zero compound slashed labels (`Save / حفظ` is prohibited).

@@ -9,9 +9,10 @@
 Before touching or authoring ANY code, you MUST inspect and read:
 1. `docs/ARCHITECTURE.md` (System design & layer boundaries)
 2. `docs/PROJECT_RULES.md` (The Constitution & development laws)
-3. `docs/MODULE_CATALOG.md` (Registry of self-contained modules)
-4. `docs/TASKS.md` (Active tasks and roadmap)
-5. `README.md` (Project overview)
+3. `docs/MICROSOFT_STORE_POLICY_CONSTITUTION.md` (Universal Developer Account Protection & Store Laws)
+4. `docs/MODULE_CATALOG.md` (Registry of self-contained modules)
+5. `docs/TASKS.md` (Active tasks and roadmap)
+6. `README.md` (Project overview)
 
 ---
 
@@ -58,3 +59,18 @@ Before declaring any task done:
 1. Run `dotnet build DropCut.sln` — must succeed with zero errors and zero warnings.
 2. Run relevant tests in `tests/`.
 3. Check actual command outputs — never hallucinate or claim success without real evidence.
+
+---
+
+## 5. Universal Microsoft Store & Developer Account Protection Protocol
+
+> **Zero-Account-Risk Law:** You must never submit or generate packages that violate Microsoft Commercial Marketplace Certification Policies or risk account suspension.
+
+1. **Mandatory 5-Asset Suite**:
+   Every package MUST bundle and verify all 5 visual assets (`Square44x44Logo.png`, `Square150x150Logo.png`, `Wide310x150Logo.png`, `SplashScreen.png`, `StoreLogo.png`).
+2. **100% Offline-First Privacy**:
+   Zero telemetry, zero analytics, zero external network calls. All processing is strictly local. A public `PRIVACY_POLICY.md` link must always be active.
+3. **Capability Justification**:
+   Always provide the approved standard justification for `runFullTrust` in Store submission notes.
+4. **Generalization Mandate**:
+   These rules apply universally to **DropCut and any software project** created or maintained for the developer.
