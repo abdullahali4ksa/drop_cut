@@ -18,6 +18,7 @@ using Windows.Storage.Streams;
 using Windows.System;
 using Windows.UI;
 using Windows.UI.Core;
+using DropCut.Modules.Settings.Contracts;
 
 namespace DropCut.App;
 
@@ -32,6 +33,7 @@ public sealed partial class MainWindow : Window
     private readonly IScreenCaptureService _screenCaptureService;
     private readonly IGlobalHotkeyService _hotkeyService;
     private readonly IOcrService _ocrService;
+    private readonly ILocalizationService _localizationService;
 
     private Polyline? _activePolyline;
     private Canvas? _activeDrawingCanvas;
@@ -44,16 +46,26 @@ public sealed partial class MainWindow : Window
     private double _tabCropH;
     private bool _isTabCropDragging;
 
+    // In-tab privacy blur state
+    private Point _tabBlurStart;
+    private double _tabBlurX;
+    private double _tabBlurY;
+    private double _tabBlurW;
+    private double _tabBlurH;
+    private bool _isTabBlurDragging;
+
     public MainWindow(
         ShellViewModel viewModel,
         IScreenCaptureService screenCaptureService,
         IGlobalHotkeyService hotkeyService,
-        IOcrService ocrService)
+        IOcrService ocrService,
+        ILocalizationService localizationService)
     {
         ViewModel = viewModel;
         _screenCaptureService = screenCaptureService;
         _hotkeyService = hotkeyService;
         _ocrService = ocrService;
+        _localizationService = localizationService;
 
         InitializeComponent();
 
@@ -135,6 +147,26 @@ public sealed partial class MainWindow : Window
                 e.Handled = true;
                 ActionUndo_Click(this, new RoutedEventArgs());
             }
+            else if (isCtrlDown && (e.Key == VirtualKey.Add || (int)e.Key == 187))
+            {
+                e.Handled = true;
+                ZoomInCurrentTab();
+            }
+            else if (isCtrlDown && (e.Key == VirtualKey.Subtract || (int)e.Key == 189))
+            {
+                e.Handled = true;
+                ZoomOutCurrentTab();
+            }
+            else if (isCtrlDown && (e.Key == VirtualKey.Number0 || e.Key == VirtualKey.NumberPad0))
+            {
+                e.Handled = true;
+                ZoomResetCurrentTab();
+            }
+            else if (!isCtrlDown && e.Key == VirtualKey.H)
+            {
+                e.Handled = true;
+                ToolHand_Click(this, new RoutedEventArgs());
+            }
         }
         catch (Exception)
         {
@@ -149,6 +181,12 @@ public sealed partial class MainWindow : Window
     {
         try
         {
+            if (ViewModel.DelaySeconds > 0)
+            {
+                NotifyToolChange($"انتظر... سيتم التقاط الشاشة بعد {ViewModel.DelaySeconds} ثوانٍ");
+                await Task.Delay(ViewModel.DelaySeconds * 1000);
+            }
+
             // Hide main window so desktop is completely clear for the snip
             this.AppWindow.Hide();
             await Task.Delay(180);
@@ -229,6 +267,34 @@ public sealed partial class MainWindow : Window
 
     private void ModeFreeform_Click(object sender, RoutedEventArgs e) =>
         StartSnippingOverlayAsync(CaptureMode.Freeform);
+
+    private void DelayNone_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.DelaySeconds = 0;
+        TxtDelayIndicator.Text = "بدون تأخير";
+        NotifyToolChange("مؤقت القص: فوري بدون تأخير");
+    }
+
+    private void Delay3s_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.DelaySeconds = 3;
+        TxtDelayIndicator.Text = "3 ثوانٍ";
+        NotifyToolChange("مؤقت القص: تأخير 3 ثوانٍ لالتقاط القوائم المنسدلة");
+    }
+
+    private void Delay5s_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.DelaySeconds = 5;
+        TxtDelayIndicator.Text = "5 ثوانٍ";
+        NotifyToolChange("مؤقت القص: تأخير 5 ثوانٍ");
+    }
+
+    private void Delay10s_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.DelaySeconds = 10;
+        TxtDelayIndicator.Text = "10 ثوانٍ";
+        NotifyToolChange("مؤقت القص: تأخير 10 ثوانٍ");
+    }
 
     // ==========================================
     // 3. External Drag & Drop Sharing to WhatsApp / Telegram / Explorer
@@ -560,6 +626,176 @@ public sealed partial class MainWindow : Window
         catch (Exception) { }
     }
 
+    // ==========================================
+    // 4.1 In-Tab Privacy Blur & Redaction Feature
+    // ==========================================
+    private void ToolBlur_Click(object sender, RoutedEventArgs e)
+    {
+        var tab = ViewModel.SelectedTab;
+        if (tab?.ImageBytes is not { Length: > 0 })
+        {
+            NotifyToolChange("يرجى أخذ لقطة شاشة أولاً لتطبيق التمويه عليها");
+            return;
+        }
+
+        tab.IsBlurring = !tab.IsBlurring;
+        if (tab.IsBlurring)
+        {
+            tab.IsCropping = false;
+            NotifyToolChange("وضع تمويه الخصوصية: اسحب بالفأرة لتحديد منطقة الأرقام أو البيانات الحساسة ثم اضغط 'تطبيق التمويه'");
+        }
+        else
+        {
+            NotifyToolChange("تم إغلاق وضع التمويه");
+        }
+    }
+
+    private void BlurCanvas_PointerPressed(object sender, PointerRoutedEventArgs e)
+    {
+        try
+        {
+            if (sender is not Canvas canvas) return;
+            _tabBlurStart = e.GetCurrentPoint(canvas).Position;
+            _isTabBlurDragging = true;
+
+            var box = FindChildByTag<Border>(canvas, "InTabBlurBox");
+            var bar = FindChildByTag<StackPanel>(canvas, "InTabBlurActionBar");
+            if (box != null)
+            {
+                box.Visibility = Visibility.Visible;
+                Canvas.SetLeft(box, _tabBlurStart.X);
+                Canvas.SetTop(box, _tabBlurStart.Y);
+                box.Width = 0;
+                box.Height = 0;
+            }
+            if (bar != null)
+            {
+                bar.Visibility = Visibility.Collapsed;
+            }
+        }
+        catch (Exception) { }
+    }
+
+    private void BlurCanvas_PointerMoved(object sender, PointerRoutedEventArgs e)
+    {
+        try
+        {
+            if (!_isTabBlurDragging || sender is not Canvas canvas) return;
+            var cur = e.GetCurrentPoint(canvas).Position;
+            _tabBlurX = Math.Min(_tabBlurStart.X, cur.X);
+            _tabBlurY = Math.Min(_tabBlurStart.Y, cur.Y);
+            _tabBlurW = Math.Abs(cur.X - _tabBlurStart.X);
+            _tabBlurH = Math.Abs(cur.Y - _tabBlurStart.Y);
+
+            var box = FindChildByTag<Border>(canvas, "InTabBlurBox");
+            if (box != null)
+            {
+                Canvas.SetLeft(box, _tabBlurX);
+                Canvas.SetTop(box, _tabBlurY);
+                box.Width = _tabBlurW;
+                box.Height = _tabBlurH;
+            }
+        }
+        catch (Exception) { }
+    }
+
+    private void BlurCanvas_PointerReleased(object sender, PointerRoutedEventArgs e)
+    {
+        try
+        {
+            if (!_isTabBlurDragging || sender is not Canvas canvas) return;
+            _isTabBlurDragging = false;
+
+            var bar = FindChildByTag<StackPanel>(canvas, "InTabBlurActionBar");
+            if (bar != null && _tabBlurW > 5 && _tabBlurH > 5)
+            {
+                Canvas.SetLeft(bar, _tabBlurX);
+                Canvas.SetTop(bar, Math.Max(0, _tabBlurY + _tabBlurH + 8));
+                bar.Visibility = Visibility.Visible;
+            }
+        }
+        catch (Exception) { }
+    }
+
+    private void BtnApplyInTabBlur_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var tab = ViewModel.SelectedTab;
+            if (tab?.ImageBytes is not { Length: > 0 } bytes || _tabBlurW <= 5 || _tabBlurH <= 5)
+            {
+                return;
+            }
+
+            var blurred = _screenCaptureService.BlurRegion(bytes, (int)_tabBlurX, (int)_tabBlurY, (int)_tabBlurW, (int)_tabBlurH);
+            if (blurred is { Length: > 0 })
+            {
+                tab.ImageBytes = blurred;
+                tab.IsBlurring = false;
+                NotifyToolChange("تم طمس وتمويه البيانات الحساسة بنجاح وحفظها بالذاكرة");
+                CopyCurrentTabImage();
+            }
+        }
+        catch (Exception)
+        {
+            // Zero-Crash Mandate
+        }
+    }
+
+    private void BtnCancelInTabBlur_Click(object sender, RoutedEventArgs e)
+    {
+        if (ViewModel.SelectedTab != null)
+        {
+            ViewModel.SelectedTab.IsBlurring = false;
+            NotifyToolChange("تم إلغاء التمويه");
+        }
+    }
+
+    // ==========================================
+    // 4.2 Hand / Pan Tool & Interactive Zoom Controls
+    // ==========================================
+    private void ToolHand_Click(object sender, RoutedEventArgs e)
+    {
+        ViewModel.ActiveTool = ToolType.Hand;
+        NotifyToolChange("تم تفعيل يد التصفح والسحب (Hand Tool) - للتنقل والسحب بدون رسم خطوط");
+    }
+
+    private ScrollViewer? GetActiveScrollViewer() =>
+        FindChildByTag<ScrollViewer>(MainTabView, "TabScrollViewer");
+
+    private void BtnZoomIn_Click(object sender, RoutedEventArgs e) => ZoomInCurrentTab();
+    private void BtnZoomOut_Click(object sender, RoutedEventArgs e) => ZoomOutCurrentTab();
+    private void BtnZoomReset_Click(object sender, RoutedEventArgs e) => ZoomResetCurrentTab();
+
+    private void ZoomInCurrentTab()
+    {
+        var tab = ViewModel.SelectedTab;
+        if (tab == null) return;
+        var newZoom = Math.Min(5.0, tab.ZoomFactor + 0.15);
+        tab.ZoomFactor = newZoom;
+        GetActiveScrollViewer()?.ChangeView(null, null, (float)newZoom);
+        NotifyToolChange($"التكبير: {tab.ZoomPercentageText}");
+    }
+
+    private void ZoomOutCurrentTab()
+    {
+        var tab = ViewModel.SelectedTab;
+        if (tab == null) return;
+        var newZoom = Math.Max(0.2, tab.ZoomFactor - 0.15);
+        tab.ZoomFactor = newZoom;
+        GetActiveScrollViewer()?.ChangeView(null, null, (float)newZoom);
+        NotifyToolChange($"التصغير: {tab.ZoomPercentageText}");
+    }
+
+    private void ZoomResetCurrentTab()
+    {
+        var tab = ViewModel.SelectedTab;
+        if (tab == null) return;
+        tab.ZoomFactor = 1.0;
+        GetActiveScrollViewer()?.ChangeView(null, null, 1.0f);
+        NotifyToolChange("الحجم الأصلي: 100%");
+    }
+
     private static T? FindChildByTag<T>(DependencyObject parent, string tag) where T : FrameworkElement
     {
         var count = VisualTreeHelper.GetChildrenCount(parent);
@@ -688,7 +924,7 @@ public sealed partial class MainWindow : Window
     {
         try
         {
-            if (ViewModel.SelectedTab?.IsCropping == true) return;
+            if (ViewModel.SelectedTab?.IsCropping == true || ViewModel.SelectedTab?.IsBlurring == true || ViewModel.ActiveTool == ToolType.Hand) return;
             if (sender is not Canvas canvas) return;
             _activeDrawingCanvas = canvas;
 
@@ -807,8 +1043,82 @@ public sealed partial class MainWindow : Window
         catch (Exception) { }
     }
 
-    private void MenuSettings_Click(object sender, RoutedEventArgs e) =>
-        NotifyToolChange("الإعدادات / Settings (الاختصار العام: Ctrl+B+B أو PrintScreen)");
+    private async void MenuSettings_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var panel = new StackPanel { Spacing = 16, Width = 380 };
+
+            // 1. Language selector
+            var langLabel = new TextBlock { Text = _localizationService.GetString("Settings_Language"), FontWeight = Microsoft.UI.Text.FontWeights.SemiBold };
+            var langCombo = new ComboBox { HorizontalAlignment = HorizontalAlignment.Stretch };
+            var languages = _localizationService.SupportedLanguages;
+            foreach (var l in languages)
+            {
+                langCombo.Items.Add(new ComboBoxItem { Content = $"{l.NativeName} ({l.DisplayName})", Tag = l.Code });
+            }
+            langCombo.SelectedIndex = languages.ToList().FindIndex(l => l.Code == _localizationService.CurrentLanguageCode);
+            if (langCombo.SelectedIndex < 0) langCombo.SelectedIndex = 0;
+
+            // 2. Theme selector
+            var themeLabel = new TextBlock { Text = _localizationService.GetString("Settings_Theme"), FontWeight = Microsoft.UI.Text.FontWeights.SemiBold };
+            var themeCombo = new ComboBox { HorizontalAlignment = HorizontalAlignment.Stretch };
+            themeCombo.Items.Add(new ComboBoxItem { Content = _localizationService.GetString("Settings_Theme_Dark"), Tag = "Dark" });
+            themeCombo.Items.Add(new ComboBoxItem { Content = _localizationService.GetString("Settings_Theme_Light"), Tag = "Light" });
+            themeCombo.Items.Add(new ComboBoxItem { Content = _localizationService.GetString("Settings_Theme_System"), Tag = "Default" });
+            themeCombo.SelectedIndex = 0;
+
+            // 3. AutoSave toggle
+            var autoSaveToggle = new ToggleSwitch
+            {
+                Header = _localizationService.GetString("Settings_AutoSave"),
+                IsOn = true
+            };
+
+            panel.Children.Add(langLabel);
+            panel.Children.Add(langCombo);
+            panel.Children.Add(themeLabel);
+            panel.Children.Add(themeCombo);
+            panel.Children.Add(autoSaveToggle);
+
+            var dialog = new ContentDialog
+            {
+                Title = _localizationService.GetString("Settings_Title"),
+                Content = panel,
+                PrimaryButtonText = _localizationService.GetString("Settings_SaveButton"),
+                CloseButtonText = _localizationService.GetString("Tab_Close"),
+                XamlRoot = this.Content.XamlRoot
+            };
+
+            var res = await dialog.ShowAsync();
+            if (res == ContentDialogResult.Primary)
+            {
+                if (langCombo.SelectedItem is ComboBoxItem item && item.Tag is string code)
+                {
+                    await _localizationService.SetLanguageAsync(code);
+                }
+
+                if (themeCombo.SelectedItem is ComboBoxItem tItem && tItem.Tag is string theme)
+                {
+                    if (this.Content is FrameworkElement rootElement)
+                    {
+                        rootElement.RequestedTheme = theme switch
+                        {
+                            "Dark" => ElementTheme.Dark,
+                            "Light" => ElementTheme.Light,
+                            _ => ElementTheme.Default
+                        };
+                    }
+                }
+
+                NotifyToolChange(_localizationService.GetString("Settings_SavedSuccess"));
+            }
+        }
+        catch (Exception)
+        {
+            // Zero-Crash Mandate
+        }
+    }
 
     private void MenuOpenVault_Click(object sender, RoutedEventArgs e)
     {

@@ -36,32 +36,32 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <!-- Section 1: Capture Mode & New Snip (Matching Snipping Tool Left/Right) -->
+                <!-- Section 1: Capture Mode, Delay & New Snip -->
                 <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                     <!-- New Snip SplitButton with Mode Dropdown -->
                     <SplitButton Click="NewSnip_Click">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <FontIcon Glyph="&#xE710;" FontSize="14" />
-                            <TextBlock Text="جديد (New)" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            <TextBlock Text="جديد" FontWeight="SemiBold" VerticalAlignment="Center" />
                         </StackPanel>
                         <SplitButton.Flyout>
                             <MenuFlyout>
-                                <MenuFlyoutItem Text="مستطيل (Rectangle)" Click="ModeRectangle_Click">
+                                <MenuFlyoutItem Text="مستطيل" Click="ModeRectangle_Click">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xE8B9;" />
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
-                                <MenuFlyoutItem Text="النافذة (Window)" Click="ModeWindow_Click">
+                                <MenuFlyoutItem Text="النافذة" Click="ModeWindow_Click">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xE7C3;" />
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
-                                <MenuFlyoutItem Text="ملء الشاشة (Full Screen)" Click="ModeFullscreen_Click">
+                                <MenuFlyoutItem Text="ملء الشاشة" Click="ModeFullscreen_Click">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xE740;" />
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
-                                <MenuFlyoutItem Text="شكل حر (Freeform)" Click="ModeFreeform_Click">
+                                <MenuFlyoutItem Text="شكل حر" Click="ModeFreeform_Click">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xE8C0;" />
                                     </MenuFlyoutItem.Icon>
@@ -69,9 +69,28 @@
                             </MenuFlyout>
                         </SplitButton.Flyout>
                         <ToolTipService.ToolTip>
-                            <ToolTip Content="قص لقطة جديدة / New Snip (Ctrl+N أو PrintScreen أو Ctrl+B+B)" />
+                            <ToolTip Content="قص لقطة جديدة (Ctrl+N أو PrintScreen أو Ctrl+B+B)" />
                         </ToolTipService.ToolTip>
                     </SplitButton>
+
+                    <!-- Snip Countdown Delay DropDownButton -->
+                    <DropDownButton Height="36" Padding="6,0">
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <FontIcon Glyph="&#xE823;" FontSize="13" />
+                            <TextBlock x:Name="TxtDelayIndicator" Text="بدون تأخير" FontSize="11" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <DropDownButton.Flyout>
+                            <MenuFlyout>
+                                <MenuFlyoutItem Text="بدون تأخير (فوري)" Click="DelayNone_Click" />
+                                <MenuFlyoutItem Text="قص بعد 3 ثوانٍ" Click="Delay3s_Click" />
+                                <MenuFlyoutItem Text="قص بعد 5 ثوانٍ" Click="Delay5s_Click" />
+                                <MenuFlyoutItem Text="قص بعد 10 ثوانٍ" Click="Delay10s_Click" />
+                            </MenuFlyout>
+                        </DropDownButton.Flyout>
+                        <ToolTipService.ToolTip>
+                            <ToolTip Content="مؤقت تأخير القص لالتقاط القوائم المنسدلة" />
+                        </ToolTipService.ToolTip>
+                    </DropDownButton>
 
                     <!-- Camera Mode Indicator -->
                     <Border Background="{ThemeResource AppAccentBrush}"
@@ -85,8 +104,16 @@
                     </Border>
                 </StackPanel>
 
-                <!-- Section 2: Drawing & Editing Tools (Center Snipping Tool Ribbon) -->
+                <!-- Section 2: Drawing, Navigation & Editing Tools -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="4">
+                    <!-- Hand Tool: Navigation & Outward Drag Mode -->
+                    <Button x:Name="BtnHandTool" Width="36" Height="36" Padding="0" Click="ToolHand_Click">
+                        <FontIcon Glyph="&#xE768;" FontSize="15" />
+                        <ToolTipService.ToolTip>
+                            <ToolTip Content="يد التصفح والسحب للمشاركة (Hand Tool)" />
+                        </ToolTipService.ToolTip>
+                    </Button>
+
                     <!-- Pen Tool with Color Flyout -->
                     <DropDownButton Height="36" Padding="8,0">
                         <StackPanel Orientation="Horizontal" Spacing="6">
@@ -95,15 +122,15 @@
                         </StackPanel>
                         <DropDownButton.Flyout>
                             <MenuFlyout>
-                                <MenuFlyoutItem Text="أحمر / Red" Click="PenRed_Click" />
-                                <MenuFlyoutItem Text="أزرق / Blue" Click="PenBlue_Click" />
-                                <MenuFlyoutItem Text="أسود / Black" Click="PenBlack_Click" />
-                                <MenuFlyoutItem Text="أخضر / Green" Click="PenGreen_Click" />
-                                <MenuFlyoutItem Text="أصفر / Yellow" Click="PenYellow_Click" />
+                                <MenuFlyoutItem Text="أحمر" Click="PenRed_Click" />
+                                <MenuFlyoutItem Text="أزرق" Click="PenBlue_Click" />
+                                <MenuFlyoutItem Text="أسود" Click="PenBlack_Click" />
+                                <MenuFlyoutItem Text="أخضر" Click="PenGreen_Click" />
+                                <MenuFlyoutItem Text="أصفر" Click="PenYellow_Click" />
                             </MenuFlyout>
                         </DropDownButton.Flyout>
                         <ToolTipService.ToolTip>
-                            <ToolTip Content="قلم الرسم / Ballpoint Pen" />
+                            <ToolTip Content="قلم الرسم الحر" />
                         </ToolTipService.ToolTip>
                     </DropDownButton>
 
@@ -114,7 +141,7 @@
                             <TextBlock Text="التمييز" VerticalAlignment="Center" />
                         </StackPanel>
                         <ToolTipService.ToolTip>
-                            <ToolTip Content="قلم التمييز الفسفوري / Highlighter" />
+                            <ToolTip Content="قلم التمييز الفسفوري" />
                         </ToolTipService.ToolTip>
                     </Button>
 
@@ -122,7 +149,15 @@
                     <Button Width="36" Height="36" Padding="0" Click="ToolEraser_Click">
                         <FontIcon Glyph="&#xE75C;" FontSize="14" />
                         <ToolTipService.ToolTip>
-                            <ToolTip Content="ممحاة التعديلات / Eraser" />
+                            <ToolTip Content="ممحاة التعديلات" />
+                        </ToolTipService.ToolTip>
+                    </Button>
+
+                    <!-- Privacy Redaction & Blur Tool -->
+                    <Button x:Name="BtnBlurTool" Width="36" Height="36" Padding="0" Click="ToolBlur_Click">
+                        <FontIcon Glyph="&#xE790;" FontSize="14" />
+                        <ToolTipService.ToolTip>
+                            <ToolTip Content="طمس وتمويه البيانات الحساسة (Privacy Blur)" />
                         </ToolTipService.ToolTip>
                     </Button>
 
@@ -130,7 +165,7 @@
                     <Button Width="36" Height="36" Padding="0" Click="ToolRuler_Click">
                         <FontIcon Glyph="&#xED5E;" FontSize="14" />
                         <ToolTipService.ToolTip>
-                            <ToolTip Content="مسطرة القياس / Ruler" />
+                            <ToolTip Content="مسطرة القياس بالبكسل" />
                         </ToolTipService.ToolTip>
                     </Button>
 
@@ -138,7 +173,7 @@
                     <Button Width="36" Height="36" Padding="0" Click="ToolText_Click">
                         <FontIcon Glyph="&#xE8D2;" FontSize="14" />
                         <ToolTipService.ToolTip>
-                            <ToolTip Content="استخراج وقراءة النصوص الذكية / Text Actions (OCR)" />
+                            <ToolTip Content="استخراج وقراءة النصوص الذكية (OCR)" />
                         </ToolTipService.ToolTip>
                     </Button>
 
@@ -146,7 +181,7 @@
                     <Button Width="36" Height="36" Padding="0" Click="ToolCrop_Click">
                         <FontIcon Glyph="&#xE7A8;" FontSize="14" />
                         <ToolTipService.ToolTip>
-                            <ToolTip Content="اقتصاص الصورة الحالية في اللسان / Crop Current Image" />
+                            <ToolTip Content="اقتصاص الصورة الحالية في اللسان" />
                         </ToolTipService.ToolTip>
                     </Button>
                 </StackPanel>
@@ -156,14 +191,14 @@
                     <Button Width="36" Height="36" Padding="0" Click="ActionUndo_Click">
                         <FontIcon Glyph="&#xE7A7;" FontSize="14" />
                         <ToolTipService.ToolTip>
-                            <ToolTip Content="تراجع / Undo (Ctrl+Z)" />
+                            <ToolTip Content="تراجع (Ctrl+Z)" />
                         </ToolTipService.ToolTip>
                     </Button>
 
                     <Button Width="36" Height="36" Padding="0" Click="ActionRedo_Click">
                         <FontIcon Glyph="&#xE7A6;" FontSize="14" />
                         <ToolTipService.ToolTip>
-                            <ToolTip Content="إعادة / Redo (Ctrl+Y)" />
+                            <ToolTip Content="إعادة (Ctrl+Y)" />
                         </ToolTipService.ToolTip>
                     </Button>
 
@@ -172,14 +207,14 @@
                     <Button Width="36" Height="36" Padding="0" Click="ActionSave_Click">
                         <FontIcon Glyph="&#xE74E;" FontSize="14" />
                         <ToolTipService.ToolTip>
-                            <ToolTip Content="حفظ اللقطة / Save (Ctrl+S)" />
+                            <ToolTip Content="حفظ اللقطة (Ctrl+S)" />
                         </ToolTipService.ToolTip>
                     </Button>
 
                     <Button Width="36" Height="36" Padding="0" Click="ActionCopy_Click">
                         <FontIcon Glyph="&#xE8C8;" FontSize="14" />
                         <ToolTipService.ToolTip>
-                            <ToolTip Content="نسخ الصورة للحافظة / Copy (Ctrl+C)" />
+                            <ToolTip Content="نسخ الصورة للحافظة (Ctrl+C)" />
                         </ToolTipService.ToolTip>
                     </Button>
 
@@ -190,7 +225,7 @@
                             DragStarting="ShareButton_DragStarting">
                         <FontIcon Glyph="&#xE72D;" FontSize="14" />
                         <ToolTipService.ToolTip>
-                            <ToolTip Content="اسحب إلى WhatsApp / Telegram / Explorer أو انقر للنسخ والمشاركة" />
+                            <ToolTip Content="اسحبها وشاركها إلينا (WhatsApp / Telegram / Explorer)" />
                         </ToolTipService.ToolTip>
                     </Button>
 
@@ -198,14 +233,14 @@
                         <FontIcon Glyph="&#xE712;" FontSize="14" />
                         <Button.Flyout>
                             <MenuFlyout>
-                                <MenuFlyoutItem Text="الإعدادات / Settings" Click="MenuSettings_Click" />
-                                <MenuFlyoutItem Text="فتح مجلد اللقطات / Open Vault Folder" Click="MenuOpenVault_Click" />
+                                <MenuFlyoutItem Text="الإعدادات" Click="MenuSettings_Click" />
+                                <MenuFlyoutItem Text="فتح مجلد اللقطات" Click="MenuOpenVault_Click" />
                                 <MenuFlyoutSeparator />
-                                <MenuFlyoutItem Text="حول البرنامج / About DropCut" Click="MenuAbout_Click" />
+                                <MenuFlyoutItem Text="حول البرنامج" Click="MenuAbout_Click" />
                             </MenuFlyout>
                         </Button.Flyout>
                         <ToolTipService.ToolTip>
-                            <ToolTip Content="المزيد من الخيارات / More Options" />
+                            <ToolTip Content="المزيد من الخيارات" />
                         </ToolTipService.ToolTip>
                     </Button>
                 </StackPanel>
@@ -271,11 +306,12 @@
                         <!-- Tab Body: Drawing Canvas & Real Captured Desktop Snapshot Area -->
                         <Grid Background="{ThemeResource AppBackgroundBrush}">
                             <!-- State 1: When real screenshot image is present -->
-                            <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                            <ScrollViewer Tag="TabScrollViewer"
+                                          HorizontalScrollBarVisibility="Auto"
                                           VerticalScrollBarVisibility="Auto"
                                           ZoomMode="Enabled"
-                                          MinZoomFactor="0.2"
-                                          MaxZoomFactor="4.0"
+                                          MinZoomFactor="0.1"
+                                          MaxZoomFactor="5.0"
                                           Visibility="{Binding HasImage, Converter={StaticResource BoolToVisibilityConverter}}">
                                 <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Margin="24">
                                     <Border BorderBrush="{ThemeResource AppBorderBrush}"
@@ -357,6 +393,44 @@
                                                     </Button>
                                                 </StackPanel>
                                             </Canvas>
+
+                                            <!-- In-Tab Privacy Redaction & Blur Overlay Layer -->
+                                            <Canvas Background="#30000000"
+                                                    Visibility="{Binding IsBlurring, Converter={StaticResource BoolToVisibilityConverter}}"
+                                                    PointerPressed="BlurCanvas_PointerPressed"
+                                                    PointerMoved="BlurCanvas_PointerMoved"
+                                                    PointerReleased="BlurCanvas_PointerReleased">
+                                                <!-- Interactive Selection Box -->
+                                                <Border BorderBrush="#F59E0B"
+                                                        BorderThickness="2"
+                                                        Background="#20F59E0B"
+                                                        Tag="InTabBlurBox"
+                                                        Visibility="Collapsed" />
+
+                                                <!-- Apply / Cancel Blur Actions Floating Pill -->
+                                                <StackPanel Tag="InTabBlurActionBar"
+                                                            Orientation="Horizontal"
+                                                            Spacing="6"
+                                                            Background="#EE1E1E1E"
+                                                            BorderBrush="#44FFFFFF"
+                                                            BorderThickness="1"
+                                                            CornerRadius="6"
+                                                            Padding="6,4"
+                                                            Visibility="Collapsed">
+                                                    <Button Click="BtnApplyInTabBlur_Click" Style="{ThemeResource AccentButtonStyle}">
+                                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                                            <FontIcon Glyph="&#xE790;" FontSize="12" />
+                                                            <TextBlock Text="تطبيق التمويه" FontSize="11" />
+                                                        </StackPanel>
+                                                    </Button>
+                                                    <Button Click="BtnCancelInTabBlur_Click">
+                                                        <StackPanel Orientation="Horizontal" Spacing="4">
+                                                            <FontIcon Glyph="&#xE711;" FontSize="12" />
+                                                            <TextBlock Text="إلغاء" FontSize="11" />
+                                                        </StackPanel>
+                                                    </Button>
+                                                </StackPanel>
+                                            </Canvas>
                                         </Grid>
                                     </Border>
                                 </Grid>
@@ -412,8 +486,27 @@
                                FontSize="12" Foreground="{ThemeResource AppSecondaryTextBrush}" />
                 </StackPanel>
 
-                <TextBlock Grid.Column="1" Text="100% | سطح المكتب" Margin="16,0"
-                           FontSize="12" Foreground="{ThemeResource AppSecondaryTextBrush}" />
+                <!-- Interactive Zoom Controls (+ / - / Reset) -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" Margin="16,0" VerticalAlignment="Center">
+                    <Button Click="BtnZoomOut_Click" Width="28" Height="28" Padding="0">
+                        <FontIcon Glyph="&#xE738;" FontSize="11" />
+                        <ToolTipService.ToolTip>
+                            <ToolTip Content="تصغير (Ctrl + -)" />
+                        </ToolTipService.ToolTip>
+                    </Button>
+                    <Button Click="BtnZoomReset_Click" Height="28" Padding="8,0">
+                        <TextBlock Text="{x:Bind ViewModel.SelectedTab.ZoomPercentageText, Mode=OneWay}" FontSize="11" FontWeight="SemiBold" />
+                        <ToolTipService.ToolTip>
+                            <ToolTip Content="الحجم الأصلي 100% (Ctrl + 0)" />
+                        </ToolTipService.ToolTip>
+                    </Button>
+                    <Button Click="BtnZoomIn_Click" Width="28" Height="28" Padding="0">
+                        <FontIcon Glyph="&#xE710;" FontSize="11" />
+                        <ToolTipService.ToolTip>
+                            <ToolTip Content="تكبير (Ctrl + +)" />
+                        </ToolTipService.ToolTip>
+                    </Button>
+                </StackPanel>
 
                 <TextBlock Grid.Column="2" Text="DropCut • Windows Snipping Engine (Ctrl+B+B)"
                            FontSize="12" Foreground="{ThemeResource AppSecondaryTextBrush}" />

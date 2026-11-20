@@ -18,6 +18,8 @@ public class ShellTabModel : ObservableObject
     private int _imageWidth = 1920;
     private int _imageHeight = 1080;
     private bool _isCropping;
+    private bool _isBlurring;
+    private double _zoomFactor = 1.0;
 
     public Guid Id { get; } = Guid.NewGuid();
 
@@ -94,6 +96,27 @@ public class ShellTabModel : ObservableObject
         get => _isCropping;
         set => SetProperty(ref _isCropping, value);
     }
+
+    public bool IsBlurring
+    {
+        get => _isBlurring;
+        set => SetProperty(ref _isBlurring, value);
+    }
+
+    public double ZoomFactor
+    {
+        get => _zoomFactor;
+        set
+        {
+            var clamped = Math.Clamp(value, 0.1, 5.0);
+            if (SetProperty(ref _zoomFactor, clamped))
+            {
+                OnPropertyChanged(nameof(ZoomPercentageText));
+            }
+        }
+    }
+
+    public string ZoomPercentageText => $"{(int)Math.Round(_zoomFactor * 100)}%";
 
     public Guid? SnippetId { get; set; }
 

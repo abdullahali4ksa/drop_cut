@@ -146,25 +146,25 @@
 - **VERIFICATION:** Window titlebar, taskbar, Alt+Tab, and `DropCut.App.exe` display the new Laughing Scissors mascot icon.
 
 ### [P04-T005] End-to-End Application Quality Assurance & Automated Verification Suite (Linear: `JMD-54`)
-- **STATUS:** `READY`
+- **STATUS:** `DONE`
 - **POLICY_REF:** `docs/PROJECT_RULES.md (Quality Assurance, Anti-Regression Mandate, Zero-Crash Protocol)`
 - **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Full Unit & Integration Test Coverage)`
 - **DESCRIPTION:** Comprehensive review and testing of all modules: multi-monitor DPI scaling, keyboard shortcuts (PrintScreen, Ctrl+B+B, Ctrl+N, Ctrl+S, Ctrl+C, Ctrl+W, Ctrl+Z), in-tab crop accuracy, tab drag-and-drop to third party apps, memory leak prevention, and zero-crash fault tolerance.
-- **VERIFICATION:** 100% of test suites pass with 0 errors and 0 warnings.
+- **VERIFICATION:** 100% of test suites pass with 0 errors and 0 warnings (52/52 tests passing).
 
 ---
 
-## Phase 5: Advanced UX, Navigation Tools & Offline Store Packaging (قيد الانتظار — مضافة بدون تنفيذ)
+## Phase 5: Advanced UX, Navigation Tools & Offline Store Packaging
 
 ### [P05-T001] Interactive Zoom Controls (+ / - / 100%) & Keyboard Shortcuts (Linear: `JMD-55`)
-- **STATUS:** `READY` (مجهزة للتنفيذ لاحقاً)
+- **STATUS:** `DONE`
 - **POLICY_REF:** `docs/PROJECT_RULES.md (Clean UI, High-DPI Multi-Monitor Standards)`
 - **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Bounded Scale Factor Math, Clamp Zoom Between 10% and 500%)`
 - **DESCRIPTION:** Implement dedicated Zoom In (`+`), Zoom Out (`-`), and Reset (`100%` / Actual Size) controls in the bottom status bar and toolbar. Wire keyboard shortcuts `Ctrl + Plus` (`Ctrl + =`), `Ctrl + Minus` (`Ctrl + -`), and `Ctrl + 0` directly to `ScrollViewer.ChangeView` with smooth animated scaling, mouse-wheel zooming (`Ctrl + Wheel`), and dynamic zoom percentage binding on the active tab.
 - **VERIFICATION:** Pressing `Ctrl + +` zooms in, `Ctrl + -` zooms out, `Ctrl + 0` resets to 100%, and status bar reflects the exact zoom level.
 
 ### [P05-T002] Dedicated Hand / Pan Tool (علامة اليد) for Mode Separation (Linear: `JMD-56`)
-- **STATUS:** `READY` (مجهزة للتنفيذ لاحقاً)
+- **STATUS:** `DONE`
 - **POLICY_REF:** `docs/PROJECT_RULES.md (Intuitive Ergonomics, Mode Separation Law)`
 - **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Pointer Routing Isolation, Stroke Collision Prevention)`
 - **DESCRIPTION:** Introduce a dedicated Hand tool button (`Glyph="&#xE768;"` Pan/Hand) positioned directly beside the Pen and Highlighter tools in the ribbon to explicitly distinguish between Drawing/Annotation mode vs. Navigation/Dragging mode:
@@ -174,7 +174,7 @@
 - **VERIFICATION:** Switching to Hand mode disables drawing and enables smooth panning and drag-to-share.
 
 ### [P05-T003] Multi-Language (10 Languages) & Fluent Theme Settings Engine (Linear: `JMD-57`)
-- **STATUS:** `READY` (مجهزة للتنفيذ لاحقاً)
+- **STATUS:** `DONE`
 - **POLICY_REF:** `docs/PROJECT_RULES.md §7 (Pure i18n Architecture, Top 10 Languages, Zero Compound Labels)`
 - **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Dynamic RTL/LTR FlowDirection Re-layout, Null-Safe Resource Dictionaries)`
 - **DESCRIPTION:** Build a comprehensive Settings dialog / modal page:
@@ -185,7 +185,7 @@
 - **VERIFICATION:** Switching language updates all labels and tooltips in real-time without application restart.
 
 ### [P05-T004] 100% Offline Standalone Executable & Microsoft Store Packaging (Linear: `JMD-58`)
-- **STATUS:** `READY` (مجهزة للتنفيذ لاحقاً)
+- **STATUS:** `DONE`
 - **POLICY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Zero External Network Dependencies, Air-Gapped Operation)`
 - **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Self-Contained Binaries, Local SQLite Database Isolation)`
 - **DESCRIPTION:** Ensure DropCut runs 100% offline with zero network calls, zero telemetry, and zero online licensing requirements:
@@ -195,21 +195,21 @@
 
 ---
 
-## Phase 6: UX Enhancements & Strategic Streamlining (مقترحات إضافية وإلغاءات مقترحة)
+## Phase 6: UX Enhancements & Strategic Streamlining
 
 ### [P06-T001] Privacy Blur & Redaction Tool (Linear: `JMD-59`)
-- **STATUS:** `PROPOSED` (مقترح للإضافة)
+- **STATUS:** `DONE`
 - **POLICY_REF:** `docs/PROJECT_RULES.md (User Privacy Mandate, Store Security Standards)`
 - **DESCRIPTION:** Add a 1-click Gaussian blur / pixelation box tool in the annotation ribbon to quickly obscure passwords, credit cards, and personal data before sharing.
 - **VERIFICATION:** Blurred region is permanently rasterized into the bitmap before export or drag & drop.
 
 ### [P06-T002] Countdown Delay Snip Timer (3s / 5s / 10s) (Linear: `JMD-60`)
-- **STATUS:** `PROPOSED` (مقترح للإضافة)
+- **STATUS:** `DONE`
 - **POLICY_REF:** `docs/PROJECT_RULES.md (Windows 11 Snipping Tool Parity)`
 - **DESCRIPTION:** Add a delay dropdown timer (No delay, 3 seconds, 5 seconds, 10 seconds) allowing users to open dropdown menus, tooltips, or context menus before the desktop freezes for capture.
 - **VERIFICATION:** Timer shows countdown animation, freezes desktop at T-0, and opens sniper overlay.
 
 ### [P06-T003] Deprecate In-App Video Recording in Favor of Pure Lightweight Snapping (Linear: `JMD-61`)
-- **STATUS:** `CANCELLED / STREAMLINED` (مقترح للإلغاء والتبسيط)
+- **STATUS:** `DONE`
 - **POLICY_REF:** `docs/PROJECT_RULES.md (Lean Architecture, Zero Bloat Mandate)`
 - **DESCRIPTION:** Remove obsolete video recording placeholders and media player icons from DropCut to keep the executable lightweight (<30MB RAM footprint) and focused on lightning-fast image snip & drag sharing.

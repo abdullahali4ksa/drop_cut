@@ -232,6 +232,100 @@ public class ScreenCaptureService : IScreenCaptureService
         }
     }
 
+    public byte[] BlurRegion(byte[] sourceBmpBytes, int x, int y, int width, int height, int blockSize = 12)
+    {
+        if (sourceBmpBytes == null || sourceBmpBytes.Length < 54 || width <= 0 || height <= 0)
+        {
+            return sourceBmpBytes ?? Array.Empty<byte>();
+        }
+
+        try
+        {
+            var result = (byte[])sourceBmpBytes.Clone();
+            var pixelDataOffset = BitConverter.ToInt32(result, 10);
+            var srcWidth = BitConverter.ToInt32(result, 18);
+            var rawHeight = BitConverter.ToInt32(result, 22);
+            var isTopDown = rawHeight < 0;
+            var srcHeight = Math.Abs(rawHeight);
+            var bpp = BitConverter.ToInt16(result, 28);
+
+            if (bpp != 32 || srcWidth <= 0 || srcHeight <= 0)
+            {
+                return sourceBmpBytes;
+            }
+
+            var safeX = Math.Clamp(x, 0, srcWidth - 1);
+            var safeY = Math.Clamp(y, 0, srcHeight - 1);
+            var safeWidth = Math.Clamp(width, 1, srcWidth - safeX);
+            var safeHeight = Math.Clamp(height, 1, srcHeight - safeY);
+            var bs = Math.Max(4, blockSize);
+
+            for (int by = 0; by < safeHeight; by += bs)
+            {
+                int bh = Math.Min(bs, safeHeight - by);
+                for (int bx = 0; bx < safeWidth; bx += bs)
+                {
+                    int bw = Math.Min(bs, safeWidth - bx);
+
+                    // Compute average color in block
+                    long sumB = 0, sumG = 0, sumR = 0;
+                    int count = 0;
+
+                    for (int dy = 0; dy < bh; dy++)
+                    {
+                        int py = safeY + by + dy;
+                        int rowIndex = isTopDown ? py : (srcHeight - 1 - py);
+                        int rowOffset = pixelDataOffset + (rowIndex * srcWidth + safeX + bx) * 4;
+
+                        for (int dx = 0; dx < bw; dx++)
+                        {
+                            int offset = rowOffset + dx * 4;
+                            if (offset + 3 < result.Length)
+                            {
+                                sumB += result[offset];
+                                sumG += result[offset + 1];
+                                sumR += result[offset + 2];
+                                count++;
+                            }
+                        }
+                    }
+
+                    if (count > 0)
+                    {
+                        byte avgB = (byte)(sumB / count);
+                        byte avgG = (byte)(sumG / count);
+                        byte avgR = (byte)(sumR / count);
+
+                        for (int dy = 0; dy < bh; dy++)
+                        {
+                            int py = safeY + by + dy;
+                            int rowIndex = isTopDown ? py : (srcHeight - 1 - py);
+                            int rowOffset = pixelDataOffset + (rowIndex * srcWidth + safeX + bx) * 4;
+
+                            for (int dx = 0; dx < bw; dx++)
+                            {
+                                int offset = rowOffset + dx * 4;
+                                if (offset + 3 < result.Length)
+                                {
+                                    result[offset] = avgB;
+                                    result[offset + 1] = avgG;
+                                    result[offset + 2] = avgR;
+                                    result[offset + 3] = 255;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+        catch
+        {
+            return sourceBmpBytes;
+        }
+    }
+
     private static byte[] WrapInBmpContainer(byte[] pixelData, int width, int height)
     {
         const int fileHeaderSize = 14;

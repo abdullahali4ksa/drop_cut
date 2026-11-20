@@ -11,5 +11,6 @@ public enum ToolType
     Shape = 3,
     Text = 4,
     BlurRedact = 5,
-    Crop = 6
+    Crop = 6,
+    Hand = 7
 }

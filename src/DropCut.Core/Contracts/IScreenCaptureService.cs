@@ -24,4 +24,9 @@ public interface IScreenCaptureService
     /// Crops a rectangular sub-region from an existing 32-bit BMP byte stream in memory.
     /// </summary>
     byte[] CropBitmap(byte[] sourceBmpBytes, int x, int y, int width, int height);
+
+    /// <summary>
+    /// Applies a pixelation / privacy blur effect to a rectangular region of a 32-bit BMP byte stream in memory.
+    /// </summary>
+    byte[] BlurRegion(byte[] sourceBmpBytes, int x, int y, int width, int height, int blockSize = 12);
 }
