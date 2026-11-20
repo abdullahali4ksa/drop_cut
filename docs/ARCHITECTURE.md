@@ -175,3 +175,20 @@ public static class WorkspaceModule
   - `IAICommandHandler`: Executes validated commands.
   - `IAIProvider`: Interface implemented by infrastructure adapters.
   - `AISecurityPolicy`: Validates every AI action against strict security bounds before execution.
+
+---
+
+## 7. Microsoft Store Deployment & MSIX Certification Pipeline
+
+DropCut implements a fully compliant Microsoft Store deployment and packaging pipeline adhering strictly to the **App Certification Process**:
+
+1. **Packaging & Identity (`Package.appxmanifest`)**:
+   - Official Store Identity: `birotech.DropCut`
+   - Publisher CN: `CN=4B6200B3-DE4E-4F39-A6EA-B5DC049294B2`
+   - Store Product ID: `9NV7BZHXBCZ7` (MSA App ID: `af96190c-754d-4834-a3c0-0e46aaefc15b`)
+2. **Certification Stages**:
+   - **Preprocessing**: Static validation of manifest schema, capabilities (`runFullTrust`), and assets.
+   - **Security Scanning**: Automated malware and vulnerability checks.
+   - **Technical Compatibility**: WACK verification ensuring zero unhandled crashes, clean resource deallocation, and sandbox compliance.
+   - **Content Verification**: Alignment with IARC Everyone/3+ rating and offline privacy declarations.
+   - **Microsoft Signing**: Store-managed digital signing and CDN replication (~15 min to general availability upon approval).
