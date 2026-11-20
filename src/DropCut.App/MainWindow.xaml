@@ -114,36 +114,107 @@
                         </ToolTipService.ToolTip>
                     </Button>
 
-                    <!-- Pen Tool with Color Flyout -->
+                    <!-- Pen Tool with Color & Size Flyout -->
                     <SplitButton x:Name="BtnPenTool" Height="36" Padding="8,0" Click="ToolPen_Click">
                         <StackPanel Orientation="Horizontal" Spacing="6">
-                            <FontIcon Glyph="&#xED63;" FontSize="14" Foreground="#FF0000" />
+                            <FontIcon x:Name="IconPenGlyph" Glyph="&#xED63;" FontSize="14" Foreground="#FF0000" />
                             <TextBlock Text="القلم" VerticalAlignment="Center" />
+                            <Border x:Name="IndicatorPenColor" Width="10" Height="10" CornerRadius="5" Background="#FF0000" BorderBrush="#88000000" BorderThickness="1" VerticalAlignment="Center" />
                         </StackPanel>
                         <SplitButton.Flyout>
                             <MenuFlyout>
-                                <MenuFlyoutItem Text="أحمر" Click="PenRed_Click" />
-                                <MenuFlyoutItem Text="أزرق" Click="PenBlue_Click" />
-                                <MenuFlyoutItem Text="أسود" Click="PenBlack_Click" />
-                                <MenuFlyoutItem Text="أخضر" Click="PenGreen_Click" />
-                                <MenuFlyoutItem Text="أصفر" Click="PenYellow_Click" />
+                                <MenuFlyoutItem Text="أحمر (Red)" Click="PenColor_Click" Tag="#FF0000">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xF127;" Foreground="#FF0000" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem Text="أزرق (Blue)" Click="PenColor_Click" Tag="#0078D7">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xF127;" Foreground="#0078D7" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem Text="أسود (Black)" Click="PenColor_Click" Tag="#000000">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xF127;" Foreground="#000000" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem Text="أخضر (Green)" Click="PenColor_Click" Tag="#107C41">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xF127;" Foreground="#107C41" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem Text="أصفر (Yellow)" Click="PenColor_Click" Tag="#FFD700">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xF127;" Foreground="#FFD700" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem Text="أبيض (White)" Click="PenColor_Click" Tag="#FFFFFF">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xF127;" Foreground="#FFFFFF" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutSeparator />
+                                <MenuFlyoutItem Text="سُمك القلم: دقيق (2px)" Click="PenSize_Click" Tag="2" />
+                                <MenuFlyoutItem Text="سُمك القلم: عادي (4px)" Click="PenSize_Click" Tag="4" />
+                                <MenuFlyoutItem Text="سُمك القلم: عريض (8px)" Click="PenSize_Click" Tag="8" />
+                                <MenuFlyoutItem Text="سُمك القلم: عريض جداً (14px)" Click="PenSize_Click" Tag="14" />
                             </MenuFlyout>
                         </SplitButton.Flyout>
                         <ToolTipService.ToolTip>
-                            <ToolTip Content="قلم الرسم الحر (انقر لتفعيله، وانقر مجدداً أو Esc للعودة للسحب)" />
+                            <ToolTip Content="قلم الرسم الحر - انقر للرسم أو افتح القائمة لتحديد اللون والحجم" />
                         </ToolTipService.ToolTip>
                     </SplitButton>
 
-                    <!-- Highlighter Tool -->
-                    <Button x:Name="BtnHighlighterTool" Height="36" Padding="8,0" Click="ToolHighlighter_Click">
+                    <!-- Highlighter Tool with Neon Colors & Size Flyout -->
+                    <SplitButton x:Name="BtnHighlighterTool" Height="36" Padding="8,0" Click="ToolHighlighter_Click">
                         <StackPanel Orientation="Horizontal" Spacing="6">
-                            <FontIcon Glyph="&#xE7E6;" FontSize="14" Foreground="#FFD700" />
+                            <FontIcon x:Name="IconHighlighterGlyph" Glyph="&#xE7E6;" FontSize="14" Foreground="#FFD700" />
                             <TextBlock Text="التمييز" VerticalAlignment="Center" />
+                            <Border x:Name="IndicatorHighlighterColor" Width="10" Height="10" CornerRadius="5" Background="#FFFF00" BorderBrush="#88000000" BorderThickness="1" VerticalAlignment="Center" />
                         </StackPanel>
+                        <SplitButton.Flyout>
+                            <MenuFlyout>
+                                <MenuFlyoutItem Text="أصفر فوسفوري (Fluorescent Yellow)" Click="HighlighterColor_Click" Tag="#FFFF00">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xF127;" Foreground="#FFFF00" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem Text="أخضر نيون (Neon Green)" Click="HighlighterColor_Click" Tag="#00FF66">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xF127;" Foreground="#00FF66" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem Text="سماوي فاتح (Sky Blue)" Click="HighlighterColor_Click" Tag="#00D2FF">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xF127;" Foreground="#00D2FF" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem Text="وردي فاقع (Bright Pink)" Click="HighlighterColor_Click" Tag="#FF3399">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xF127;" Foreground="#FF3399" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem Text="برتقالي مشرق (Bright Orange)" Click="HighlighterColor_Click" Tag="#FF9900">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xF127;" Foreground="#FF9900" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem Text="بنفسجي فاتح (Lavender)" Click="HighlighterColor_Click" Tag="#CC66FF">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xF127;" Foreground="#CC66FF" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutSeparator />
+                                <MenuFlyoutItem Text="سُمك التمييز: رفيع (12px)" Click="HighlighterSize_Click" Tag="12" />
+                                <MenuFlyoutItem Text="سُمك التمييز: متوسط (20px)" Click="HighlighterSize_Click" Tag="20" />
+                                <MenuFlyoutItem Text="سُمك التمييز: عريض (32px)" Click="HighlighterSize_Click" Tag="32" />
+                                <MenuFlyoutItem Text="سُمك التمييز: عريض جداً (48px)" Click="HighlighterSize_Click" Tag="48" />
+                            </MenuFlyout>
+                        </SplitButton.Flyout>
                         <ToolTipService.ToolTip>
-                            <ToolTip Content="قلم التمييز الفسفوري (انقر لتفعيله، ومجدداً للإلغاء)" />
+                            <ToolTip Content="قلم التمييز الشفاف (Highlighter) - انقر للتمييز أو افتح القائمة لتحديد اللون والحجم" />
                         </ToolTipService.ToolTip>
-                    </Button>
+                    </SplitButton>
 
                     <!-- Eraser Tool -->
                     <Button x:Name="BtnEraserTool" Width="36" Height="36" Padding="0" Click="ToolEraser_Click">
@@ -319,8 +390,8 @@
                                             BorderThickness="1"
                                             CornerRadius="4"
                                             Background="{ThemeResource AppBackgroundBrush}">
-                                        <!-- Draggable image container with Context Menu -->
-                                        <Grid CanDrag="{Binding IsHandMode}" DragStarting="ImageContainer_DragStarting">
+                                        <!-- Draggable image container with Context Menu (Strict Left-to-Right Cartesian coordinate plane) -->
+                                        <Grid CanDrag="{Binding IsHandMode}" DragStarting="ImageContainer_DragStarting" FlowDirection="LeftToRight">
                                             <Grid.ContextFlyout>
                                                 <MenuFlyout>
                                                     <MenuFlyoutItem Text="نسخ الصورة (Copy)" Click="MenuCopy_Click">
@@ -355,6 +426,7 @@
                                             <!-- Captured Screenshot Display -->
                                             <Image Source="{Binding ImageBytes, Converter={StaticResource BytesToBitmapImageConverter}}"
                                                    Stretch="None"
+                                                   FlowDirection="LeftToRight"
                                                    HorizontalAlignment="Center"
                                                    VerticalAlignment="Center" />
 
@@ -384,6 +456,7 @@
 
                                             <!-- Interactive Inking & Annotation Canvas Layer (Active only in Drawing Mode) -->
                                             <Canvas Background="Transparent"
+                                                    FlowDirection="LeftToRight"
                                                     IsHitTestVisible="{Binding IsDrawingMode}"
                                                     PointerPressed="AnnotationCanvas_PointerPressed"
                                                     PointerMoved="AnnotationCanvas_PointerMoved"
@@ -391,6 +464,7 @@
 
                                             <!-- In-Tab Interactive Crop Overlay Layer -->
                                             <Canvas Background="#40000000"
+                                                    FlowDirection="LeftToRight"
                                                     Visibility="{Binding IsCropping, Converter={StaticResource BoolToVisibilityConverter}}"
                                                     PointerPressed="CropCanvas_PointerPressed"
                                                     PointerMoved="CropCanvas_PointerMoved"
@@ -402,15 +476,18 @@
                                                         Tag="InTabCropBox"
                                                         Visibility="Collapsed" />
 
-                                                <!-- 8 Interactive Resize Handles (Corner & Edge Grabbers like MS Paint) -->
-                                                <Border Tag="CropHandle_NW" Width="12" Height="12" Background="White" BorderBrush="#0078D7" BorderThickness="2" CornerRadius="2" Visibility="Collapsed" />
-                                                <Border Tag="CropHandle_N"  Width="12" Height="12" Background="White" BorderBrush="#0078D7" BorderThickness="2" CornerRadius="2" Visibility="Collapsed" />
-                                                <Border Tag="CropHandle_NE" Width="12" Height="12" Background="White" BorderBrush="#0078D7" BorderThickness="2" CornerRadius="2" Visibility="Collapsed" />
-                                                <Border Tag="CropHandle_E"  Width="12" Height="12" Background="White" BorderBrush="#0078D7" BorderThickness="2" CornerRadius="2" Visibility="Collapsed" />
-                                                <Border Tag="CropHandle_SE" Width="12" Height="12" Background="White" BorderBrush="#0078D7" BorderThickness="2" CornerRadius="2" Visibility="Collapsed" />
-                                                <Border Tag="CropHandle_S"  Width="12" Height="12" Background="White" BorderBrush="#0078D7" BorderThickness="2" CornerRadius="2" Visibility="Collapsed" />
-                                                <Border Tag="CropHandle_SW" Width="12" Height="12" Background="White" BorderBrush="#0078D7" BorderThickness="2" CornerRadius="2" Visibility="Collapsed" />
-                                                <Border Tag="CropHandle_W"  Width="12" Height="12" Background="White" BorderBrush="#0078D7" BorderThickness="2" CornerRadius="2" Visibility="Collapsed" />
+                                                <!-- 8 Interactive Crop Handles & Prominent Dashes (Corners & Edges) -->
+                                                <!-- Corner Brackets (Thick 18x18 squares with 3px border and drop shadow) -->
+                                                <Border Tag="CropHandle_NW" Width="18" Height="18" Background="White" BorderBrush="#0078D7" BorderThickness="3" CornerRadius="3" Visibility="Collapsed" />
+                                                <Border Tag="CropHandle_NE" Width="18" Height="18" Background="White" BorderBrush="#0078D7" BorderThickness="3" CornerRadius="3" Visibility="Collapsed" />
+                                                <Border Tag="CropHandle_SE" Width="18" Height="18" Background="White" BorderBrush="#0078D7" BorderThickness="3" CornerRadius="3" Visibility="Collapsed" />
+                                                <Border Tag="CropHandle_SW" Width="18" Height="18" Background="White" BorderBrush="#0078D7" BorderThickness="3" CornerRadius="3" Visibility="Collapsed" />
+
+                                                <!-- Edge Dashes (Prominent thick bars: horizontal 42x8 for Top/Bottom, vertical 8x42 for Left/Right) -->
+                                                <Border Tag="CropHandle_N"  Width="42" Height="8"  Background="White" BorderBrush="#0078D7" BorderThickness="2" CornerRadius="4" Visibility="Collapsed" />
+                                                <Border Tag="CropHandle_S"  Width="42" Height="8"  Background="White" BorderBrush="#0078D7" BorderThickness="2" CornerRadius="4" Visibility="Collapsed" />
+                                                <Border Tag="CropHandle_W"  Width="8"  Height="42" Background="White" BorderBrush="#0078D7" BorderThickness="2" CornerRadius="4" Visibility="Collapsed" />
+                                                <Border Tag="CropHandle_E"  Width="8"  Height="42" Background="White" BorderBrush="#0078D7" BorderThickness="2" CornerRadius="4" Visibility="Collapsed" />
 
                                                 <!-- Apply / Cancel Crop Actions Floating Pill -->
                                                 <StackPanel Tag="InTabCropActionBar"
@@ -439,6 +516,7 @@
 
                                             <!-- In-Tab Privacy Redaction & Blur Overlay Layer -->
                                             <Canvas Background="#30000000"
+                                                    FlowDirection="LeftToRight"
                                                     Visibility="{Binding IsBlurring, Converter={StaticResource BoolToVisibilityConverter}}"
                                                     PointerPressed="BlurCanvas_PointerPressed"
                                                     PointerMoved="BlurCanvas_PointerMoved"

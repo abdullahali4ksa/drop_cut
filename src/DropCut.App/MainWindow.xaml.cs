@@ -38,6 +38,11 @@ public sealed partial class MainWindow : Window
     private Polyline? _activePolyline;
     private Canvas? _activeDrawingCanvas;
 
+    // Tool styling & customization state
+    private string _highlighterColor = "#FFFF00";
+    private int _highlighterThickness = 20;
+    private int _penThickness = 4;
+
     // In-tab cropping state (8-point interactive handles like MS Paint)
     private Point _tabCropStart;
     private double _tabCropX;
@@ -45,6 +50,11 @@ public sealed partial class MainWindow : Window
     private double _tabCropW;
     private double _tabCropH;
     private bool _isTabCropDragging;
+    private bool _isMovingCropBox;
+    private bool _isNewCropDrawing;
+    private Point _cropBoxMoveStart;
+    private double _cropBoxInitialX;
+    private double _cropBoxInitialY;
     private string? _activeCropHandle;
     private Point _cropDragStartPoint;
     private double _initialCropX;
@@ -548,14 +558,19 @@ public sealed partial class MainWindow : Window
 
         if (ViewModel.ActiveTool == ToolType.Crop)
         {
-            SetToolMode(ToolType.Hand);
+            BtnApplyInTabCrop_Click(sender, e);
         }
         else
         {
-            _tabCropX = 0;
-            _tabCropY = 0;
-            _tabCropW = tab.ImageWidth > 0 ? tab.ImageWidth : 800;
-            _tabCropH = tab.ImageHeight > 0 ? tab.ImageHeight : 600;
+            int imgW = tab.ImageWidth > 0 ? tab.ImageWidth : 800;
+            int imgH = tab.ImageHeight > 0 ? tab.ImageHeight : 600;
+
+            int insetX = Math.Min(30, Math.Max(10, imgW / 12));
+            int insetY = Math.Min(30, Math.Max(10, imgH / 12));
+            _tabCropX = insetX;
+            _tabCropY = insetY;
+            _tabCropW = Math.Max(50, imgW - insetX * 2);
+            _tabCropH = Math.Max(50, imgH - insetY * 2);
 
             SetToolMode(ToolType.Crop);
 
@@ -588,17 +603,30 @@ public sealed partial class MainWindow : Window
                 _initialCropW = _tabCropW;
                 _initialCropH = _tabCropH;
                 _isTabCropDragging = true;
+                _isMovingCropBox = false;
+                _isNewCropDrawing = false;
+            }
+            else if (_tabCropW > 20 && _tabCropH > 20 &&
+                     pt.X >= _tabCropX && pt.X <= _tabCropX + _tabCropW &&
+                     pt.Y >= _tabCropY && pt.Y <= _tabCropY + _tabCropH)
+            {
+                // Clicked inside existing crop area -> Move / Pan the crop box
+                _activeCropHandle = null;
+                _isMovingCropBox = true;
+                _isNewCropDrawing = false;
+                _cropBoxMoveStart = pt;
+                _cropBoxInitialX = _tabCropX;
+                _cropBoxInitialY = _tabCropY;
+                _isTabCropDragging = true;
             }
             else
             {
+                // Clicked outside -> prepare to draw a new crop box if dragged
                 _activeCropHandle = null;
+                _isMovingCropBox = false;
+                _isNewCropDrawing = true;
                 _tabCropStart = pt;
                 _isTabCropDragging = true;
-                _tabCropX = pt.X;
-                _tabCropY = pt.Y;
-                _tabCropW = 0;
-                _tabCropH = 0;
-                UpdateCropVisuals(canvas);
             }
         }
         catch (Exception) { }
@@ -657,13 +685,29 @@ public sealed partial class MainWindow : Window
                     }
                     UpdateCropVisuals(canvas);
                 }
-                else
+                else if (_isMovingCropBox)
                 {
-                    _tabCropX = Math.Min(_tabCropStart.X, pt.X);
-                    _tabCropY = Math.Min(_tabCropStart.Y, pt.Y);
-                    _tabCropW = Math.Abs(pt.X - _tabCropStart.X);
-                    _tabCropH = Math.Abs(pt.Y - _tabCropStart.Y);
+                    double dx = pt.X - _cropBoxMoveStart.X;
+                    double dy = pt.Y - _cropBoxMoveStart.Y;
+                    var tab = ViewModel.SelectedTab;
+                    double maxW = tab?.ImageWidth > 0 ? tab.ImageWidth : 3000;
+                    double maxH = tab?.ImageHeight > 0 ? tab.ImageHeight : 3000;
+
+                    _tabCropX = Math.Clamp(_cropBoxInitialX + dx, 0, Math.Max(0, maxW - _tabCropW));
+                    _tabCropY = Math.Clamp(_cropBoxInitialY + dy, 0, Math.Max(0, maxH - _tabCropH));
                     UpdateCropVisuals(canvas);
+                }
+                else if (_isNewCropDrawing)
+                {
+                    double dist = Math.Max(Math.Abs(pt.X - _tabCropStart.X), Math.Abs(pt.Y - _tabCropStart.Y));
+                    if (dist > 8)
+                    {
+                        _tabCropX = Math.Min(_tabCropStart.X, pt.X);
+                        _tabCropY = Math.Min(_tabCropStart.Y, pt.Y);
+                        _tabCropW = Math.Abs(pt.X - _tabCropStart.X);
+                        _tabCropH = Math.Abs(pt.Y - _tabCropStart.Y);
+                        UpdateCropVisuals(canvas);
+                    }
                 }
             }
             else
@@ -688,7 +732,16 @@ public sealed partial class MainWindow : Window
                         SetCanvasCursor(InputSystemCursorShape.SizeWestEast);
                         break;
                     default:
-                        SetCanvasCursor(InputSystemCursorShape.Cross);
+                        if (_tabCropW > 20 && _tabCropH > 20 &&
+                            pt.X >= _tabCropX && pt.X <= _tabCropX + _tabCropW &&
+                            pt.Y >= _tabCropY && pt.Y <= _tabCropY + _tabCropH)
+                        {
+                            SetCanvasCursor(InputSystemCursorShape.SizeAll);
+                        }
+                        else
+                        {
+                            SetCanvasCursor(InputSystemCursorShape.Cross);
+                        }
                         break;
                 }
             }
@@ -703,6 +756,8 @@ public sealed partial class MainWindow : Window
             if (sender is not Canvas canvas) return;
             _isTabCropDragging = false;
             _activeCropHandle = null;
+            _isMovingCropBox = false;
+            _isNewCropDrawing = false;
             UpdateCropVisuals(canvas);
         }
         catch (Exception) { }
@@ -725,21 +780,30 @@ public sealed partial class MainWindow : Window
         double cw = Math.Max(10, _tabCropW);
         double ch = Math.Max(10, _tabCropH);
 
-        PositionHandle(canvas, "CropHandle_NW", cx - 6, cy - 6);
-        PositionHandle(canvas, "CropHandle_N",  cx + cw / 2 - 6, cy - 6);
-        PositionHandle(canvas, "CropHandle_NE", cx + cw - 6, cy - 6);
-        PositionHandle(canvas, "CropHandle_E",  cx + cw - 6, cy + ch / 2 - 6);
-        PositionHandle(canvas, "CropHandle_SE", cx + cw - 6, cy + ch - 6);
-        PositionHandle(canvas, "CropHandle_S",  cx + cw / 2 - 6, cy + ch - 6);
-        PositionHandle(canvas, "CropHandle_SW", cx - 6, cy + ch - 6);
-        PositionHandle(canvas, "CropHandle_W",  cx - 6, cy + ch / 2 - 6);
+        // Position 4 Corner brackets (18x18, center offset: -9)
+        PositionHandle(canvas, "CropHandle_NW", cx - 9, cy - 9);
+        PositionHandle(canvas, "CropHandle_NE", cx + cw - 9, cy - 9);
+        PositionHandle(canvas, "CropHandle_SE", cx + cw - 9, cy + ch - 9);
+        PositionHandle(canvas, "CropHandle_SW", cx - 9, cy + ch - 9);
+
+        // Position 4 Edge prominent dashes (Top/Bottom are 42x8, Left/Right are 8x42)
+        PositionHandle(canvas, "CropHandle_N",  cx + cw / 2 - 21, cy - 4);
+        PositionHandle(canvas, "CropHandle_S",  cx + cw / 2 - 21, cy + ch - 4);
+        PositionHandle(canvas, "CropHandle_W",  cx - 4, cy + ch / 2 - 21);
+        PositionHandle(canvas, "CropHandle_E",  cx + cw - 4, cy + ch / 2 - 21);
 
         var bar = FindChildByTag<StackPanel>(canvas, "InTabCropActionBar");
         if (bar != null)
         {
             bar.Visibility = Visibility.Visible;
-            Canvas.SetLeft(bar, Math.Max(0, cx));
-            Canvas.SetTop(bar, cy + ch + 10);
+            double barTop = cy + ch + 12;
+            var tab = ViewModel.SelectedTab;
+            if (tab?.ImageHeight > 0 && barTop + 45 > tab.ImageHeight)
+            {
+                barTop = Math.Max(10, cy + ch - 45);
+            }
+            Canvas.SetLeft(bar, Math.Max(10, cx));
+            Canvas.SetTop(bar, barTop);
         }
     }
 
@@ -756,18 +820,26 @@ public sealed partial class MainWindow : Window
 
     private static string? HitTestCropHandle(Point pt, double cx, double cy, double cw, double ch)
     {
-        const double threshold = 14;
+        const double cornerTol = 24;
+        const double edgeBreadthTol = 18;
+        const double edgeLengthTol = 28;
 
-        bool Near(double hx, double hy) => Math.Abs(pt.X - hx) <= threshold && Math.Abs(pt.Y - hy) <= threshold;
+        bool Near(double hx, double hy, double rx, double ry) =>
+            Math.Abs(pt.X - hx) <= rx && Math.Abs(pt.Y - hy) <= ry;
 
-        if (Near(cx, cy)) return "NW";
-        if (Near(cx + cw / 2, cy)) return "N";
-        if (Near(cx + cw, cy)) return "NE";
-        if (Near(cx + cw, cy + ch / 2)) return "E";
-        if (Near(cx + cw, cy + ch)) return "SE";
-        if (Near(cx + cw / 2, cy + ch)) return "S";
-        if (Near(cx, cy + ch)) return "SW";
-        if (Near(cx, cy + ch / 2)) return "W";
+        // Corners
+        if (Near(cx, cy, cornerTol, cornerTol)) return "NW";
+        if (Near(cx + cw, cy, cornerTol, cornerTol)) return "NE";
+        if (Near(cx + cw, cy + ch, cornerTol, cornerTol)) return "SE";
+        if (Near(cx, cy + ch, cornerTol, cornerTol)) return "SW";
+
+        // Top & Bottom Edges (wide dashes)
+        if (Near(cx + cw / 2, cy, edgeLengthTol, edgeBreadthTol)) return "N";
+        if (Near(cx + cw / 2, cy + ch, edgeLengthTol, edgeBreadthTol)) return "S";
+
+        // Left & Right Edges (tall dashes)
+        if (Near(cx, cy + ch / 2, edgeBreadthTol, edgeLengthTol)) return "W";
+        if (Near(cx + cw, cy + ch / 2, edgeBreadthTol, edgeLengthTol)) return "E";
 
         return null;
     }
@@ -1004,52 +1076,78 @@ public sealed partial class MainWindow : Window
         }
     }
 
-    private void PenRed_Click(object sender, RoutedEventArgs e)
+    private void PenColor_Click(object sender, RoutedEventArgs e)
     {
-        ViewModel.PenColor = "#FF0000";
-        SetToolMode(ToolType.Pen);
-        NotifyToolChange("تم اختيار القلم باللون الأحمر");
+        try
+        {
+            if (sender is FrameworkElement elem && elem.Tag is string hex)
+            {
+                ViewModel.PenColor = hex;
+                var brush = new SolidColorBrush(ParseColorHex(hex));
+                if (IconPenGlyph != null) IconPenGlyph.Foreground = brush;
+                if (IndicatorPenColor != null) IndicatorPenColor.Background = brush;
+                SetToolMode(ToolType.Pen);
+                NotifyToolChange($"تم اختيار لون القلم: {hex}");
+            }
+        }
+        catch (Exception) { }
     }
 
-    private void PenBlue_Click(object sender, RoutedEventArgs e)
+    private void PenSize_Click(object sender, RoutedEventArgs e)
     {
-        ViewModel.PenColor = "#0078D7";
-        SetToolMode(ToolType.Pen);
-        NotifyToolChange("تم اختيار القلم باللون الأزرق");
+        try
+        {
+            if (sender is FrameworkElement elem && int.TryParse(elem.Tag?.ToString(), out var size))
+            {
+                _penThickness = size;
+                SetToolMode(ToolType.Pen);
+                NotifyToolChange($"تم ضبط سُمك القلم: {size}px");
+            }
+        }
+        catch (Exception) { }
     }
 
-    private void PenBlack_Click(object sender, RoutedEventArgs e)
-    {
-        ViewModel.PenColor = "#000000";
-        SetToolMode(ToolType.Pen);
-        NotifyToolChange("تم اختيار القلم باللون الأسود");
-    }
-
-    private void PenGreen_Click(object sender, RoutedEventArgs e)
-    {
-        ViewModel.PenColor = "#107C41";
-        SetToolMode(ToolType.Pen);
-        NotifyToolChange("تم اختيار القلم باللون الأخضر");
-    }
-
-    private void PenYellow_Click(object sender, RoutedEventArgs e)
-    {
-        ViewModel.PenColor = "#FFD700";
-        SetToolMode(ToolType.Pen);
-        NotifyToolChange("تم اختيار القلم باللون الأصفر");
-    }
-
-    private void ToolHighlighter_Click(object sender, RoutedEventArgs e)
+    private void ToolHighlighter_Click(SplitButton sender, SplitButtonClickEventArgs args)
     {
         if (ViewModel.ActiveTool == ToolType.Highlighter)
         {
-            BtnCommitAndSaveEditing_Click(sender, e);
+            BtnCommitAndSaveEditing_Click(sender, new RoutedEventArgs());
         }
         else
         {
-            ViewModel.PenColor = "#80FFD700";
             SetToolMode(ToolType.Highlighter);
         }
+    }
+
+    private void HighlighterColor_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            if (sender is FrameworkElement elem && elem.Tag is string hex)
+            {
+                _highlighterColor = hex;
+                var brush = new SolidColorBrush(ParseColorHex(hex));
+                if (IconHighlighterGlyph != null) IconHighlighterGlyph.Foreground = brush;
+                if (IndicatorHighlighterColor != null) IndicatorHighlighterColor.Background = brush;
+                SetToolMode(ToolType.Highlighter);
+                NotifyToolChange($"تم اختيار لون التمييز الشفاف: {hex}");
+            }
+        }
+        catch (Exception) { }
+    }
+
+    private void HighlighterSize_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            if (sender is FrameworkElement elem && int.TryParse(elem.Tag?.ToString(), out var size))
+            {
+                _highlighterThickness = size;
+                SetToolMode(ToolType.Highlighter);
+                NotifyToolChange($"تم ضبط سُمك قلم التمييز: {size}px");
+            }
+        }
+        catch (Exception) { }
     }
 
     private void ToolEraser_Click(object sender, RoutedEventArgs e)
@@ -1146,6 +1244,12 @@ public sealed partial class MainWindow : Window
             ResetButtonStyle(BtnRulerTool);
             ResetButtonStyle(BtnTextTool);
             ResetButtonStyle(BtnCropTool);
+
+            // Re-apply chosen tool color badges
+            if (IconPenGlyph != null) IconPenGlyph.Foreground = new SolidColorBrush(ParseColorHex(ViewModel.PenColor));
+            if (IndicatorPenColor != null) IndicatorPenColor.Background = new SolidColorBrush(ParseColorHex(ViewModel.PenColor));
+            if (IconHighlighterGlyph != null) IconHighlighterGlyph.Foreground = new SolidColorBrush(ParseColorHex(_highlighterColor));
+            if (IndicatorHighlighterColor != null) IndicatorHighlighterColor.Background = new SolidColorBrush(ParseColorHex(_highlighterColor));
 
             // 2. Apply vibrant active styling (Golden Yellow for editing tools, Fluent Blue for Hand tool)
             switch (tool)
@@ -1272,7 +1376,28 @@ public sealed partial class MainWindow : Window
         try
         {
             var tab = ViewModel.SelectedTab;
-            if (tab?.ImageBytes is { Length: > 0 } bytes && _activeDrawingCanvas != null && _activeDrawingCanvas.Children.Count > 0)
+            if (tab == null)
+            {
+                SetToolMode(ToolType.Hand);
+                return;
+            }
+
+            // 1. If currently in Crop mode -> Commit crop!
+            if (ViewModel.ActiveTool == ToolType.Crop)
+            {
+                BtnApplyInTabCrop_Click(sender, e);
+                return;
+            }
+
+            // 2. If currently in Privacy Blur mode -> Commit blur!
+            if (ViewModel.ActiveTool == ToolType.BlurRedact)
+            {
+                BtnApplyInTabBlur_Click(sender, e);
+                return;
+            }
+
+            // 3. If currently in Inking mode -> Rasterize annotations!
+            if (tab.ImageBytes is { Length: > 0 } bytes && _activeDrawingCanvas != null && _activeDrawingCanvas.Children.Count > 0)
             {
                 var strokes = new List<StrokeRenderData>();
                 foreach (var child in _activeDrawingCanvas.Children)
@@ -1282,7 +1407,7 @@ public sealed partial class MainWindow : Window
                         var pts = poly.Points.Select(p => (p.X, p.Y)).ToList();
                         var hex = (poly.Stroke as SolidColorBrush)?.Color.ToString() ?? "#FF0000";
                         var thickness = (int)poly.StrokeThickness;
-                        bool isHighlight = thickness >= 10;
+                        bool isHighlight = poly.Opacity < 0.9 || thickness >= 10;
                         strokes.Add(new StrokeRenderData(pts, hex, thickness, isHighlight));
                     }
                 }
@@ -1403,17 +1528,35 @@ public sealed partial class MainWindow : Window
 
             var pt = e.GetCurrentPoint(canvas).Position;
 
-            if (ViewModel.ActiveTool == ToolType.Pen || ViewModel.ActiveTool == ToolType.Highlighter)
+            if (ViewModel.ActiveTool == ToolType.Pen)
             {
                 var color = ParseColorHex(ViewModel.PenColor);
-                var thickness = ViewModel.ActiveTool == ToolType.Highlighter ? 14 : 3;
+                var thickness = _penThickness;
 
                 _activePolyline = new Polyline
                 {
                     Stroke = new SolidColorBrush(color),
                     StrokeThickness = thickness,
+                    Opacity = 1.0,
                     StrokeStartLineCap = PenLineCap.Round,
                     StrokeEndLineCap = PenLineCap.Round,
+                    StrokeLineJoin = PenLineJoin.Round
+                };
+                _activePolyline.Points.Add(pt);
+                canvas.Children.Add(_activePolyline);
+            }
+            else if (ViewModel.ActiveTool == ToolType.Highlighter)
+            {
+                var color = ParseColorHex(_highlighterColor);
+                var thickness = _highlighterThickness;
+
+                _activePolyline = new Polyline
+                {
+                    Stroke = new SolidColorBrush(color),
+                    StrokeThickness = thickness,
+                    Opacity = 0.45, // Semi-transparent highlighter so text underneath is clearly visible
+                    StrokeStartLineCap = PenLineCap.Flat,
+                    StrokeEndLineCap = PenLineCap.Flat,
                     StrokeLineJoin = PenLineJoin.Round
                 };
                 _activePolyline.Points.Add(pt);

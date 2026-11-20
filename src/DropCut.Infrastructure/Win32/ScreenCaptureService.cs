@@ -416,6 +416,7 @@ public class ScreenCaptureService : IScreenCaptureService
 
                 int radius = Math.Max(1, stroke.Thickness / 2);
                 bool isHighlight = stroke.IsHighlighter;
+                var visited = isHighlight ? new HashSet<int>() : null;
 
                 for (int i = 0; i < stroke.Points.Count - 1; i++)
                 {
@@ -454,10 +455,14 @@ public class ScreenCaptureService : IScreenCaptureService
                                 {
                                     if (isHighlight)
                                     {
-                                        result[offset] = (byte)((result[offset] + b) / 2);
-                                        result[offset + 1] = (byte)((result[offset + 1] + g) / 2);
-                                        result[offset + 2] = (byte)((result[offset + 2] + r) / 2);
-                                        result[offset + 3] = 255;
+                                        if (visited!.Add(offset))
+                                        {
+                                            // True neon highlighter transparency (45% stroke color, 55% background)
+                                            result[offset]     = (byte)((result[offset]     * 55 + b * 45) / 100);
+                                            result[offset + 1] = (byte)((result[offset + 1] * 55 + g * 45) / 100);
+                                            result[offset + 2] = (byte)((result[offset + 2] * 55 + r * 45) / 100);
+                                            result[offset + 3] = 255;
+                                        }
                                     }
                                     else
                                     {
