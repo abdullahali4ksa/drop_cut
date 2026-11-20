@@ -238,3 +238,17 @@
 - **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Protected Branch Policies, Clean .gitignore)`
 - **DESCRIPTION:** Create public GitHub repository `drop_cut` under authenticated account `abdullahali4ksa`, configure origin remote, commit all clean verified code, and push the main branch.
 - **VERIFICATION:** Remote repository is accessible on GitHub at https://github.com/abdullahali4ksa/drop_cut with full commit history, tests, and clean build.
+
+### [P07-T004] Microsoft Partner Center Submission & Store Identity Association (Linear: `JMD-65`)
+- **STATUS:** `DONE`
+- **POLICY_REF:** `docs/PROJECT_RULES.md (Microsoft Store Standards, Offline-First Architecture, MSIX Sandbox Compliance)`
+- **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Identity Manifest Integrity, Official Partner Center Binding)`
+- **DESCRIPTION:** Complete browser automation of Microsoft Partner Center submission for "DropCut":
+  - Product Name reserved: `DropCut` (Product ID: `9NV7BZHXBCZ7`, MSA App ID: `af96190c-754d-4834-a3c0-0e46aaefc15b`)
+  - Pricing & Availability: Free ($0.00 USD) worldwide across 240+ countries.
+  - App Properties: Productivity, Utilities + tools, zero telemetry, offline-first.
+  - Age Ratings (IARC): Everyone / 3+ rating certified.
+  - Store Listings: English and Arabic localized titles, descriptions, features, and copyright.
+  - Certification Notes: 100% offline desktop utility, zero personal data collection, zero ads.
+  - Synchronize official Package Identity (`birotech.DropCut`, `CN=4B6200B3-DE4E-4F39-A6EA-B5DC049294B2`, `birotech.DropCut_4spa8h579ffz6`) into `Package.appxmanifest`.
+- **VERIFICATION:** Partner Center submission sections completed up to package upload; Package.appxmanifest identity verified.

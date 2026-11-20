@@ -13,7 +13,7 @@
     Publisher="CN=4B6200B3-DE4E-4F39-A6EA-B5DC049294B2"
     Version="1.0.0.0" />
 
-  <mp:PhoneIdentity PhoneProductId="4A2B6C8E-3211-4E87-991A-88D8E93F12C4" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="af96190c-754d-4834-a3c0-0e46aaefc15b" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
     <DisplayName>DropCut</DisplayName>
