@@ -97,6 +97,20 @@ public sealed partial class MainWindow : Window
 
         ApplyLocalization();
 
+        // If Windows OS is non-Arabic, automatically adapt to English or system language so foreign users see clean English
+        try
+        {
+            var sysCulture = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.ToLowerInvariant();
+            if (!sysCulture.Equals("ar", StringComparison.OrdinalIgnoreCase))
+            {
+                var targetLang = _localizationService.SupportedLanguages.Any(l => l.Code.Equals(sysCulture, StringComparison.OrdinalIgnoreCase))
+                    ? sysCulture
+                    : "en";
+                _ = _localizationService.SetLanguageAsync(targetLang);
+            }
+        }
+        catch { }
+
         // Configure window icon
         try
         {
@@ -224,7 +238,7 @@ public sealed partial class MainWindow : Window
         {
             if (ViewModel.DelaySeconds > 0)
             {
-                NotifyToolChange($"انتظر... سيتم التقاط الشاشة بعد {ViewModel.DelaySeconds} ثوانٍ");
+                NotifyToolChange(_localizationService.GetString("Delay_" + ViewModel.DelaySeconds + "s"));
                 await Task.Delay(ViewModel.DelaySeconds * 1000);
             }
 
@@ -426,7 +440,7 @@ public sealed partial class MainWindow : Window
         {
             var tab = args.Item as ShellTabModel ?? ViewModel.SelectedTab;
             PrepareDataPackageForDragSync(tab, args.Data);
-            NotifyToolChange("جارٍ سحب اللسان ومشاركة الصورة...");
+            NotifyToolChange(_localizationService.GetString("Status_Dragging"));
         }
         catch (Exception)
         {
@@ -453,7 +467,7 @@ public sealed partial class MainWindow : Window
             var tab = (sender as FrameworkElement)?.DataContext as ShellTabModel ?? ViewModel.SelectedTab;
             PrepareDataPackageForDragSync(tab, args.Data);
             ConfigureCompactDragUI(args.DragUI, tab);
-            NotifyToolChange("جارٍ سحب الصورة ومشاركتها...");
+            NotifyToolChange(_localizationService.GetString("Status_Dragging"));
         }
         catch (Exception) { }
         finally
@@ -477,7 +491,7 @@ public sealed partial class MainWindow : Window
             var tab = ViewModel.SelectedTab;
             PrepareDataPackageForDragSync(tab, args.Data);
             ConfigureCompactDragUI(args.DragUI, tab);
-            NotifyToolChange("جارٍ سحب ومشاركة الصورة بشكل مصغر...");
+            NotifyToolChange(_localizationService.GetString("Status_Dragging"));
         }
         catch (Exception) { }
         finally
@@ -500,7 +514,7 @@ public sealed partial class MainWindow : Window
             var tab = ViewModel.SelectedTab;
             PrepareDataPackageForDragSync(tab, args.Data);
             ConfigureCompactDragUI(args.DragUI, tab);
-            NotifyToolChange("جارٍ سحب ومشاركة اللقطة إلى تطبيق خارجي...");
+            NotifyToolChange(_localizationService.GetString("Status_Dragging"));
         }
         catch (Exception) { }
         finally
@@ -564,7 +578,7 @@ public sealed partial class MainWindow : Window
         var tab = ViewModel.SelectedTab;
         if (tab?.ImageBytes is not { Length: > 0 })
         {
-            NotifyToolChange("يرجى أخذ لقطة شاشة أولاً أو اختيار لسان يحتوي على صورة لاقتصاصها");
+            NotifyToolChange(_localizationService.GetString("Action_NewSnip_Tip"));
             return;
         }
 
@@ -873,7 +887,7 @@ public sealed partial class MainWindow : Window
                 tab.ImageWidth = (int)_tabCropW;
                 tab.ImageHeight = (int)_tabCropH;
                 SetToolMode(ToolType.Hand);
-                NotifyToolChange($"تم اقتصاص الصورة الحالية بنجاح إلى ({tab.ImageWidth} × {tab.ImageHeight} بكسل)");
+                NotifyToolChange(_localizationService.GetString("Status_CropCommitted"));
                 CopyCurrentTabImage();
             }
         }
@@ -888,7 +902,7 @@ public sealed partial class MainWindow : Window
         try
         {
             SetToolMode(ToolType.Hand);
-            NotifyToolChange("تم إلغاء الاقتصاص");
+            NotifyToolChange(_localizationService.GetString("Status_HandActive"));
         }
         catch (Exception) { }
     }
@@ -901,7 +915,7 @@ public sealed partial class MainWindow : Window
         var tab = ViewModel.SelectedTab;
         if (tab?.ImageBytes is not { Length: > 0 })
         {
-            NotifyToolChange("يرجى أخذ لقطة شاشة أولاً لتطبيق التمويه عليها");
+            NotifyToolChange(_localizationService.GetString("Action_NewSnip_Tip"));
             return;
         }
 
@@ -997,7 +1011,7 @@ public sealed partial class MainWindow : Window
             {
                 tab.ImageBytes = blurred;
                 SetToolMode(ToolType.Hand);
-                NotifyToolChange("تم طمس وتمويه البيانات الحساسة بنجاح وحفظها بالذاكرة");
+                NotifyToolChange(_localizationService.GetString("Status_BlurCommitted"));
                 CopyCurrentTabImage();
             }
         }
@@ -1010,7 +1024,7 @@ public sealed partial class MainWindow : Window
     private void BtnCancelInTabBlur_Click(object sender, RoutedEventArgs e)
     {
         SetToolMode(ToolType.Hand);
-        NotifyToolChange("تم إلغاء التمويه");
+        NotifyToolChange(_localizationService.GetString("Status_HandActive"));
     }
 
     // ==========================================
@@ -1035,7 +1049,7 @@ public sealed partial class MainWindow : Window
         var newZoom = Math.Min(5.0, tab.ZoomFactor + 0.15);
         tab.ZoomFactor = newZoom;
         GetActiveScrollViewer()?.ChangeView(null, null, (float)newZoom);
-        NotifyToolChange($"التكبير: {tab.ZoomPercentageText}");
+        NotifyToolChange($"{_localizationService.GetString("Zoom_In")}: {tab.ZoomPercentageText}");
     }
 
     private void ZoomOutCurrentTab()
@@ -1045,7 +1059,7 @@ public sealed partial class MainWindow : Window
         var newZoom = Math.Max(0.2, tab.ZoomFactor - 0.15);
         tab.ZoomFactor = newZoom;
         GetActiveScrollViewer()?.ChangeView(null, null, (float)newZoom);
-        NotifyToolChange($"التصغير: {tab.ZoomPercentageText}");
+        NotifyToolChange($"{_localizationService.GetString("Zoom_Out")}: {tab.ZoomPercentageText}");
     }
 
     private void ZoomResetCurrentTab()
@@ -1054,7 +1068,7 @@ public sealed partial class MainWindow : Window
         if (tab == null) return;
         tab.ZoomFactor = 1.0;
         GetActiveScrollViewer()?.ChangeView(null, null, 1.0f);
-        NotifyToolChange("الحجم الأصلي: 100%");
+        NotifyToolChange(_localizationService.GetString("Zoom_Reset"));
     }
 
     private static T? FindChildByTag<T>(DependencyObject parent, string tag) where T : FrameworkElement
@@ -1099,7 +1113,7 @@ public sealed partial class MainWindow : Window
                 if (IconPenGlyph != null) IconPenGlyph.Foreground = brush;
                 if (IndicatorPenColor != null) IndicatorPenColor.Background = brush;
                 SetToolMode(ToolType.Pen);
-                NotifyToolChange($"تم اختيار لون القلم: {hex}");
+                NotifyToolChange($"{_localizationService.GetString("Tool_Pen")}: {hex}");
             }
         }
         catch (Exception) { }
@@ -1113,7 +1127,7 @@ public sealed partial class MainWindow : Window
             {
                 _penThickness = size;
                 SetToolMode(ToolType.Pen);
-                NotifyToolChange($"تم ضبط سُمك القلم: {size}px");
+                NotifyToolChange($"{_localizationService.GetString("Tool_Pen")}: {size}px");
             }
         }
         catch (Exception) { }
@@ -1142,7 +1156,7 @@ public sealed partial class MainWindow : Window
                 if (IconHighlighterGlyph != null) IconHighlighterGlyph.Foreground = brush;
                 if (IndicatorHighlighterColor != null) IndicatorHighlighterColor.Background = brush;
                 SetToolMode(ToolType.Highlighter);
-                NotifyToolChange($"تم اختيار لون التمييز الشفاف: {hex}");
+                NotifyToolChange($"{_localizationService.GetString("Tool_Highlighter")}: {hex}");
             }
         }
         catch (Exception) { }
@@ -1156,7 +1170,7 @@ public sealed partial class MainWindow : Window
             {
                 _highlighterThickness = size;
                 SetToolMode(ToolType.Highlighter);
-                NotifyToolChange($"تم ضبط سُمك قلم التمييز: {size}px");
+                NotifyToolChange($"{_localizationService.GetString("Tool_Highlighter")}: {size}px");
             }
         }
         catch (Exception) { }
@@ -1167,7 +1181,7 @@ public sealed partial class MainWindow : Window
         if (_activeDrawingCanvas != null && _activeDrawingCanvas.Children.Count > 0)
         {
             _activeDrawingCanvas.Children.Clear();
-            NotifyToolChange("تم مسح كافة الرسومات من الصورة");
+            NotifyToolChange(_localizationService.GetString("Status_AllCleared"));
         }
         SetToolMode(ToolType.Hand);
     }
@@ -1203,7 +1217,7 @@ public sealed partial class MainWindow : Window
                     tab.IsBlurring = false;
                     tab.IsDrawingMode = false;
                 }
-                NotifyToolChange("وضع اليد نشط 🖐️: جاهز للسحب والمشاركة أو تحريك الصورة، والنقر الأيمن للخيارات");
+                NotifyToolChange(_localizationService.GetString("Status_HandActive"));
             }
             else if (tool == ToolType.Crop)
             {
@@ -1213,7 +1227,7 @@ public sealed partial class MainWindow : Window
                     tab.IsBlurring = false;
                     tab.IsDrawingMode = false;
                 }
-                NotifyToolChange("وضع الاقتصاص نشط: حدد المستطيل المراد قصه، أو اضغط Esc للعودة للسحب");
+                NotifyToolChange(_localizationService.GetString("Status_CropActive"));
             }
             else if (tool == ToolType.BlurRedact)
             {
@@ -1223,7 +1237,7 @@ public sealed partial class MainWindow : Window
                     tab.IsBlurring = true;
                     tab.IsDrawingMode = false;
                 }
-                NotifyToolChange("وضع طمس البيانات نشط: حدد المستطيل المراد تمويهه، أو اضغط Esc للعودة للسحب");
+                NotifyToolChange(_localizationService.GetString("Status_BlurActive"));
             }
             else
             {
@@ -1233,6 +1247,9 @@ public sealed partial class MainWindow : Window
                     tab.IsBlurring = false;
                     tab.IsDrawingMode = true;
                 }
+                NotifyToolChange(tool == ToolType.Highlighter
+                    ? _localizationService.GetString("Status_HighlighterActive")
+                    : _localizationService.GetString("Status_PenActive"));
             }
 
             UpdateActiveToolUI(tool);
@@ -1432,7 +1449,7 @@ public sealed partial class MainWindow : Window
                         tab.ImageBytes = baked;
                         _activeDrawingCanvas.Children.Clear();
                         CopyCurrentTabImage();
-                        NotifyToolChange("تم حفظ ودمج كافة التعديلات والرسومات في الصورة بنجاح! وضع السحب مفعل الآن 🖐️");
+                        NotifyToolChange(_localizationService.GetString("Status_Saved"));
                     }
                 }
             }
@@ -1485,13 +1502,13 @@ public sealed partial class MainWindow : Window
             var tab = ViewModel.SelectedTab;
             if (tab?.ImageBytes is not { Length: > 0 } bytes)
             {
-                NotifyToolChange("يرجى أخذ لقطة شاشة أولاً لاستخراج النصوص");
+                NotifyToolChange(_localizationService.GetString("Action_NewSnip_Tip"));
                 return;
             }
 
             // Flash active yellow style while extracting
             ApplyActiveYellowStyle(BtnTextTool);
-            NotifyToolChange("جارٍ قراءة النصوص من الصورة (OCR)...");
+            NotifyToolChange(_localizationService.GetString("Tool_Text"));
 
             var result = await _ocrService.ExtractTextAsync(bytes);
 
@@ -1500,11 +1517,11 @@ public sealed partial class MainWindow : Window
                 var dp = new DataPackage();
                 dp.SetText(result.Value);
                 Clipboard.SetContent(dp);
-                tab.AutoSaveStatus = $"تم استخراج النص ({result.Value.Length} حرف) ونسخه للحافظة بنجاح";
+                tab.AutoSaveStatus = _localizationService.GetString("Status_Copied");
             }
             else
             {
-                tab.AutoSaveStatus = "لم يتم العثور على نصوص قابلة للقراءة في هذه الصورة";
+                tab.AutoSaveStatus = _localizationService.GetString("Status_Ready");
             }
 
             // Automatically turn off yellow style and return to previous state
@@ -1644,18 +1661,14 @@ public sealed partial class MainWindow : Window
             if (_activeDrawingCanvas != null && _activeDrawingCanvas.Children.Count > 0)
             {
                 _activeDrawingCanvas.Children.RemoveAt(_activeDrawingCanvas.Children.Count - 1);
-                NotifyToolChange("تراجع عن آخر رسمة");
-            }
-            else
-            {
-                NotifyToolChange("لا توجد رسومات للتراجع عنها");
+                NotifyToolChange(_localizationService.GetString("Action_Undo"));
             }
         }
         catch (Exception) { }
     }
 
     private void ActionRedo_Click(object sender, RoutedEventArgs e) =>
-        NotifyToolChange("إعادة (Redo)");
+        NotifyToolChange(_localizationService.GetString("Action_Redo"));
 
     private void ActionSave_Click(object sender, RoutedEventArgs e) => SaveCurrentTabImage();
 
@@ -1666,7 +1679,6 @@ public sealed partial class MainWindow : Window
         try
         {
             CopyCurrentTabImage();
-            NotifyToolChange("تم النسخ للحافظة — يمكنك أيضاً سحب التاب أو الصورة مباشرة إلى WhatsApp أو Telegram أو المستكشف");
         }
         catch (Exception) { }
     }
@@ -1797,10 +1809,17 @@ public sealed partial class MainWindow : Window
 
             if (MenuSettings != null) MenuSettings.Text = _localizationService.GetString("Nav_Settings");
             if (MenuOpenVault != null) MenuOpenVault.Text = _localizationService.GetString("Nav_Vault");
+            if (MenuAbout != null) MenuAbout.Text = _localizationService.GetString("Nav_About");
+
+            if (BtnZoomOut != null) ToolTipService.SetToolTip(BtnZoomOut, _localizationService.GetString("Zoom_Out"));
+            if (BtnZoomReset != null) ToolTipService.SetToolTip(BtnZoomReset, _localizationService.GetString("Zoom_Reset"));
+            if (BtnZoomIn != null) ToolTipService.SetToolTip(BtnZoomIn, _localizationService.GetString("Zoom_In"));
+            if (TxtStatusBarEngine != null) TxtStatusBarEngine.Text = _localizationService.GetString("Status_EngineReady");
 
             // 3. Guidance & Action Button Text
             if (TxtCommitSave != null) TxtCommitSave.Text = _localizationService.GetString("Action_CommitSave");
             if (TxtRevertHand != null) TxtRevertHand.Text = _localizationService.GetString("Action_RevertHand");
+            if (TxtModeGuidance != null) TxtModeGuidance.Text = _localizationService.GetString("Action_ModeGuidance");
         }
         catch (Exception) { }
     }
@@ -1821,7 +1840,7 @@ public sealed partial class MainWindow : Window
     }
 
     private void MenuAbout_Click(object sender, RoutedEventArgs e) =>
-        NotifyToolChange("DropCut v1.0.0 — أداة القصاصة المتطورة (Snipping & Workspace)");
+        NotifyToolChange(_localizationService.GetString("About_Title"));
 
     private void SaveCurrentTabImage()
     {
@@ -1840,7 +1859,8 @@ public sealed partial class MainWindow : Window
 
             File.WriteAllBytes(fullPath, bytes);
             tab.ImagePath = fullPath;
-            tab.AutoSaveStatus = $"تم الحفظ في {fileName}";
+            tab.AutoSaveStatus = string.Format(_localizationService.GetString("Status_SavedTo"), fileName);
+            NotifyToolChange(tab.AutoSaveStatus);
         }
         catch (Exception)
         {
@@ -1869,7 +1889,8 @@ public sealed partial class MainWindow : Window
             stream.Seek(0);
             dp.SetBitmap(RandomAccessStreamReference.CreateFromStream(stream));
             Clipboard.SetContent(dp);
-            tab.AutoSaveStatus = "تم النسخ إلى الحافظة بنجاح (جاهز للصق Ctrl+V)";
+            tab.AutoSaveStatus = _localizationService.GetString("Status_Copied");
+            NotifyToolChange(tab.AutoSaveStatus);
         }
         catch (Exception)
         {

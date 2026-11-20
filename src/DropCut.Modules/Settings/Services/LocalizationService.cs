@@ -98,6 +98,7 @@ public class LocalizationService : ILocalizationService
             ["Action_Settings_Tip"] = "المزيد من الخيارات والإعدادات",
             ["Action_CommitSave"] = "✓ حفظ وإنهاء (✓)",
             ["Action_RevertHand"] = "رجوع لوضع اليد 🖐️",
+            ["Action_ModeGuidance"] = "وضع التحرير نشط — تم قفل وضع السحب مؤقتاً لحماية الرسم ✏️",
             ["Action_DragDropPill"] = "اسحبها وشاركها إلينا (WhatsApp / Telegram / Explorer)",
             ["Mode_Rect"] = "مستطيل",
             ["Mode_Win"] = "النافذة",
@@ -106,7 +107,25 @@ public class LocalizationService : ILocalizationService
             ["Delay_None"] = "بدون تأخير (فوري)",
             ["Delay_3s"] = "قص بعد 3 ثوانٍ",
             ["Delay_5s"] = "قص بعد 5 ثوانٍ",
-            ["Delay_10s"] = "قص بعد 10 ثوانٍ"
+            ["Delay_10s"] = "قص بعد 10 ثوانٍ",
+            ["Nav_About"] = "حول البرنامج",
+            ["About_Title"] = "DropCut v1.0.0 — أداة القصاصة المتطورة ومساحة العمل السريعة",
+            ["Status_Copied"] = "تم النسخ إلى الحافظة بنجاح (جاهز للصق Ctrl+V)",
+            ["Status_SavedTo"] = "تم الحفظ في {0}",
+            ["Action_DragDropPillToolTip"] = "اضغط واسحب هذا الزر وأفلته مباشرة داخل أي تطبيق (واتساب، تيليجرام، مستكشف الملفات)",
+            ["Zoom_In"] = "تكبير (Ctrl + +)",
+            ["Zoom_Out"] = "تصغير (Ctrl + -)",
+            ["Zoom_Reset"] = "الحجم الأصلي 100% (Ctrl + 0)",
+            ["Status_EngineReady"] = "DropCut • محرك القص لنظام ويندوز (Ctrl+B+B)",
+            ["Status_HandActive"] = "وضع اليد نشط 🖐️: جاهز للسحب والمشاركة أو تحريك الصورة",
+            ["Status_PenActive"] = "أداة القلم نشطة",
+            ["Status_HighlighterActive"] = "أداة قلم التمييز نشطة",
+            ["Status_CropActive"] = "وضع الاقتصاص نشط: حدد المستطيل المراد قصه",
+            ["Status_BlurActive"] = "وضع طمس البيانات نشط: حدد المستطيل المراد تمويهه",
+            ["Status_CropCommitted"] = "تم اقتصاص الصورة بنجاح",
+            ["Status_BlurCommitted"] = "تم طمس وتمويه البيانات الحساسة بنجاح",
+            ["Status_AllCleared"] = "تم مسح كافة الرسومات من الصورة",
+            ["Status_Dragging"] = "جارٍ سحب الصورة ومشاركتها..."
         },
         ["en"] = new Dictionary<string, string>
         {
@@ -174,6 +193,7 @@ public class LocalizationService : ILocalizationService
             ["Action_Settings_Tip"] = "Application Settings & Options",
             ["Action_CommitSave"] = "✓ Save & Commit (✓)",
             ["Action_RevertHand"] = "Back to Hand Mode 🖐️",
+            ["Action_ModeGuidance"] = "Editing Mode Active — Dragging locked temporarily to protect drawing ✏️",
             ["Action_DragDropPill"] = "Drag to share into WhatsApp / Telegram / Explorer",
             ["Mode_Rect"] = "Rectangle",
             ["Mode_Win"] = "Window",
@@ -182,7 +202,25 @@ public class LocalizationService : ILocalizationService
             ["Delay_None"] = "No delay (Instant)",
             ["Delay_3s"] = "Snip in 3 seconds",
             ["Delay_5s"] = "Snip in 5 seconds",
-            ["Delay_10s"] = "Snip in 10 seconds"
+            ["Delay_10s"] = "Snip in 10 seconds",
+            ["Nav_About"] = "About DropCut",
+            ["About_Title"] = "DropCut v1.0.0 — Modern Snipping Tool & Drag-to-Share Workspace",
+            ["Status_Copied"] = "Copied to clipboard (Ready to paste with Ctrl+V)",
+            ["Status_SavedTo"] = "Saved to {0}",
+            ["Action_DragDropPillToolTip"] = "Click and drag to drop directly into WhatsApp, Telegram, Explorer, etc.",
+            ["Zoom_In"] = "Zoom In (Ctrl + +)",
+            ["Zoom_Out"] = "Zoom Out (Ctrl + -)",
+            ["Zoom_Reset"] = "Actual Size 100% (Ctrl + 0)",
+            ["Status_EngineReady"] = "DropCut • Windows Snipping Engine (Ctrl+B+B)",
+            ["Status_HandActive"] = "Hand mode active 🖐️: Ready to pan or drag to share",
+            ["Status_PenActive"] = "Pen tool active",
+            ["Status_HighlighterActive"] = "Highlighter tool active",
+            ["Status_CropActive"] = "Crop mode active: Select rectangle to crop",
+            ["Status_BlurActive"] = "Privacy blur active: Select rectangle to obscure",
+            ["Status_CropCommitted"] = "Image cropped successfully",
+            ["Status_BlurCommitted"] = "Sensitive data obscured successfully",
+            ["Status_AllCleared"] = "All annotations cleared",
+            ["Status_Dragging"] = "Dragging image to share..."
         },
         ["es"] = new Dictionary<string, string>
         {
@@ -250,6 +288,7 @@ public class LocalizationService : ILocalizationService
             ["Action_Settings_Tip"] = "Configuración y opciones",
             ["Action_CommitSave"] = "✓ Guardar y finalizar (✓)",
             ["Action_RevertHand"] = "Volver a modo Mano 🖐️",
+            ["Action_ModeGuidance"] = "Modo edición activo — Arrastre bloqueado temporalmente para proteger el dibujo ✏️",
             ["Action_DragDropPill"] = "Arrastre para compartir en WhatsApp / Telegram / Explorador",
             ["Mode_Rect"] = "Rectángulo",
             ["Mode_Win"] = "Ventana",
@@ -258,7 +297,26 @@ public class LocalizationService : ILocalizationService
             ["Delay_None"] = "Sin retardo (Inmediato)",
             ["Delay_3s"] = "Capturar en 3 segundos",
             ["Delay_5s"] = "Capturar en 5 segundos",
-            ["Delay_10s"] = "Capturar en 10 segundos"
+            ["Delay_10s"] = "Capturar en 10 segundos",
+            ["Nav_About"] = "Acerca de DropCut",
+            ["About_Title"] = "DropCut v1.0.0 — Herramienta moderna de recortes y espacio de trabajo",
+            ["Status_Copied"] = "Copiado al portapapeles (Listo para pegar con Ctrl+V)",
+            ["Status_SavedTo"] = "Guardado en {0}",
+            ["Action_DragDropPill"] = "Arrastra y comparte (WhatsApp / Telegram / Explorer)",
+            ["Action_DragDropPillToolTip"] = "Haga clic y arrastre para soltar directamente en WhatsApp, Telegram, Explorador, etc.",
+            ["Zoom_In"] = "Acercar (Ctrl + +)",
+            ["Zoom_Out"] = "Alejar (Ctrl + -)",
+            ["Zoom_Reset"] = "Tamaño real 100% (Ctrl + 0)",
+            ["Status_EngineReady"] = "DropCut • Motor de recortes de Windows (Ctrl+B+B)",
+            ["Status_HandActive"] = "Modo mano activo 🖐️: Listo para desplazar o arrastrar para compartir",
+            ["Status_PenActive"] = "Herramienta bolígrafo activa",
+            ["Status_HighlighterActive"] = "Herramienta resaltador activa",
+            ["Status_CropActive"] = "Modo recorte activo: Seleccione el área para recortar",
+            ["Status_BlurActive"] = "Difuminado de privacidad activo: Seleccione el área para ocultar",
+            ["Status_CropCommitted"] = "Imagen recortada con éxito",
+            ["Status_BlurCommitted"] = "Datos confidenciales ocultados con éxito",
+            ["Status_AllCleared"] = "Todas las anotaciones borradas",
+            ["Status_Dragging"] = "Arrastrando imagen para compartir..."
         },
         ["hi"] = new Dictionary<string, string>
         {
@@ -587,6 +645,7 @@ public class LocalizationService : ILocalizationService
     {
         _eventBus = Guard.AgainstNull(eventBus, nameof(eventBus));
         _preferenceRepository = preferenceRepository;
+        _currentLanguageCode = "ar";
     }
 
     public string GetString(string key)

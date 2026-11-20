@@ -20,8 +20,22 @@ public class ShellTabModel : ObservableObject
     private bool _isCropping;
     private bool _isBlurring;
     private double _zoomFactor = 1.0;
+    private string _sharePillText = "Drag to share into WhatsApp / Telegram / Explorer";
+    private string _sharePillToolTip = "Click and drag to drop directly into WhatsApp, Telegram, Explorer, etc.";
 
     public Guid Id { get; } = Guid.NewGuid();
+
+    public string SharePillText
+    {
+        get => _sharePillText;
+        set => SetProperty(ref _sharePillText, value);
+    }
+
+    public string SharePillToolTip
+    {
+        get => _sharePillToolTip;
+        set => SetProperty(ref _sharePillToolTip, value);
+    }
 
     public string Title
     {

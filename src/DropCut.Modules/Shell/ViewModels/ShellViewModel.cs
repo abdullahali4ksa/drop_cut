@@ -151,7 +151,9 @@ public partial class ShellViewModel : ObservableObject
         {
             Title = _localizationService.GetString("Tab_NewSnippet", _tabCounter),
             Workspace = workspaceVm,
-            AutoSaveStatus = _localizationService.GetString("Status_Ready")
+            AutoSaveStatus = _localizationService.GetString("Status_Ready"),
+            SharePillText = _localizationService.GetString("Action_DragDropPill"),
+            SharePillToolTip = _localizationService.GetString("Action_DragDropPillToolTip")
         };
 
         RunOnUi(() =>
@@ -351,12 +353,16 @@ public partial class ShellViewModel : ObservableObject
 
     private void UpdateTabTitles()
     {
+        var pillText = _localizationService.GetString("Action_DragDropPill");
+        var pillToolTip = _localizationService.GetString("Action_DragDropPillToolTip");
         for (int i = 0; i < Tabs.Count; i++)
         {
             if (Tabs[i].Title.StartsWith("Snip") || Tabs[i].Title.StartsWith("لقطة") || Tabs[i].Title.StartsWith("Captura"))
             {
                 Tabs[i].Title = _localizationService.GetString("Tab_NewSnippet", i + 1);
             }
+            Tabs[i].SharePillText = pillText;
+            Tabs[i].SharePillToolTip = pillToolTip;
         }
     }
 }

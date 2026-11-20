@@ -45,22 +45,22 @@
                         <FontIcon Glyph="&#xE710;" FontSize="15" />
                         <SplitButton.Flyout>
                             <MenuFlyout>
-                                <MenuFlyoutItem x:Name="MenuModeRect" Text="مستطيل" Click="ModeRectangle_Click">
+                                <MenuFlyoutItem x:Name="MenuModeRect" Text="Rectangle" Click="ModeRectangle_Click">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xE8B9;" />
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
-                                <MenuFlyoutItem x:Name="MenuModeWin" Text="النافذة" Click="ModeWindow_Click">
+                                <MenuFlyoutItem x:Name="MenuModeWin" Text="Window" Click="ModeWindow_Click">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xE7C3;" />
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
-                                <MenuFlyoutItem x:Name="MenuModeFull" Text="ملء الشاشة" Click="ModeFullscreen_Click">
+                                <MenuFlyoutItem x:Name="MenuModeFull" Text="Fullscreen" Click="ModeFullscreen_Click">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xE740;" />
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
-                                <MenuFlyoutItem x:Name="MenuModeFree" Text="شكل حر" Click="ModeFreeform_Click">
+                                <MenuFlyoutItem x:Name="MenuModeFree" Text="Freeform" Click="ModeFreeform_Click">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xE8C0;" />
                                     </MenuFlyoutItem.Icon>
@@ -74,10 +74,10 @@
                         <FontIcon Glyph="&#xE823;" FontSize="14" />
                         <DropDownButton.Flyout>
                             <MenuFlyout>
-                                <MenuFlyoutItem x:Name="MenuDelayNone" Text="بدون تأخير (فوري)" Click="DelayNone_Click" />
-                                <MenuFlyoutItem x:Name="MenuDelay3s" Text="قص بعد 3 ثوانٍ" Click="Delay3s_Click" />
-                                <MenuFlyoutItem x:Name="MenuDelay5s" Text="قص بعد 5 ثوانٍ" Click="Delay5s_Click" />
-                                <MenuFlyoutItem x:Name="MenuDelay10s" Text="قص بعد 10 ثوانٍ" Click="Delay10s_Click" />
+                                <MenuFlyoutItem x:Name="MenuDelayNone" Text="No delay (Instant)" Click="DelayNone_Click" />
+                                <MenuFlyoutItem x:Name="MenuDelay3s" Text="Snip in 3 seconds" Click="Delay3s_Click" />
+                                <MenuFlyoutItem x:Name="MenuDelay5s" Text="Snip in 5 seconds" Click="Delay5s_Click" />
+                                <MenuFlyoutItem x:Name="MenuDelay10s" Text="Snip in 10 seconds" Click="Delay10s_Click" />
                             </MenuFlyout>
                         </DropDownButton.Flyout>
                     </DropDownButton>
@@ -107,41 +107,41 @@
                         </StackPanel>
                         <SplitButton.Flyout>
                             <MenuFlyout>
-                                <MenuFlyoutItem Text="أحمر (Red)" Click="PenColor_Click" Tag="#FF0000">
+                                <MenuFlyoutItem Text="Red" Click="PenColor_Click" Tag="#FF0000">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xF127;" Foreground="#FF0000" />
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
-                                <MenuFlyoutItem Text="أزرق (Blue)" Click="PenColor_Click" Tag="#0078D7">
+                                <MenuFlyoutItem Text="Blue" Click="PenColor_Click" Tag="#0078D7">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xF127;" Foreground="#0078D7" />
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
-                                <MenuFlyoutItem Text="أسود (Black)" Click="PenColor_Click" Tag="#000000">
+                                <MenuFlyoutItem Text="Black" Click="PenColor_Click" Tag="#000000">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xF127;" Foreground="#000000" />
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
-                                <MenuFlyoutItem Text="أخضر (Green)" Click="PenColor_Click" Tag="#107C41">
+                                <MenuFlyoutItem Text="Green" Click="PenColor_Click" Tag="#107C41">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xF127;" Foreground="#107C41" />
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
-                                <MenuFlyoutItem Text="أصفر (Yellow)" Click="PenColor_Click" Tag="#FFD700">
+                                <MenuFlyoutItem Text="Yellow" Click="PenColor_Click" Tag="#FFD700">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xF127;" Foreground="#FFD700" />
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
-                                <MenuFlyoutItem Text="أبيض (White)" Click="PenColor_Click" Tag="#FFFFFF">
+                                <MenuFlyoutItem Text="White" Click="PenColor_Click" Tag="#FFFFFF">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xF127;" Foreground="#FFFFFF" />
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
                                 <MenuFlyoutSeparator />
-                                <MenuFlyoutItem Text="سُمك القلم: دقيق (2px)" Click="PenSize_Click" Tag="2" />
-                                <MenuFlyoutItem Text="سُمك القلم: عادي (4px)" Click="PenSize_Click" Tag="4" />
-                                <MenuFlyoutItem Text="سُمك القلم: عريض (8px)" Click="PenSize_Click" Tag="8" />
-                                <MenuFlyoutItem Text="سُمك القلم: عريض جداً (14px)" Click="PenSize_Click" Tag="14" />
+                                <MenuFlyoutItem Text="Fine (2px)" Click="PenSize_Click" Tag="2" />
+                                <MenuFlyoutItem Text="Medium (4px)" Click="PenSize_Click" Tag="4" />
+                                <MenuFlyoutItem Text="Bold (8px)" Click="PenSize_Click" Tag="8" />
+                                <MenuFlyoutItem Text="Extra Bold (14px)" Click="PenSize_Click" Tag="14" />
                             </MenuFlyout>
                         </SplitButton.Flyout>
                     </SplitButton>
@@ -154,41 +154,41 @@
                         </StackPanel>
                         <SplitButton.Flyout>
                             <MenuFlyout>
-                                <MenuFlyoutItem Text="أصفر فوسفوري (Fluorescent Yellow)" Click="HighlighterColor_Click" Tag="#FFFF00">
+                                <MenuFlyoutItem Text="Neon Yellow" Click="HighlighterColor_Click" Tag="#FFFF00">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xF127;" Foreground="#FFFF00" />
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
-                                <MenuFlyoutItem Text="أخضر نيون (Neon Green)" Click="HighlighterColor_Click" Tag="#00FF66">
+                                <MenuFlyoutItem Text="Neon Green" Click="HighlighterColor_Click" Tag="#00FF66">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xF127;" Foreground="#00FF66" />
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
-                                <MenuFlyoutItem Text="سماوي فاتح (Sky Blue)" Click="HighlighterColor_Click" Tag="#00D2FF">
+                                <MenuFlyoutItem Text="Sky Blue" Click="HighlighterColor_Click" Tag="#00D2FF">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xF127;" Foreground="#00D2FF" />
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
-                                <MenuFlyoutItem Text="وردي فاقع (Bright Pink)" Click="HighlighterColor_Click" Tag="#FF3399">
+                                <MenuFlyoutItem Text="Bright Pink" Click="HighlighterColor_Click" Tag="#FF3399">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xF127;" Foreground="#FF3399" />
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
-                                <MenuFlyoutItem Text="برتقالي مشرق (Bright Orange)" Click="HighlighterColor_Click" Tag="#FF9900">
+                                <MenuFlyoutItem Text="Bright Orange" Click="HighlighterColor_Click" Tag="#FF9900">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xF127;" Foreground="#FF9900" />
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
-                                <MenuFlyoutItem Text="بنفسجي فاتح (Lavender)" Click="HighlighterColor_Click" Tag="#CC66FF">
+                                <MenuFlyoutItem Text="Lavender" Click="HighlighterColor_Click" Tag="#CC66FF">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xF127;" Foreground="#CC66FF" />
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
                                 <MenuFlyoutSeparator />
-                                <MenuFlyoutItem Text="سُمك التمييز: رفيع (12px)" Click="HighlighterSize_Click" Tag="12" />
-                                <MenuFlyoutItem Text="سُمك التمييز: متوسط (20px)" Click="HighlighterSize_Click" Tag="20" />
-                                <MenuFlyoutItem Text="سُمك التمييز: عريض (32px)" Click="HighlighterSize_Click" Tag="32" />
-                                <MenuFlyoutItem Text="سُمك التمييز: عريض جداً (48px)" Click="HighlighterSize_Click" Tag="48" />
+                                <MenuFlyoutItem Text="Fine (12px)" Click="HighlighterSize_Click" Tag="12" />
+                                <MenuFlyoutItem Text="Medium (20px)" Click="HighlighterSize_Click" Tag="20" />
+                                <MenuFlyoutItem Text="Wide (32px)" Click="HighlighterSize_Click" Tag="32" />
+                                <MenuFlyoutItem Text="Extra Wide (48px)" Click="HighlighterSize_Click" Tag="48" />
                             </MenuFlyout>
                         </SplitButton.Flyout>
                     </SplitButton>
@@ -251,10 +251,10 @@
                         <FontIcon Glyph="&#xE712;" FontSize="14" />
                         <Button.Flyout>
                             <MenuFlyout>
-                                <MenuFlyoutItem x:Name="MenuSettings" Text="الإعدادات" Click="MenuSettings_Click" />
-                                <MenuFlyoutItem x:Name="MenuOpenVault" Text="فتح مجلد اللقطات" Click="MenuOpenVault_Click" />
+                                <MenuFlyoutItem x:Name="MenuSettings" Text="Settings" Click="MenuSettings_Click" />
+                                <MenuFlyoutItem x:Name="MenuOpenVault" Text="Vault Gallery" Click="MenuOpenVault_Click" />
                                 <MenuFlyoutSeparator />
-                                <MenuFlyoutItem x:Name="MenuAbout" Text="حول البرنامج" Click="MenuAbout_Click" />
+                                <MenuFlyoutItem x:Name="MenuAbout" Text="About DropCut" Click="MenuAbout_Click" />
                             </MenuFlyout>
                         </Button.Flyout>
                     </Button>
@@ -290,31 +290,31 @@
                         <!-- Right-Click / Touch Long-Press Context Menu -->
                         <TabViewItem.ContextFlyout>
                             <MenuFlyout>
-                                <MenuFlyoutItem Text="Pin Tab / تثبيت اللسان"
+                                <MenuFlyoutItem Text="Pin Tab"
                                                 Click="ContextPin_Click">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xE718;" />
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
-                                <MenuFlyoutItem Text="Add to Favorites / إضافة للمفضلة"
+                                <MenuFlyoutItem Text="Add to Favorites"
                                                 Click="ContextFavorite_Click">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xE734;" />
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
                                 <MenuFlyoutSeparator />
-                                <MenuFlyoutItem Text="Close / إغلاق (Ctrl+W)"
+                                <MenuFlyoutItem Text="Close (Ctrl+W)"
                                                 Click="ContextClose_Click">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xE711;" />
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
-                                <MenuFlyoutItem Text="Close to the Right / إغلاق جهة اليمين"
+                                <MenuFlyoutItem Text="Close to the Right"
                                                 Click="ContextCloseRight_Click" />
-                                <MenuFlyoutItem Text="Close Others / إغلاق النوافذ الأخرى"
+                                <MenuFlyoutItem Text="Close Others"
                                                 Click="ContextCloseOthers_Click" />
                                 <MenuFlyoutSeparator />
-                                <MenuFlyoutItem Text="Close All / إغلاق الكل"
+                                <MenuFlyoutItem Text="Close All"
                                                 Click="ContextCloseAll_Click" />
                             </MenuFlyout>
                         </TabViewItem.ContextFlyout>
@@ -338,28 +338,28 @@
                                         <Grid CanDrag="{Binding IsHandMode}" DragStarting="ImageContainer_DragStarting" FlowDirection="LeftToRight">
                                             <Grid.ContextFlyout>
                                                 <MenuFlyout>
-                                                    <MenuFlyoutItem Text="نسخ الصورة (Copy)" Click="MenuCopy_Click">
+                                                    <MenuFlyoutItem Text="Copy Image (Ctrl+C)" Click="MenuCopy_Click">
                                                         <MenuFlyoutItem.Icon>
                                                             <FontIcon Glyph="&#xE8C8;" />
                                                         </MenuFlyoutItem.Icon>
                                                     </MenuFlyoutItem>
-                                                    <MenuFlyoutItem Text="حفظ باسم... (Save As)" Click="MenuSave_Click">
+                                                    <MenuFlyoutItem Text="Save As... (Ctrl+S)" Click="MenuSave_Click">
                                                         <MenuFlyoutItem.Icon>
                                                             <FontIcon Glyph="&#xE74E;" />
                                                         </MenuFlyoutItem.Icon>
                                                     </MenuFlyoutItem>
-                                                    <MenuFlyoutItem Text="مشاركة اللقطة" Click="ActionShare_Click">
+                                                    <MenuFlyoutItem Text="Share Snippet" Click="ActionShare_Click">
                                                         <MenuFlyoutItem.Icon>
                                                             <FontIcon Glyph="&#xE72D;" />
                                                         </MenuFlyoutItem.Icon>
                                                     </MenuFlyoutItem>
                                                     <MenuFlyoutSeparator />
-                                                    <MenuFlyoutItem Text="مسح كافة الرسومات" Click="ToolEraser_Click">
+                                                    <MenuFlyoutItem Text="Clear All Annotations" Click="ToolEraser_Click">
                                                         <MenuFlyoutItem.Icon>
                                                             <FontIcon Glyph="&#xE75C;" />
                                                         </MenuFlyoutItem.Icon>
                                                     </MenuFlyoutItem>
-                                                    <MenuFlyoutItem Text="الرجوع لوضع اليد 🖐️ (سحب وإفلات)" Click="BtnRevertToHand_Click">
+                                                    <MenuFlyoutItem Text="Back to Hand Mode 🖐️" Click="BtnRevertToHand_Click">
                                                         <MenuFlyoutItem.Icon>
                                                             <FontIcon Glyph="&#xE768;" />
                                                         </MenuFlyoutItem.Icon>
@@ -387,14 +387,14 @@
                                                     DragStarting="ImageContainer_DragStarting">
                                                 <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                                                     <FontIcon Glyph="&#xE72D;" FontSize="13" Foreground="{ThemeResource AppAccentBrush}" />
-                                                    <TextBlock Text="اسحبها وشاركها إلينا (WhatsApp / Telegram / Explorer)"
+                                                    <TextBlock Text="{x:Bind SharePillText, Mode=OneWay}"
                                                                FontSize="11"
                                                                Foreground="White"
                                                                FontWeight="SemiBold"
                                                                VerticalAlignment="Center" />
                                                 </StackPanel>
                                                 <ToolTipService.ToolTip>
-                                                    <ToolTip Content="اضغط واسحب هذا الزر وأفلته مباشرة داخل أي تطبيق (واتساب، تيليجرام، مستكشف الملفات، إلخ)" />
+                                                    <ToolTip Content="{x:Bind SharePillToolTip, Mode=OneWay}" />
                                                 </ToolTipService.ToolTip>
                                             </Border>
 
@@ -551,7 +551,7 @@
             <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
                 <FontIcon x:Name="IconModeGuidance" Glyph="&#xED63;" FontSize="14" Foreground="#FFD700" />
                 <TextBlock x:Name="TxtModeGuidance"
-                           Text="وضع التحرير نشط — تم قفل وضع السحب مؤقتاً لحماية الرسم ✏️"
+                           Text="Editing Mode Active — Dragging locked temporarily to protect drawing ✏️"
                            FontSize="12"
                            FontWeight="SemiBold"
                            Foreground="White"
@@ -566,14 +566,14 @@
                         BorderThickness="1">
                     <StackPanel Orientation="Horizontal" Spacing="4">
                         <FontIcon Glyph="&#xE73E;" FontSize="11" Foreground="White" />
-                        <TextBlock x:Name="TxtCommitSave" Text="حفظ وإنهاء (✓)" FontSize="11" FontWeight="SemiBold" Foreground="White" />
+                        <TextBlock x:Name="TxtCommitSave" Text="Commit &amp; Save (✓)" FontSize="11" FontWeight="SemiBold" Foreground="White" />
                     </StackPanel>
                 </Button>
                 <Button Click="BtnRevertToHand_Click"
                         Padding="8,4"
                         Height="28"
                         CornerRadius="14">
-                    <TextBlock x:Name="TxtRevertHand" Text="إلغاء (Esc)" FontSize="11" />
+                    <TextBlock x:Name="TxtRevertHand" Text="Cancel (Esc)" FontSize="11" />
                 </Button>
             </StackPanel>
         </Border>
@@ -596,27 +596,18 @@
 
                 <!-- Interactive Zoom Controls (+ / - / Reset) -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="4" Margin="16,0" VerticalAlignment="Center">
-                    <Button Click="BtnZoomOut_Click" Width="28" Height="28" Padding="0">
+                    <Button x:Name="BtnZoomOut" Click="BtnZoomOut_Click" Width="28" Height="28" Padding="0">
                         <FontIcon Glyph="&#xE738;" FontSize="11" />
-                        <ToolTipService.ToolTip>
-                            <ToolTip Content="تصغير (Ctrl + -)" />
-                        </ToolTipService.ToolTip>
                     </Button>
-                    <Button Click="BtnZoomReset_Click" Height="28" Padding="8,0">
+                    <Button x:Name="BtnZoomReset" Click="BtnZoomReset_Click" Height="28" Padding="8,0">
                         <TextBlock Text="{x:Bind ViewModel.SelectedTab.ZoomPercentageText, Mode=OneWay}" FontSize="11" FontWeight="SemiBold" />
-                        <ToolTipService.ToolTip>
-                            <ToolTip Content="الحجم الأصلي 100% (Ctrl + 0)" />
-                        </ToolTipService.ToolTip>
                     </Button>
-                    <Button Click="BtnZoomIn_Click" Width="28" Height="28" Padding="0">
+                    <Button x:Name="BtnZoomIn" Click="BtnZoomIn_Click" Width="28" Height="28" Padding="0">
                         <FontIcon Glyph="&#xE710;" FontSize="11" />
-                        <ToolTipService.ToolTip>
-                            <ToolTip Content="تكبير (Ctrl + +)" />
-                        </ToolTipService.ToolTip>
                     </Button>
                 </StackPanel>
 
-                <TextBlock Grid.Column="2" Text="DropCut • Windows Snipping Engine (Ctrl+B+B)"
+                <TextBlock x:Name="TxtStatusBarEngine" Grid.Column="2" Text="DropCut • Windows Snipping Engine (Ctrl+B+B)"
                            FontSize="12" Foreground="{ThemeResource AppSecondaryTextBrush}" />
             </Grid>
         </Border>
