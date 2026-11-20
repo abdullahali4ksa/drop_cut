@@ -303,7 +303,7 @@
                                                     DragStarting="ImageContainer_DragStarting">
                                                 <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
                                                     <FontIcon Glyph="&#xE72D;" FontSize="13" Foreground="{ThemeResource AppAccentBrush}" />
-                                                    <TextBlock Text="اسحب الصورة من هنا إلى WhatsApp / Telegram / Explorer"
+                                                    <TextBlock Text="اسحبها وشاركها إلينا (WhatsApp / Telegram / Explorer)"
                                                                FontSize="11"
                                                                Foreground="White"
                                                                FontWeight="SemiBold"

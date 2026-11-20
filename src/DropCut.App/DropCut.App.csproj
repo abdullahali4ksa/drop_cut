@@ -19,7 +19,14 @@
     <Authors>abdullah ali, birotech</Authors>
     <Copyright>Copyright © 2026 birotech. All rights reserved.</Copyright>
     <Product>DropCut</Product>
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Content Include="Assets\**">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
 
   <ItemGroup>
     <Manifest Include="$(ApplicationManifest)" />

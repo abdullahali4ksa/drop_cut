@@ -9,6 +9,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Media.Imaging;
 using Microsoft.UI.Xaml.Shapes;
 using Windows.ApplicationModel.DataTransfer;
 using Windows.Foundation;
@@ -55,6 +56,17 @@ public sealed partial class MainWindow : Window
         _ocrService = ocrService;
 
         InitializeComponent();
+
+        // Configure window icon
+        try
+        {
+            var iconPath = System.IO.Path.Combine(AppContext.BaseDirectory, "Assets", "app.ico");
+            if (System.IO.File.Exists(iconPath))
+            {
+                this.AppWindow.SetIcon(iconPath);
+            }
+        }
+        catch { }
 
         // Listen for global background shortcuts (PrintScreen, Ctrl+Shift+S, Ctrl+B+B)
         _hotkeyService.HotkeyPressed += OnGlobalHotkeyPressed;
@@ -256,10 +268,48 @@ public sealed partial class MainWindow : Window
 
             // 3. Text fallback
             data.SetText(filePath);
+
+            // 4. Set rich drag metadata and thumbnail on DataPackage
+            data.Properties.Title = "اسحبها وشاركها إلينا (WhatsApp / Telegram / Explorer)";
+            data.Properties.Description = "اسحب وأفلت داخل أي محادثة أو مجلد للمشاركة الفورية";
+            data.Properties.Thumbnail = RandomAccessStreamReference.CreateFromStream(stream);
         }
         catch (Exception)
         {
             // Protected Zero-Crash boundary
+        }
+    }
+
+    private void ConfigureCompactDragUI(DragUI dragUI, ShellTabModel? tab)
+    {
+        if (tab?.ImageBytes is not { Length: > 0 } bytes)
+        {
+            return;
+        }
+
+        try
+        {
+            var stream = new InMemoryRandomAccessStream();
+            using (var writer = new DataWriter(stream.GetOutputStreamAt(0)))
+            {
+                writer.WriteBytes(bytes);
+                writer.StoreAsync().AsTask().GetAwaiter().GetResult();
+                writer.DetachStream();
+            }
+            stream.Seek(0);
+
+            var thumb = new BitmapImage
+            {
+                DecodePixelWidth = 140,
+                DecodePixelHeight = 140
+            };
+            thumb.SetSource(stream);
+
+            dragUI.SetContentFromBitmapImage(thumb, new Windows.Foundation.Point(70, 70));
+        }
+        catch (Exception)
+        {
+            // Zero-Crash Mandate
         }
     }
 
@@ -289,6 +339,7 @@ public sealed partial class MainWindow : Window
         {
             var tab = (sender as FrameworkElement)?.DataContext as ShellTabModel ?? ViewModel.SelectedTab;
             PrepareDataPackageForDragSync(tab, args.Data);
+            ConfigureCompactDragUI(args.DragUI, tab);
             NotifyToolChange("جارٍ سحب الصورة ومشاركتها...");
         }
         catch (Exception) { }
@@ -305,7 +356,8 @@ public sealed partial class MainWindow : Window
         {
             var tab = ViewModel.SelectedTab;
             PrepareDataPackageForDragSync(tab, args.Data);
-            NotifyToolChange("جارٍ سحب الصورة ومشاركتها...");
+            ConfigureCompactDragUI(args.DragUI, tab);
+            NotifyToolChange("جارٍ سحب ومشاركة الصورة بشكل مصغر...");
         }
         catch (Exception) { }
         finally
@@ -321,6 +373,7 @@ public sealed partial class MainWindow : Window
         {
             var tab = ViewModel.SelectedTab;
             PrepareDataPackageForDragSync(tab, args.Data);
+            ConfigureCompactDragUI(args.DragUI, tab);
             NotifyToolChange("جارٍ سحب ومشاركة اللقطة إلى تطبيق خارجي...");
         }
         catch (Exception) { }

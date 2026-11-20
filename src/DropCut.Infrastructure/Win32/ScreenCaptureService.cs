@@ -154,6 +154,13 @@ public class ScreenCaptureService : IScreenCaptureService
             var pixelBytes = new byte[width * height * 4];
             GetDIBits(memDc, bitmap, 0, (uint)height, pixelBytes, ref bmi, DIB_RGB_COLORS);
 
+            // GDI BitBlt does not populate the Alpha channel in 32-bit DIBs.
+            // Force Alpha = 255 (0xFF) on all pixels to ensure 100% solid opacity without any transparency.
+            for (int i = 3; i < pixelBytes.Length; i += 4)
+            {
+                pixelBytes[i] = 255;
+            }
+
             // Construct valid standard 32-bit BMP byte stream
             var bmpBytes = WrapInBmpContainer(pixelBytes, width, height);
             return Task.FromResult(bmpBytes);
@@ -209,6 +216,12 @@ public class ScreenCaptureService : IScreenCaptureService
                 {
                     Array.Copy(sourceBmpBytes, srcRowOffset, croppedPixels, dstRowOffset, safeWidth * 4);
                 }
+            }
+
+            // Ensure 100% solid opacity on all cropped pixels
+            for (int i = 3; i < croppedPixels.Length; i += 4)
+            {
+                croppedPixels[i] = 255;
             }
 
             return WrapInBmpContainer(croppedPixels, safeWidth, safeHeight);
