@@ -48,6 +48,7 @@ public partial class SettingsViewModel : ObservableObject
         "System",
         "Light",
         "Dark",
+        "Gray",
         "MicaAlt"
     };
 

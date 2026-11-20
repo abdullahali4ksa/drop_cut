@@ -75,7 +75,38 @@ public class LocalizationService : ILocalizationService
             ["Settings_Hotkey"] = "اختصار القص الفوري",
             ["Settings_SaveButton"] = "حفظ الإعدادات",
             ["Settings_ResetButton"] = "استعادة الافتراضيات",
-            ["Settings_SavedSuccess"] = "تم حفظ الإعدادات بنجاح"
+            ["Settings_SavedSuccess"] = "تم حفظ الإعدادات بنجاح",
+            ["Settings_Theme_Gray"] = "رمادي محايد (Slate Gray)",
+            ["Tool_Blur"] = "طمس البيانات",
+            ["Tool_Text"] = "استخراج النصوص",
+            ["Tool_Hand_Tip"] = "يد التصفح والسحب للمشاركة (Hand Tool)",
+            ["Tool_Pen_Tip"] = "قلم الرسم الحر - انقر للرسم أو افتح القائمة للألوان والحجم",
+            ["Tool_Highlighter_Tip"] = "قلم التمييز الشفاف - انقر للتمييز أو افتح القائمة للألوان والحجم",
+            ["Tool_Eraser_Tip"] = "ممحاة الرسومات (Eraser)",
+            ["Tool_Blur_Tip"] = "طمس وتمويه البيانات الحساسة (Privacy Blur)",
+            ["Tool_Ruler_Tip"] = "مسطرة القياس بالبكسل",
+            ["Tool_Text_Tip"] = "استخراج وقراءة النصوص الذكية (OCR)",
+            ["Tool_Crop_Tip"] = "اقتصاص الصورة الحالية",
+            ["Action_NewSnip_Tip"] = "قص لقطة جديدة (Ctrl+N أو PrintScreen أو Ctrl+B+B)",
+            ["Action_Delay_Tip"] = "مؤقت تأخير القص لالتقاط القوائم المنسدلة",
+            ["Action_SnipMode_Tip"] = "وضع التقاط الشاشة",
+            ["Action_Undo_Tip"] = "تراجع (Ctrl+Z)",
+            ["Action_Redo_Tip"] = "إعادة (Ctrl+Y)",
+            ["Action_Save_Tip"] = "حفظ اللقطة (Ctrl+S)",
+            ["Action_Copy_Tip"] = "نسخ الصورة للحافظة (Ctrl+C)",
+            ["Action_Share_Tip"] = "مشاركة اللقطة وسحبها للتطبيقات",
+            ["Action_Settings_Tip"] = "المزيد من الخيارات والإعدادات",
+            ["Action_CommitSave"] = "✓ حفظ وإنهاء (✓)",
+            ["Action_RevertHand"] = "رجوع لوضع اليد 🖐️",
+            ["Action_DragDropPill"] = "اسحبها وشاركها إلينا (WhatsApp / Telegram / Explorer)",
+            ["Mode_Rect"] = "مستطيل",
+            ["Mode_Win"] = "النافذة",
+            ["Mode_Full"] = "ملء الشاشة",
+            ["Mode_Free"] = "شكل حر",
+            ["Delay_None"] = "بدون تأخير (فوري)",
+            ["Delay_3s"] = "قص بعد 3 ثوانٍ",
+            ["Delay_5s"] = "قص بعد 5 ثوانٍ",
+            ["Delay_10s"] = "قص بعد 10 ثوانٍ"
         },
         ["en"] = new Dictionary<string, string>
         {
@@ -120,7 +151,38 @@ public class LocalizationService : ILocalizationService
             ["Settings_Hotkey"] = "Instant Snipping Hotkey",
             ["Settings_SaveButton"] = "Save Settings",
             ["Settings_ResetButton"] = "Reset to Defaults",
-            ["Settings_SavedSuccess"] = "Settings saved successfully"
+            ["Settings_SavedSuccess"] = "Settings saved successfully",
+            ["Settings_Theme_Gray"] = "Neutral Slate Gray",
+            ["Tool_Blur"] = "Privacy Blur",
+            ["Tool_Text"] = "Extract Text (OCR)",
+            ["Tool_Hand_Tip"] = "Hand Drag & Drop Tool",
+            ["Tool_Pen_Tip"] = "Freehand Pen - Click to draw or open menu for colors & sizes",
+            ["Tool_Highlighter_Tip"] = "Translucent Highlighter - Click to highlight or open menu",
+            ["Tool_Eraser_Tip"] = "Eraser Tool",
+            ["Tool_Blur_Tip"] = "Privacy Blur & Redact Tool",
+            ["Tool_Ruler_Tip"] = "Pixel Ruler",
+            ["Tool_Text_Tip"] = "Smart OCR Text Extraction",
+            ["Tool_Crop_Tip"] = "Crop Current Image",
+            ["Action_NewSnip_Tip"] = "New Snip (Ctrl+N, PrintScreen, Ctrl+B+B)",
+            ["Action_Delay_Tip"] = "Snip Countdown Delay Timer",
+            ["Action_SnipMode_Tip"] = "Screen Capture Mode",
+            ["Action_Undo_Tip"] = "Undo (Ctrl+Z)",
+            ["Action_Redo_Tip"] = "Redo (Ctrl+Y)",
+            ["Action_Save_Tip"] = "Save Snippet (Ctrl+S)",
+            ["Action_Copy_Tip"] = "Copy Image to Clipboard (Ctrl+C)",
+            ["Action_Share_Tip"] = "Share & Drag Snippet to other apps",
+            ["Action_Settings_Tip"] = "Application Settings & Options",
+            ["Action_CommitSave"] = "✓ Save & Commit (✓)",
+            ["Action_RevertHand"] = "Back to Hand Mode 🖐️",
+            ["Action_DragDropPill"] = "Drag to share into WhatsApp / Telegram / Explorer",
+            ["Mode_Rect"] = "Rectangle",
+            ["Mode_Win"] = "Window",
+            ["Mode_Full"] = "Fullscreen",
+            ["Mode_Free"] = "Freeform",
+            ["Delay_None"] = "No delay (Instant)",
+            ["Delay_3s"] = "Snip in 3 seconds",
+            ["Delay_5s"] = "Snip in 5 seconds",
+            ["Delay_10s"] = "Snip in 10 seconds"
         },
         ["es"] = new Dictionary<string, string>
         {
@@ -165,7 +227,38 @@ public class LocalizationService : ILocalizationService
             ["Settings_Hotkey"] = "Atajo de captura rápida",
             ["Settings_SaveButton"] = "Guardar cambios",
             ["Settings_ResetButton"] = "Restablecer valores",
-            ["Settings_SavedSuccess"] = "Configuración guardada correctamente"
+            ["Settings_SavedSuccess"] = "Configuración guardada correctamente",
+            ["Settings_Theme_Gray"] = "Gris neutro (Slate Gray)",
+            ["Tool_Blur"] = "Desenfocar privacidad",
+            ["Tool_Text"] = "Extraer texto (OCR)",
+            ["Tool_Hand_Tip"] = "Herramienta Mano para arrastrar y compartir",
+            ["Tool_Pen_Tip"] = "Bolígrafo de dibujo libre",
+            ["Tool_Highlighter_Tip"] = "Resaltador translúcido",
+            ["Tool_Eraser_Tip"] = "Borrador de anotaciones",
+            ["Tool_Blur_Tip"] = "Desenfocar información confidencial",
+            ["Tool_Ruler_Tip"] = "Regla de medición en píxeles",
+            ["Tool_Text_Tip"] = "Extracción inteligente de texto (OCR)",
+            ["Tool_Crop_Tip"] = "Recortar imagen actual",
+            ["Action_NewSnip_Tip"] = "Nueva captura (Ctrl+N, PrintScreen)",
+            ["Action_Delay_Tip"] = "Temporizador de retardo de captura",
+            ["Action_SnipMode_Tip"] = "Modo de captura de pantalla",
+            ["Action_Undo_Tip"] = "Deshacer (Ctrl+Z)",
+            ["Action_Redo_Tip"] = "Rehacer (Ctrl+Y)",
+            ["Action_Save_Tip"] = "Guardar captura (Ctrl+S)",
+            ["Action_Copy_Tip"] = "Copiar imagen (Ctrl+C)",
+            ["Action_Share_Tip"] = "Compartir y arrastrar a otras aplicaciones",
+            ["Action_Settings_Tip"] = "Configuración y opciones",
+            ["Action_CommitSave"] = "✓ Guardar y finalizar (✓)",
+            ["Action_RevertHand"] = "Volver a modo Mano 🖐️",
+            ["Action_DragDropPill"] = "Arrastre para compartir en WhatsApp / Telegram / Explorador",
+            ["Mode_Rect"] = "Rectángulo",
+            ["Mode_Win"] = "Ventana",
+            ["Mode_Full"] = "Pantalla completa",
+            ["Mode_Free"] = "Forma libre",
+            ["Delay_None"] = "Sin retardo (Inmediato)",
+            ["Delay_3s"] = "Capturar en 3 segundos",
+            ["Delay_5s"] = "Capturar en 5 segundos",
+            ["Delay_10s"] = "Capturar en 10 segundos"
         },
         ["hi"] = new Dictionary<string, string>
         {
@@ -508,7 +601,13 @@ public class LocalizationService : ILocalizationService
             return value;
         }
 
-        // Fallback to Arabic (the master default)
+        // Fallback to English (the canonical base)
+        if (_dictionaries.TryGetValue("en", out var enDict) && enDict.TryGetValue(key, out var enVal))
+        {
+            return enVal;
+        }
+
+        // Fallback to Arabic
         if (_dictionaries.TryGetValue("ar", out var arDict) && arDict.TryGetValue(key, out var arVal))
         {
             return arVal;

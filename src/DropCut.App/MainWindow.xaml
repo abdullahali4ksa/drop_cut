@@ -14,7 +14,8 @@
         <MicaBackdrop />
     </Window.SystemBackdrop>
 
-    <Grid Background="{ThemeResource AppBackgroundBrush}"
+    <Grid x:Name="RootAppGrid"
+          Background="{ThemeResource AppBackgroundBrush}"
           FlowDirection="{x:Bind GetFlowDirection(ViewModel.IsRtl), Mode=OneWay}"
           KeyDown="Grid_KeyDown">
         <Grid.RowDefinitions>
@@ -37,89 +38,72 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Section 1: Capture Mode, Delay & New Snip -->
+                <!-- Section 1: Capture Mode, Delay & New Snip (Pure Clean Icons Law) -->
                 <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                    <!-- New Snip SplitButton with Mode Dropdown -->
-                    <SplitButton Click="NewSnip_Click">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
-                            <FontIcon Glyph="&#xE710;" FontSize="14" />
-                            <TextBlock Text="جديد" FontWeight="SemiBold" VerticalAlignment="Center" />
-                        </StackPanel>
+                    <!-- New Snip SplitButton with Mode Dropdown (Pure Icon +) -->
+                    <SplitButton x:Name="BtnNewSnip" Height="36" Padding="10,0" Click="NewSnip_Click">
+                        <FontIcon Glyph="&#xE710;" FontSize="15" />
                         <SplitButton.Flyout>
                             <MenuFlyout>
-                                <MenuFlyoutItem Text="مستطيل" Click="ModeRectangle_Click">
+                                <MenuFlyoutItem x:Name="MenuModeRect" Text="مستطيل" Click="ModeRectangle_Click">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xE8B9;" />
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
-                                <MenuFlyoutItem Text="النافذة" Click="ModeWindow_Click">
+                                <MenuFlyoutItem x:Name="MenuModeWin" Text="النافذة" Click="ModeWindow_Click">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xE7C3;" />
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
-                                <MenuFlyoutItem Text="ملء الشاشة" Click="ModeFullscreen_Click">
+                                <MenuFlyoutItem x:Name="MenuModeFull" Text="ملء الشاشة" Click="ModeFullscreen_Click">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xE740;" />
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
-                                <MenuFlyoutItem Text="شكل حر" Click="ModeFreeform_Click">
+                                <MenuFlyoutItem x:Name="MenuModeFree" Text="شكل حر" Click="ModeFreeform_Click">
                                     <MenuFlyoutItem.Icon>
                                         <FontIcon Glyph="&#xE8C0;" />
                                     </MenuFlyoutItem.Icon>
                                 </MenuFlyoutItem>
                             </MenuFlyout>
                         </SplitButton.Flyout>
-                        <ToolTipService.ToolTip>
-                            <ToolTip Content="قص لقطة جديدة (Ctrl+N أو PrintScreen أو Ctrl+B+B)" />
-                        </ToolTipService.ToolTip>
                     </SplitButton>
 
-                    <!-- Snip Countdown Delay DropDownButton -->
-                    <DropDownButton Height="36" Padding="6,0">
-                        <StackPanel Orientation="Horizontal" Spacing="4">
-                            <FontIcon Glyph="&#xE823;" FontSize="13" />
-                            <TextBlock x:Name="TxtDelayIndicator" Text="بدون تأخير" FontSize="11" VerticalAlignment="Center" />
-                        </StackPanel>
+                    <!-- Snip Countdown Delay DropDownButton (Pure Icon Clock) -->
+                    <DropDownButton x:Name="BtnDelayTool" Height="36" Padding="10,0">
+                        <FontIcon Glyph="&#xE823;" FontSize="14" />
                         <DropDownButton.Flyout>
                             <MenuFlyout>
-                                <MenuFlyoutItem Text="بدون تأخير (فوري)" Click="DelayNone_Click" />
-                                <MenuFlyoutItem Text="قص بعد 3 ثوانٍ" Click="Delay3s_Click" />
-                                <MenuFlyoutItem Text="قص بعد 5 ثوانٍ" Click="Delay5s_Click" />
-                                <MenuFlyoutItem Text="قص بعد 10 ثوانٍ" Click="Delay10s_Click" />
+                                <MenuFlyoutItem x:Name="MenuDelayNone" Text="بدون تأخير (فوري)" Click="DelayNone_Click" />
+                                <MenuFlyoutItem x:Name="MenuDelay3s" Text="قص بعد 3 ثوانٍ" Click="Delay3s_Click" />
+                                <MenuFlyoutItem x:Name="MenuDelay5s" Text="قص بعد 5 ثوانٍ" Click="Delay5s_Click" />
+                                <MenuFlyoutItem x:Name="MenuDelay10s" Text="قص بعد 10 ثوانٍ" Click="Delay10s_Click" />
                             </MenuFlyout>
                         </DropDownButton.Flyout>
-                        <ToolTipService.ToolTip>
-                            <ToolTip Content="مؤقت تأخير القص لالتقاط القوائم المنسدلة" />
-                        </ToolTipService.ToolTip>
                     </DropDownButton>
 
-                    <!-- Camera Mode Indicator -->
-                    <Border Background="{ThemeResource AppAccentBrush}"
+                    <!-- Camera Mode Indicator (Pure Camera Icon Badge) -->
+                    <Border x:Name="BadgeCameraMode"
+                            Background="{ThemeResource AppAccentBrush}"
                             CornerRadius="4"
-                            Padding="8,6"
+                            Padding="8,8"
                             VerticalAlignment="Center">
-                        <StackPanel Orientation="Horizontal" Spacing="4">
-                            <FontIcon Glyph="&#xE722;" FontSize="13" Foreground="White" />
-                            <TextBlock Text="لقطة" FontSize="11" Foreground="White" FontWeight="SemiBold" />
-                        </StackPanel>
+                        <FontIcon Glyph="&#xE722;" FontSize="14" Foreground="White" />
                     </Border>
                 </StackPanel>
 
-                <!-- Section 2: Drawing, Navigation & Editing Tools -->
+                <!-- Section 2: Drawing, Navigation & Editing Tools (100% Pure Icons with Color Badges) -->
                 <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="4">
                     <!-- Hand Tool: Navigation & Outward Drag Mode -->
                     <Button x:Name="BtnHandTool" Width="36" Height="36" Padding="0" Click="ToolHand_Click">
                         <FontIcon Glyph="&#xE768;" FontSize="15" />
-                        <ToolTipService.ToolTip>
-                            <ToolTip Content="يد التصفح والسحب للمشاركة (Hand Tool)" />
-                        </ToolTipService.ToolTip>
                     </Button>
 
-                    <!-- Pen Tool with Color & Size Flyout -->
+                    <!-- Pen Tool with Color & Size Flyout (Pure Pen Icon + Color Dot) -->
                     <SplitButton x:Name="BtnPenTool" Height="36" Padding="8,0" Click="ToolPen_Click">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
+                        <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
                             <FontIcon x:Name="IconPenGlyph" Glyph="&#xED63;" FontSize="14" Foreground="#FF0000" />
-                            <TextBlock Text="القلم" VerticalAlignment="Center" />
-                            <Border x:Name="IndicatorPenColor" Width="10" Height="10" CornerRadius="5" Background="#FF0000" BorderBrush="#88000000" BorderThickness="1" VerticalAlignment="Center" />
+                            <Border x:Name="IndicatorPenColor" Width="8" Height="8" CornerRadius="4" Background="#FF0000" BorderBrush="#88000000" BorderThickness="1" VerticalAlignment="Center" />
                         </StackPanel>
                         <SplitButton.Flyout>
                             <MenuFlyout>
@@ -160,17 +144,13 @@
                                 <MenuFlyoutItem Text="سُمك القلم: عريض جداً (14px)" Click="PenSize_Click" Tag="14" />
                             </MenuFlyout>
                         </SplitButton.Flyout>
-                        <ToolTipService.ToolTip>
-                            <ToolTip Content="قلم الرسم الحر - انقر للرسم أو افتح القائمة لتحديد اللون والحجم" />
-                        </ToolTipService.ToolTip>
                     </SplitButton>
 
-                    <!-- Highlighter Tool with Neon Colors & Size Flyout -->
+                    <!-- Highlighter Tool with Neon Colors & Size Flyout (Pure Highlighter Icon + Color Dot) -->
                     <SplitButton x:Name="BtnHighlighterTool" Height="36" Padding="8,0" Click="ToolHighlighter_Click">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
+                        <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
                             <FontIcon x:Name="IconHighlighterGlyph" Glyph="&#xE7E6;" FontSize="14" Foreground="#FFD700" />
-                            <TextBlock Text="التمييز" VerticalAlignment="Center" />
-                            <Border x:Name="IndicatorHighlighterColor" Width="10" Height="10" CornerRadius="5" Background="#FFFF00" BorderBrush="#88000000" BorderThickness="1" VerticalAlignment="Center" />
+                            <Border x:Name="IndicatorHighlighterColor" Width="8" Height="8" CornerRadius="4" Background="#FFFF00" BorderBrush="#88000000" BorderThickness="1" VerticalAlignment="Center" />
                         </StackPanel>
                         <SplitButton.Flyout>
                             <MenuFlyout>
@@ -211,108 +191,72 @@
                                 <MenuFlyoutItem Text="سُمك التمييز: عريض جداً (48px)" Click="HighlighterSize_Click" Tag="48" />
                             </MenuFlyout>
                         </SplitButton.Flyout>
-                        <ToolTipService.ToolTip>
-                            <ToolTip Content="قلم التمييز الشفاف (Highlighter) - انقر للتمييز أو افتح القائمة لتحديد اللون والحجم" />
-                        </ToolTipService.ToolTip>
                     </SplitButton>
 
                     <!-- Eraser Tool -->
                     <Button x:Name="BtnEraserTool" Width="36" Height="36" Padding="0" Click="ToolEraser_Click">
                         <FontIcon Glyph="&#xE75C;" FontSize="14" />
-                        <ToolTipService.ToolTip>
-                            <ToolTip Content="ممحاة التعديلات" />
-                        </ToolTipService.ToolTip>
                     </Button>
 
                     <!-- Privacy Redaction & Blur Tool -->
                     <Button x:Name="BtnBlurTool" Width="36" Height="36" Padding="0" Click="ToolBlur_Click">
                         <FontIcon Glyph="&#xE790;" FontSize="14" />
-                        <ToolTipService.ToolTip>
-                            <ToolTip Content="طمس وتمويه البيانات الحساسة (Privacy Blur)" />
-                        </ToolTipService.ToolTip>
                     </Button>
 
                     <!-- Ruler Tool -->
                     <Button x:Name="BtnRulerTool" Width="36" Height="36" Padding="0" Click="ToolRuler_Click">
                         <FontIcon Glyph="&#xED5E;" FontSize="14" />
-                        <ToolTipService.ToolTip>
-                            <ToolTip Content="مسطرة القياس بالبكسل" />
-                        </ToolTipService.ToolTip>
                     </Button>
 
                     <!-- Text Actions / OCR -->
                     <Button x:Name="BtnTextTool" Width="36" Height="36" Padding="0" Click="ToolText_Click">
                         <FontIcon Glyph="&#xE8D2;" FontSize="14" />
-                        <ToolTipService.ToolTip>
-                            <ToolTip Content="استخراج وقراءة النصوص الذكية (OCR)" />
-                        </ToolTipService.ToolTip>
                     </Button>
 
                     <!-- Crop Tool (Crops current open image) -->
                     <Button x:Name="BtnCropTool" Width="36" Height="36" Padding="0" Click="ToolCrop_Click">
                         <FontIcon Glyph="&#xE7A8;" FontSize="14" />
-                        <ToolTipService.ToolTip>
-                            <ToolTip Content="اقتصاص الصورة الحالية في اللسان" />
-                        </ToolTipService.ToolTip>
                     </Button>
                 </StackPanel>
 
-                <!-- Section 3: Actions & Sharing (Right Side) -->
+                <!-- Section 3: Actions & Sharing (Right Side, Pure Icons Law) -->
                 <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
-                    <Button Width="36" Height="36" Padding="0" Click="ActionUndo_Click">
+                    <Button x:Name="BtnUndo" Width="36" Height="36" Padding="0" Click="ActionUndo_Click">
                         <FontIcon Glyph="&#xE7A7;" FontSize="14" />
-                        <ToolTipService.ToolTip>
-                            <ToolTip Content="تراجع (Ctrl+Z)" />
-                        </ToolTipService.ToolTip>
                     </Button>
 
-                    <Button Width="36" Height="36" Padding="0" Click="ActionRedo_Click">
+                    <Button x:Name="BtnRedo" Width="36" Height="36" Padding="0" Click="ActionRedo_Click">
                         <FontIcon Glyph="&#xE7A6;" FontSize="14" />
-                        <ToolTipService.ToolTip>
-                            <ToolTip Content="إعادة (Ctrl+Y)" />
-                        </ToolTipService.ToolTip>
                     </Button>
 
                     <AppBarSeparator />
 
-                    <Button Width="36" Height="36" Padding="0" Click="ActionSave_Click">
+                    <Button x:Name="BtnSave" Width="36" Height="36" Padding="0" Click="ActionSave_Click">
                         <FontIcon Glyph="&#xE74E;" FontSize="14" />
-                        <ToolTipService.ToolTip>
-                            <ToolTip Content="حفظ اللقطة (Ctrl+S)" />
-                        </ToolTipService.ToolTip>
                     </Button>
 
-                    <Button Width="36" Height="36" Padding="0" Click="ActionCopy_Click">
+                    <Button x:Name="BtnCopy" Width="36" Height="36" Padding="0" Click="ActionCopy_Click">
                         <FontIcon Glyph="&#xE8C8;" FontSize="14" />
-                        <ToolTipService.ToolTip>
-                            <ToolTip Content="نسخ الصورة للحافظة (Ctrl+C)" />
-                        </ToolTipService.ToolTip>
                     </Button>
 
                     <!-- Drag & Share button: draggable directly into external apps -->
-                    <Button Width="36" Height="36" Padding="0"
+                    <Button x:Name="BtnShare" Width="36" Height="36" Padding="0"
                             Click="ActionShare_Click"
                             CanDrag="True"
                             DragStarting="ShareButton_DragStarting">
                         <FontIcon Glyph="&#xE72D;" FontSize="14" />
-                        <ToolTipService.ToolTip>
-                            <ToolTip Content="اسحبها وشاركها إلينا (WhatsApp / Telegram / Explorer)" />
-                        </ToolTipService.ToolTip>
                     </Button>
 
-                    <Button Width="36" Height="36" Padding="0">
+                    <Button x:Name="BtnMoreOptions" Width="36" Height="36" Padding="0">
                         <FontIcon Glyph="&#xE712;" FontSize="14" />
                         <Button.Flyout>
                             <MenuFlyout>
-                                <MenuFlyoutItem Text="الإعدادات" Click="MenuSettings_Click" />
-                                <MenuFlyoutItem Text="فتح مجلد اللقطات" Click="MenuOpenVault_Click" />
+                                <MenuFlyoutItem x:Name="MenuSettings" Text="الإعدادات" Click="MenuSettings_Click" />
+                                <MenuFlyoutItem x:Name="MenuOpenVault" Text="فتح مجلد اللقطات" Click="MenuOpenVault_Click" />
                                 <MenuFlyoutSeparator />
-                                <MenuFlyoutItem Text="حول البرنامج" Click="MenuAbout_Click" />
+                                <MenuFlyoutItem x:Name="MenuAbout" Text="حول البرنامج" Click="MenuAbout_Click" />
                             </MenuFlyout>
                         </Button.Flyout>
-                        <ToolTipService.ToolTip>
-                            <ToolTip Content="المزيد من الخيارات" />
-                        </ToolTipService.ToolTip>
                     </Button>
                 </StackPanel>
             </Grid>
@@ -622,14 +566,14 @@
                         BorderThickness="1">
                     <StackPanel Orientation="Horizontal" Spacing="4">
                         <FontIcon Glyph="&#xE73E;" FontSize="11" Foreground="White" />
-                        <TextBlock Text="حفظ وإنهاء (✓)" FontSize="11" FontWeight="SemiBold" Foreground="White" />
+                        <TextBlock x:Name="TxtCommitSave" Text="حفظ وإنهاء (✓)" FontSize="11" FontWeight="SemiBold" Foreground="White" />
                     </StackPanel>
                 </Button>
                 <Button Click="BtnRevertToHand_Click"
                         Padding="8,4"
                         Height="28"
                         CornerRadius="14">
-                    <TextBlock Text="إلغاء (Esc)" FontSize="11" />
+                    <TextBlock x:Name="TxtRevertHand" Text="إلغاء (Esc)" FontSize="11" />
                 </Button>
             </StackPanel>
         </Border>

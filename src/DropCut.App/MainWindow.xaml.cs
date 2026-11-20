@@ -2,6 +2,7 @@ using System.Diagnostics;
 using System.IO;
 using DropCut.Core.Contracts;
 using DropCut.Core.Domain;
+using DropCut.Core.Events;
 using DropCut.Modules.Shell.Models;
 using DropCut.Modules.Shell.ViewModels;
 using Microsoft.UI.Input;
@@ -34,6 +35,7 @@ public sealed partial class MainWindow : Window
     private readonly IGlobalHotkeyService _hotkeyService;
     private readonly IOcrService _ocrService;
     private readonly ILocalizationService _localizationService;
+    private readonly IEventBus _eventBus;
 
     private Polyline? _activePolyline;
     private Canvas? _activeDrawingCanvas;
@@ -75,15 +77,25 @@ public sealed partial class MainWindow : Window
         IScreenCaptureService screenCaptureService,
         IGlobalHotkeyService hotkeyService,
         IOcrService ocrService,
-        ILocalizationService localizationService)
+        ILocalizationService localizationService,
+        IEventBus eventBus)
     {
         ViewModel = viewModel;
         _screenCaptureService = screenCaptureService;
         _hotkeyService = hotkeyService;
         _ocrService = ocrService;
         _localizationService = localizationService;
+        _eventBus = eventBus;
 
         InitializeComponent();
+
+        _eventBus.Subscribe<LanguageChangedEvent>((e, ct) =>
+        {
+            DispatcherQueue.TryEnqueue(() => ApplyLocalization());
+            return Task.CompletedTask;
+        });
+
+        ApplyLocalization();
 
         // Configure window icon
         try
@@ -300,29 +312,29 @@ public sealed partial class MainWindow : Window
     private void DelayNone_Click(object sender, RoutedEventArgs e)
     {
         ViewModel.DelaySeconds = 0;
-        TxtDelayIndicator.Text = "بدون تأخير";
-        NotifyToolChange("مؤقت القص: فوري بدون تأخير");
+        ToolTipService.SetToolTip(BtnDelayTool, _localizationService.GetString("Ribbon_Delay_None"));
+        NotifyToolChange(_localizationService.GetString("Ribbon_Delay_None"));
     }
 
     private void Delay3s_Click(object sender, RoutedEventArgs e)
     {
         ViewModel.DelaySeconds = 3;
-        TxtDelayIndicator.Text = "3 ثوانٍ";
-        NotifyToolChange("مؤقت القص: تأخير 3 ثوانٍ لالتقاط القوائم المنسدلة");
+        ToolTipService.SetToolTip(BtnDelayTool, _localizationService.GetString("Ribbon_Delay_3s"));
+        NotifyToolChange(_localizationService.GetString("Ribbon_Delay_3s"));
     }
 
     private void Delay5s_Click(object sender, RoutedEventArgs e)
     {
         ViewModel.DelaySeconds = 5;
-        TxtDelayIndicator.Text = "5 ثوانٍ";
-        NotifyToolChange("مؤقت القص: تأخير 5 ثوانٍ");
+        ToolTipService.SetToolTip(BtnDelayTool, _localizationService.GetString("Ribbon_Delay_5s"));
+        NotifyToolChange(_localizationService.GetString("Ribbon_Delay_5s"));
     }
 
     private void Delay10s_Click(object sender, RoutedEventArgs e)
     {
         ViewModel.DelaySeconds = 10;
-        TxtDelayIndicator.Text = "10 ثوانٍ";
-        NotifyToolChange("مؤقت القص: تأخير 10 ثوانٍ");
+        ToolTipService.SetToolTip(BtnDelayTool, _localizationService.GetString("Ribbon_Delay_10s"));
+        NotifyToolChange(_localizationService.GetString("Ribbon_Delay_10s"));
     }
 
     // ==========================================
@@ -1681,6 +1693,7 @@ public sealed partial class MainWindow : Window
             var themeCombo = new ComboBox { HorizontalAlignment = HorizontalAlignment.Stretch };
             themeCombo.Items.Add(new ComboBoxItem { Content = _localizationService.GetString("Settings_Theme_Dark"), Tag = "Dark" });
             themeCombo.Items.Add(new ComboBoxItem { Content = _localizationService.GetString("Settings_Theme_Light"), Tag = "Light" });
+            themeCombo.Items.Add(new ComboBoxItem { Content = _localizationService.GetString("Settings_Theme_Gray"), Tag = "Gray" });
             themeCombo.Items.Add(new ComboBoxItem { Content = _localizationService.GetString("Settings_Theme_System"), Tag = "Default" });
             themeCombo.SelectedIndex = 0;
 
@@ -1718,15 +1731,25 @@ public sealed partial class MainWindow : Window
                 {
                     if (this.Content is FrameworkElement rootElement)
                     {
-                        rootElement.RequestedTheme = theme switch
+                        if (theme == "Gray")
                         {
-                            "Dark" => ElementTheme.Dark,
-                            "Light" => ElementTheme.Light,
-                            _ => ElementTheme.Default
-                        };
+                            rootElement.RequestedTheme = ElementTheme.Dark;
+                            if (RootAppGrid != null) RootAppGrid.Background = new SolidColorBrush(Color.FromArgb(255, 43, 45, 48)); // #2B2D30 Slate Gray
+                        }
+                        else
+                        {
+                            if (RootAppGrid != null) RootAppGrid.ClearValue(Grid.BackgroundProperty);
+                            rootElement.RequestedTheme = theme switch
+                            {
+                                "Dark" => ElementTheme.Dark,
+                                "Light" => ElementTheme.Light,
+                                _ => ElementTheme.Default
+                            };
+                        }
                     }
                 }
 
+                ApplyLocalization();
                 NotifyToolChange(_localizationService.GetString("Settings_SavedSuccess"));
             }
         }
@@ -1734,6 +1757,52 @@ public sealed partial class MainWindow : Window
         {
             // Zero-Crash Mandate
         }
+    }
+
+    private void ApplyLocalization()
+    {
+        try
+        {
+            // 1. ToolTips across all 10 languages
+            ToolTipService.SetToolTip(BtnNewSnip, _localizationService.GetString("Action_NewSnip_Tip"));
+            ToolTipService.SetToolTip(BtnDelayTool, _localizationService.GetString("Action_Delay_Tip"));
+            ToolTipService.SetToolTip(BadgeCameraMode, _localizationService.GetString("Action_SnipMode_Tip"));
+
+            ToolTipService.SetToolTip(BtnHandTool, _localizationService.GetString("Tool_Hand_Tip"));
+            ToolTipService.SetToolTip(BtnPenTool, _localizationService.GetString("Tool_Pen_Tip"));
+            ToolTipService.SetToolTip(BtnHighlighterTool, _localizationService.GetString("Tool_Highlighter_Tip"));
+            ToolTipService.SetToolTip(BtnEraserTool, _localizationService.GetString("Tool_Eraser_Tip"));
+            ToolTipService.SetToolTip(BtnBlurTool, _localizationService.GetString("Tool_Blur_Tip"));
+            ToolTipService.SetToolTip(BtnRulerTool, _localizationService.GetString("Tool_Ruler_Tip"));
+            ToolTipService.SetToolTip(BtnTextTool, _localizationService.GetString("Tool_Text_Tip"));
+            ToolTipService.SetToolTip(BtnCropTool, _localizationService.GetString("Tool_Crop_Tip"));
+
+            ToolTipService.SetToolTip(BtnUndo, _localizationService.GetString("Action_Undo_Tip"));
+            ToolTipService.SetToolTip(BtnRedo, _localizationService.GetString("Action_Redo_Tip"));
+            ToolTipService.SetToolTip(BtnSave, _localizationService.GetString("Action_Save_Tip"));
+            ToolTipService.SetToolTip(BtnCopy, _localizationService.GetString("Action_Copy_Tip"));
+            ToolTipService.SetToolTip(BtnShare, _localizationService.GetString("Action_Share_Tip"));
+            ToolTipService.SetToolTip(BtnMoreOptions, _localizationService.GetString("Action_Settings_Tip"));
+
+            // 2. Menu Flyout Items
+            if (MenuModeRect != null) MenuModeRect.Text = _localizationService.GetString("Mode_Rect");
+            if (MenuModeWin != null) MenuModeWin.Text = _localizationService.GetString("Mode_Win");
+            if (MenuModeFull != null) MenuModeFull.Text = _localizationService.GetString("Mode_Full");
+            if (MenuModeFree != null) MenuModeFree.Text = _localizationService.GetString("Mode_Free");
+
+            if (MenuDelayNone != null) MenuDelayNone.Text = _localizationService.GetString("Delay_None");
+            if (MenuDelay3s != null) MenuDelay3s.Text = _localizationService.GetString("Delay_3s");
+            if (MenuDelay5s != null) MenuDelay5s.Text = _localizationService.GetString("Delay_5s");
+            if (MenuDelay10s != null) MenuDelay10s.Text = _localizationService.GetString("Delay_10s");
+
+            if (MenuSettings != null) MenuSettings.Text = _localizationService.GetString("Nav_Settings");
+            if (MenuOpenVault != null) MenuOpenVault.Text = _localizationService.GetString("Nav_Vault");
+
+            // 3. Guidance & Action Button Text
+            if (TxtCommitSave != null) TxtCommitSave.Text = _localizationService.GetString("Action_CommitSave");
+            if (TxtRevertHand != null) TxtRevertHand.Text = _localizationService.GetString("Action_RevertHand");
+        }
+        catch (Exception) { }
     }
 
     private void MenuOpenVault_Click(object sender, RoutedEventArgs e)
