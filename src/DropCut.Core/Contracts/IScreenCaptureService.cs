@@ -29,4 +29,9 @@ public interface IScreenCaptureService
     /// Applies a pixelation / privacy blur effect to a rectangular region of a 32-bit BMP byte stream in memory.
     /// </summary>
     byte[] BlurRegion(byte[] sourceBmpBytes, int x, int y, int width, int height, int blockSize = 12);
+
+    /// <summary>
+    /// Renders drawing strokes and inking annotations directly onto an existing 32-bit BMP byte stream in memory.
+    /// </summary>
+    byte[] RenderAnnotations(byte[] sourceBmpBytes, IEnumerable<DropCut.Core.Domain.StrokeRenderData> strokes);
 }

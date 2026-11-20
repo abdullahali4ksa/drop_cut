@@ -94,13 +94,25 @@ public class ShellTabModel : ObservableObject
     public bool IsCropping
     {
         get => _isCropping;
-        set => SetProperty(ref _isCropping, value);
+        set
+        {
+            if (SetProperty(ref _isCropping, value))
+            {
+                OnPropertyChanged(nameof(IsHandMode));
+            }
+        }
     }
 
     public bool IsBlurring
     {
         get => _isBlurring;
-        set => SetProperty(ref _isBlurring, value);
+        set
+        {
+            if (SetProperty(ref _isBlurring, value))
+            {
+                OnPropertyChanged(nameof(IsHandMode));
+            }
+        }
     }
 
     public double ZoomFactor
@@ -123,8 +135,16 @@ public class ShellTabModel : ObservableObject
     public bool IsDrawingMode
     {
         get => _isDrawingMode;
-        set => SetProperty(ref _isDrawingMode, value);
+        set
+        {
+            if (SetProperty(ref _isDrawingMode, value))
+            {
+                OnPropertyChanged(nameof(IsHandMode));
+            }
+        }
     }
+
+    public bool IsHandMode => !_isDrawingMode && !_isCropping && !_isBlurring;
 
     public Guid? SnippetId { get; set; }
 

@@ -38,13 +38,19 @@ public sealed partial class MainWindow : Window
     private Polyline? _activePolyline;
     private Canvas? _activeDrawingCanvas;
 
-    // In-tab cropping state
+    // In-tab cropping state (8-point interactive handles like MS Paint)
     private Point _tabCropStart;
     private double _tabCropX;
     private double _tabCropY;
     private double _tabCropW;
     private double _tabCropH;
     private bool _isTabCropDragging;
+    private string? _activeCropHandle;
+    private Point _cropDragStartPoint;
+    private double _initialCropX;
+    private double _initialCropY;
+    private double _initialCropW;
+    private double _initialCropH;
 
     // In-tab privacy blur state
     private Point _tabBlurStart;
@@ -413,6 +419,12 @@ public sealed partial class MainWindow : Window
 
     private void TabItem_DragStarting(UIElement sender, DragStartingEventArgs args)
     {
+        if (ViewModel.ActiveTool != ToolType.Hand)
+        {
+            args.Cancel = true;
+            return;
+        }
+
         var deferral = args.GetDeferral();
         try
         {
@@ -430,6 +442,13 @@ public sealed partial class MainWindow : Window
 
     private void ImageContainer_DragStarting(UIElement sender, DragStartingEventArgs args)
     {
+        // Enforce strict drag locking while editing is active
+        if (ViewModel.ActiveTool != ToolType.Hand)
+        {
+            args.Cancel = true;
+            return;
+        }
+
         var deferral = args.GetDeferral();
         try
         {
@@ -447,6 +466,12 @@ public sealed partial class MainWindow : Window
 
     private void ShareButton_DragStarting(UIElement sender, DragStartingEventArgs args)
     {
+        if (ViewModel.ActiveTool != ToolType.Hand)
+        {
+            args.Cancel = true;
+            return;
+        }
+
         var deferral = args.GetDeferral();
         try
         {
@@ -527,7 +552,22 @@ public sealed partial class MainWindow : Window
         }
         else
         {
+            _tabCropX = 0;
+            _tabCropY = 0;
+            _tabCropW = tab.ImageWidth > 0 ? tab.ImageWidth : 800;
+            _tabCropH = tab.ImageHeight > 0 ? tab.ImageHeight : 600;
+
             SetToolMode(ToolType.Crop);
+
+            var scroll = GetActiveScrollViewer();
+            if (scroll != null)
+            {
+                var box = FindChildByTag<Border>(scroll, "InTabCropBox");
+                if (box?.Parent is Canvas canvas)
+                {
+                    UpdateCropVisuals(canvas);
+                }
+            }
         }
     }
 
@@ -536,22 +576,29 @@ public sealed partial class MainWindow : Window
         try
         {
             if (sender is not Canvas canvas) return;
-            _tabCropStart = e.GetCurrentPoint(canvas).Position;
-            _isTabCropDragging = true;
+            var pt = e.GetCurrentPoint(canvas).Position;
 
-            var box = FindChildByTag<Border>(canvas, "InTabCropBox");
-            var bar = FindChildByTag<StackPanel>(canvas, "InTabCropActionBar");
-            if (box != null)
+            var hitHandle = HitTestCropHandle(pt, _tabCropX, _tabCropY, _tabCropW, _tabCropH);
+            if (hitHandle != null)
             {
-                box.Visibility = Visibility.Visible;
-                Canvas.SetLeft(box, _tabCropStart.X);
-                Canvas.SetTop(box, _tabCropStart.Y);
-                box.Width = 0;
-                box.Height = 0;
+                _activeCropHandle = hitHandle;
+                _cropDragStartPoint = pt;
+                _initialCropX = _tabCropX;
+                _initialCropY = _tabCropY;
+                _initialCropW = _tabCropW;
+                _initialCropH = _tabCropH;
+                _isTabCropDragging = true;
             }
-            if (bar != null)
+            else
             {
-                bar.Visibility = Visibility.Collapsed;
+                _activeCropHandle = null;
+                _tabCropStart = pt;
+                _isTabCropDragging = true;
+                _tabCropX = pt.X;
+                _tabCropY = pt.Y;
+                _tabCropW = 0;
+                _tabCropH = 0;
+                UpdateCropVisuals(canvas);
             }
         }
         catch (Exception) { }
@@ -561,20 +608,89 @@ public sealed partial class MainWindow : Window
     {
         try
         {
-            if (!_isTabCropDragging || sender is not Canvas canvas) return;
-            var cur = e.GetCurrentPoint(canvas).Position;
-            _tabCropX = Math.Min(_tabCropStart.X, cur.X);
-            _tabCropY = Math.Min(_tabCropStart.Y, cur.Y);
-            _tabCropW = Math.Abs(cur.X - _tabCropStart.X);
-            _tabCropH = Math.Abs(cur.Y - _tabCropStart.Y);
+            if (sender is not Canvas canvas) return;
+            var pt = e.GetCurrentPoint(canvas).Position;
 
-            var box = FindChildByTag<Border>(canvas, "InTabCropBox");
-            if (box != null)
+            if (_isTabCropDragging)
             {
-                Canvas.SetLeft(box, _tabCropX);
-                Canvas.SetTop(box, _tabCropY);
-                box.Width = _tabCropW;
-                box.Height = _tabCropH;
+                if (_activeCropHandle != null)
+                {
+                    double dx = pt.X - _cropDragStartPoint.X;
+                    double dy = pt.Y - _cropDragStartPoint.Y;
+
+                    switch (_activeCropHandle)
+                    {
+                        case "NW":
+                            _tabCropX = Math.Min(_initialCropX + _initialCropW - 20, _initialCropX + dx);
+                            _tabCropY = Math.Min(_initialCropY + _initialCropH - 20, _initialCropY + dy);
+                            _tabCropW = _initialCropW - (_tabCropX - _initialCropX);
+                            _tabCropH = _initialCropH - (_tabCropY - _initialCropY);
+                            break;
+                        case "N":
+                            _tabCropY = Math.Min(_initialCropY + _initialCropH - 20, _initialCropY + dy);
+                            _tabCropH = _initialCropH - (_tabCropY - _initialCropY);
+                            break;
+                        case "NE":
+                            _tabCropY = Math.Min(_initialCropY + _initialCropH - 20, _initialCropY + dy);
+                            _tabCropH = _initialCropH - (_tabCropY - _initialCropY);
+                            _tabCropW = Math.Max(20, _initialCropW + dx);
+                            break;
+                        case "E":
+                            _tabCropW = Math.Max(20, _initialCropW + dx);
+                            break;
+                        case "SE":
+                            _tabCropW = Math.Max(20, _initialCropW + dx);
+                            _tabCropH = Math.Max(20, _initialCropH + dy);
+                            break;
+                        case "S":
+                            _tabCropH = Math.Max(20, _initialCropH + dy);
+                            break;
+                        case "SW":
+                            _tabCropX = Math.Min(_initialCropX + _initialCropW - 20, _initialCropX + dx);
+                            _tabCropW = _initialCropW - (_tabCropX - _initialCropX);
+                            _tabCropH = Math.Max(20, _initialCropH + dy);
+                            break;
+                        case "W":
+                            _tabCropX = Math.Min(_initialCropX + _initialCropW - 20, _initialCropX + dx);
+                            _tabCropW = _initialCropW - (_tabCropX - _initialCropX);
+                            break;
+                    }
+                    UpdateCropVisuals(canvas);
+                }
+                else
+                {
+                    _tabCropX = Math.Min(_tabCropStart.X, pt.X);
+                    _tabCropY = Math.Min(_tabCropStart.Y, pt.Y);
+                    _tabCropW = Math.Abs(pt.X - _tabCropStart.X);
+                    _tabCropH = Math.Abs(pt.Y - _tabCropStart.Y);
+                    UpdateCropVisuals(canvas);
+                }
+            }
+            else
+            {
+                var hoverHandle = HitTestCropHandle(pt, _tabCropX, _tabCropY, _tabCropW, _tabCropH);
+                switch (hoverHandle)
+                {
+                    case "NW":
+                    case "SE":
+                        SetCanvasCursor(InputSystemCursorShape.SizeNorthwestSoutheast);
+                        break;
+                    case "NE":
+                    case "SW":
+                        SetCanvasCursor(InputSystemCursorShape.SizeNortheastSouthwest);
+                        break;
+                    case "N":
+                    case "S":
+                        SetCanvasCursor(InputSystemCursorShape.SizeNorthSouth);
+                        break;
+                    case "E":
+                    case "W":
+                        SetCanvasCursor(InputSystemCursorShape.SizeWestEast);
+                        break;
+                    default:
+                        SetCanvasCursor(InputSystemCursorShape.Cross);
+                        break;
+                }
             }
         }
         catch (Exception) { }
@@ -584,18 +700,76 @@ public sealed partial class MainWindow : Window
     {
         try
         {
-            if (!_isTabCropDragging || sender is not Canvas canvas) return;
+            if (sender is not Canvas canvas) return;
             _isTabCropDragging = false;
-
-            var bar = FindChildByTag<StackPanel>(canvas, "InTabCropActionBar");
-            if (bar != null && _tabCropW > 15 && _tabCropH > 15)
-            {
-                Canvas.SetLeft(bar, _tabCropX);
-                Canvas.SetTop(bar, Math.Max(0, _tabCropY + _tabCropH + 8));
-                bar.Visibility = Visibility.Visible;
-            }
+            _activeCropHandle = null;
+            UpdateCropVisuals(canvas);
         }
         catch (Exception) { }
+    }
+
+    private void UpdateCropVisuals(Canvas canvas)
+    {
+        var box = FindChildByTag<Border>(canvas, "InTabCropBox");
+        if (box != null)
+        {
+            box.Visibility = Visibility.Visible;
+            Canvas.SetLeft(box, _tabCropX);
+            Canvas.SetTop(box, _tabCropY);
+            box.Width = Math.Max(10, _tabCropW);
+            box.Height = Math.Max(10, _tabCropH);
+        }
+
+        double cx = _tabCropX;
+        double cy = _tabCropY;
+        double cw = Math.Max(10, _tabCropW);
+        double ch = Math.Max(10, _tabCropH);
+
+        PositionHandle(canvas, "CropHandle_NW", cx - 6, cy - 6);
+        PositionHandle(canvas, "CropHandle_N",  cx + cw / 2 - 6, cy - 6);
+        PositionHandle(canvas, "CropHandle_NE", cx + cw - 6, cy - 6);
+        PositionHandle(canvas, "CropHandle_E",  cx + cw - 6, cy + ch / 2 - 6);
+        PositionHandle(canvas, "CropHandle_SE", cx + cw - 6, cy + ch - 6);
+        PositionHandle(canvas, "CropHandle_S",  cx + cw / 2 - 6, cy + ch - 6);
+        PositionHandle(canvas, "CropHandle_SW", cx - 6, cy + ch - 6);
+        PositionHandle(canvas, "CropHandle_W",  cx - 6, cy + ch / 2 - 6);
+
+        var bar = FindChildByTag<StackPanel>(canvas, "InTabCropActionBar");
+        if (bar != null)
+        {
+            bar.Visibility = Visibility.Visible;
+            Canvas.SetLeft(bar, Math.Max(0, cx));
+            Canvas.SetTop(bar, cy + ch + 10);
+        }
+    }
+
+    private static void PositionHandle(Canvas canvas, string tag, double left, double top)
+    {
+        var handle = FindChildByTag<Border>(canvas, tag);
+        if (handle != null)
+        {
+            handle.Visibility = Visibility.Visible;
+            Canvas.SetLeft(handle, left);
+            Canvas.SetTop(handle, top);
+        }
+    }
+
+    private static string? HitTestCropHandle(Point pt, double cx, double cy, double cw, double ch)
+    {
+        const double threshold = 14;
+
+        bool Near(double hx, double hy) => Math.Abs(pt.X - hx) <= threshold && Math.Abs(pt.Y - hy) <= threshold;
+
+        if (Near(cx, cy)) return "NW";
+        if (Near(cx + cw / 2, cy)) return "N";
+        if (Near(cx + cw, cy)) return "NE";
+        if (Near(cx + cw, cy + ch / 2)) return "E";
+        if (Near(cx + cw, cy + ch)) return "SE";
+        if (Near(cx + cw / 2, cy + ch)) return "S";
+        if (Near(cx, cy + ch)) return "SW";
+        if (Near(cx, cy + ch / 2)) return "W";
+
+        return null;
     }
 
     private void BtnApplyInTabCrop_Click(object sender, RoutedEventArgs e)
@@ -822,7 +996,7 @@ public sealed partial class MainWindow : Window
     {
         if (ViewModel.ActiveTool == ToolType.Pen)
         {
-            SetToolMode(ToolType.Hand);
+            BtnCommitAndSaveEditing_Click(sender, new RoutedEventArgs());
         }
         else
         {
@@ -869,7 +1043,7 @@ public sealed partial class MainWindow : Window
     {
         if (ViewModel.ActiveTool == ToolType.Highlighter)
         {
-            SetToolMode(ToolType.Hand);
+            BtnCommitAndSaveEditing_Click(sender, e);
         }
         else
         {
@@ -963,65 +1137,63 @@ public sealed partial class MainWindow : Window
     {
         try
         {
-            var accentStyle = (Style)Application.Current.Resources["AccentButtonStyle"];
+            // 1. Reset all button styles to clean default
+            ResetButtonStyle(BtnHandTool);
+            ResetButtonStyle(BtnPenTool);
+            ResetButtonStyle(BtnHighlighterTool);
+            ResetButtonStyle(BtnEraserTool);
+            ResetButtonStyle(BtnBlurTool);
+            ResetButtonStyle(BtnRulerTool);
+            ResetButtonStyle(BtnTextTool);
+            ResetButtonStyle(BtnCropTool);
 
-            // 1. Reset all button styles to standard
-            if (BtnHandTool != null) BtnHandTool.Style = null;
-            if (BtnPenTool != null) BtnPenTool.Style = null;
-            if (BtnHighlighterTool != null) BtnHighlighterTool.Style = null;
-            if (BtnEraserTool != null) BtnEraserTool.Style = null;
-            if (BtnBlurTool != null) BtnBlurTool.Style = null;
-            if (BtnRulerTool != null) BtnRulerTool.Style = null;
-            if (BtnTextTool != null) BtnTextTool.Style = null;
-            if (BtnCropTool != null) BtnCropTool.Style = null;
-
-            // 2. Set accent style on active tool and update cursor & guidance
+            // 2. Apply vibrant active styling (Golden Yellow for editing tools, Fluent Blue for Hand tool)
             switch (tool)
             {
                 case ToolType.Hand:
-                    if (BtnHandTool != null) BtnHandTool.Style = accentStyle;
+                    ApplyActiveBlueStyle(BtnHandTool);
                     HideModeGuidance();
                     SetCanvasCursor(InputSystemCursorShape.Hand);
                     break;
 
                 case ToolType.Pen:
-                    if (BtnPenTool != null) BtnPenTool.Style = accentStyle;
-                    ShowModeGuidance("\uED63", "وضع القلم نشط — انقر عليه مجدداً أو اضغط Esc للعودة لوضع السحب 🖐️");
+                    ApplyActiveYellowStyle(BtnPenTool);
+                    ShowModeGuidance("\uED63", "وضع القلم نشط — تم قفل وضع السحب مؤقتاً لحماية الرسم ✏️");
                     SetCanvasCursor(InputSystemCursorShape.Cross);
                     break;
 
                 case ToolType.Highlighter:
-                    if (BtnHighlighterTool != null) BtnHighlighterTool.Style = accentStyle;
-                    ShowModeGuidance("\uE7E6", "وضع قلم التمييز نشط — انقر عليه مجدداً أو اضغط Esc للعودة لوضع السحب 🖐️");
+                    ApplyActiveYellowStyle(BtnHighlighterTool);
+                    ShowModeGuidance("\uE7E6", "وضع قلم التمييز نشط — تم قفل وضع السحب لحماية الرسم ✏️");
                     SetCanvasCursor(InputSystemCursorShape.Cross);
                     break;
 
                 case ToolType.BlurRedact:
-                    if (BtnBlurTool != null) BtnBlurTool.Style = accentStyle;
-                    ShowModeGuidance("\uE790", "وضع طمس البيانات الحساسة نشط — انقر مجدداً أو اضغط Esc للعودة 🖐️");
+                    ApplyActiveYellowStyle(BtnBlurTool);
+                    ShowModeGuidance("\uE790", "وضع طمس البيانات الحساسة نشط — تم قفل وضع السحب مؤقتاً 🫥");
                     SetCanvasCursor(InputSystemCursorShape.Cross);
                     break;
 
                 case ToolType.Crop:
-                    if (BtnCropTool != null) BtnCropTool.Style = accentStyle;
-                    ShowModeGuidance("\uE7A8", "وضع اقتصاص الصورة نشط — انقر مجدداً أو اضغط Esc للعودة 🖐️");
+                    ApplyActiveYellowStyle(BtnCropTool);
+                    ShowModeGuidance("\uE7A8", "وضع اقتصاص الصورة نشط — اسحب من أي مقبض من الـ 8 نقاط للتقليص 🔲");
                     SetCanvasCursor(InputSystemCursorShape.Cross);
                     break;
 
                 case ToolType.Select:
-                    if (BtnEraserTool != null) BtnEraserTool.Style = accentStyle;
-                    ShowModeGuidance("\uE75C", "وضع الممحاة نشط — اضغط Esc للعودة لوضع السحب 🖐️");
+                    ApplyActiveYellowStyle(BtnEraserTool);
+                    ShowModeGuidance("\uE75C", "وضع الممحاة نشط 🧹");
                     SetCanvasCursor(InputSystemCursorShape.Arrow);
                     break;
 
                 case ToolType.Shape:
-                    if (BtnRulerTool != null) BtnRulerTool.Style = accentStyle;
-                    ShowModeGuidance("\uED5E", "وضع مسطرة القياس نشط — اضغط Esc للعودة 🖐️");
+                    ApplyActiveYellowStyle(BtnRulerTool);
+                    ShowModeGuidance("\uED5E", "مسطرة القياس نشطة 📏");
                     SetCanvasCursor(InputSystemCursorShape.Cross);
                     break;
 
                 default:
-                    if (BtnHandTool != null) BtnHandTool.Style = accentStyle;
+                    ApplyActiveBlueStyle(BtnHandTool);
                     HideModeGuidance();
                     SetCanvasCursor(InputSystemCursorShape.Hand);
                     break;
@@ -1030,6 +1202,109 @@ public sealed partial class MainWindow : Window
         catch (Exception)
         {
             // Zero-Crash Mandate
+        }
+    }
+
+    private static void ApplyActiveYellowStyle(Control? button)
+    {
+        if (button == null) return;
+        button.Background = new SolidColorBrush(Color.FromArgb(255, 255, 215, 0)); // #FFD700 Vibrant Gold Yellow
+        button.Foreground = new SolidColorBrush(Microsoft.UI.Colors.Black);
+        button.BorderBrush = new SolidColorBrush(Color.FromArgb(255, 184, 134, 11)); // #B8860B
+        button.BorderThickness = new Thickness(2);
+        button.FontWeight = Microsoft.UI.Text.FontWeights.Bold;
+
+        SetInnerElementsForeground(button, Microsoft.UI.Colors.Black);
+    }
+
+    private static void ApplyActiveBlueStyle(Control? button)
+    {
+        if (button == null) return;
+        button.Background = new SolidColorBrush(Color.FromArgb(255, 0, 120, 215)); // #0078D7 Fluent Blue
+        button.Foreground = new SolidColorBrush(Microsoft.UI.Colors.White);
+        button.BorderBrush = new SolidColorBrush(Color.FromArgb(255, 0, 90, 170));
+        button.BorderThickness = new Thickness(2);
+        button.FontWeight = Microsoft.UI.Text.FontWeights.Bold;
+
+        SetInnerElementsForeground(button, Microsoft.UI.Colors.White);
+    }
+
+    private static void ResetButtonStyle(Control? button)
+    {
+        if (button == null) return;
+        button.ClearValue(Control.BackgroundProperty);
+        button.ClearValue(Control.ForegroundProperty);
+        button.ClearValue(Control.BorderBrushProperty);
+        button.ClearValue(Control.BorderThicknessProperty);
+        button.ClearValue(Control.FontWeightProperty);
+        button.Style = null;
+
+        ResetInnerElementsForeground(button);
+    }
+
+    private static void SetInnerElementsForeground(DependencyObject parent, Color color)
+    {
+        var brush = new SolidColorBrush(color);
+        int count = VisualTreeHelper.GetChildrenCount(parent);
+        for (int i = 0; i < count; i++)
+        {
+            var child = VisualTreeHelper.GetChild(parent, i);
+            if (child is FontIcon fi) fi.Foreground = brush;
+            if (child is TextBlock tb) tb.Foreground = brush;
+            SetInnerElementsForeground(child, color);
+        }
+    }
+
+    private static void ResetInnerElementsForeground(DependencyObject parent)
+    {
+        int count = VisualTreeHelper.GetChildrenCount(parent);
+        for (int i = 0; i < count; i++)
+        {
+            var child = VisualTreeHelper.GetChild(parent, i);
+            if (child is FontIcon fi) fi.ClearValue(FontIcon.ForegroundProperty);
+            if (child is TextBlock tb) tb.ClearValue(TextBlock.ForegroundProperty);
+            ResetInnerElementsForeground(child);
+        }
+    }
+
+    private void BtnCommitAndSaveEditing_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var tab = ViewModel.SelectedTab;
+            if (tab?.ImageBytes is { Length: > 0 } bytes && _activeDrawingCanvas != null && _activeDrawingCanvas.Children.Count > 0)
+            {
+                var strokes = new List<StrokeRenderData>();
+                foreach (var child in _activeDrawingCanvas.Children)
+                {
+                    if (child is Polyline poly && poly.Points.Count >= 2)
+                    {
+                        var pts = poly.Points.Select(p => (p.X, p.Y)).ToList();
+                        var hex = (poly.Stroke as SolidColorBrush)?.Color.ToString() ?? "#FF0000";
+                        var thickness = (int)poly.StrokeThickness;
+                        bool isHighlight = thickness >= 10;
+                        strokes.Add(new StrokeRenderData(pts, hex, thickness, isHighlight));
+                    }
+                }
+
+                if (strokes.Count > 0)
+                {
+                    var baked = _screenCaptureService.RenderAnnotations(bytes, strokes);
+                    if (baked != null && baked.Length > 0)
+                    {
+                        tab.ImageBytes = baked;
+                        _activeDrawingCanvas.Children.Clear();
+                        CopyCurrentTabImage();
+                        NotifyToolChange("تم حفظ ودمج كافة التعديلات والرسومات في الصورة بنجاح! وضع السحب مفعل الآن 🖐️");
+                    }
+                }
+            }
+
+            SetToolMode(ToolType.Hand);
+        }
+        catch (Exception)
+        {
+            SetToolMode(ToolType.Hand);
         }
     }
 
@@ -1077,7 +1352,10 @@ public sealed partial class MainWindow : Window
                 return;
             }
 
+            // Flash active yellow style while extracting
+            ApplyActiveYellowStyle(BtnTextTool);
             NotifyToolChange("جارٍ قراءة النصوص من الصورة (OCR)...");
+
             var result = await _ocrService.ExtractTextAsync(bytes);
 
             if (result.IsSuccess && !string.IsNullOrWhiteSpace(result.Value))
@@ -1091,9 +1369,15 @@ public sealed partial class MainWindow : Window
             {
                 tab.AutoSaveStatus = "لم يتم العثور على نصوص قابلة للقراءة في هذه الصورة";
             }
+
+            // Automatically turn off yellow style and return to previous state
+            await Task.Delay(400);
+            ResetButtonStyle(BtnTextTool);
+            SetToolMode(ToolType.Hand);
         }
         catch (Exception ex)
         {
+            ResetButtonStyle(BtnTextTool);
             NotifyToolChange($"تعذر استخراج النصوص: {ex.Message}");
         }
     }

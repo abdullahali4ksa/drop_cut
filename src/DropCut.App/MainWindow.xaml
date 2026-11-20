@@ -320,7 +320,7 @@
                                             CornerRadius="4"
                                             Background="{ThemeResource AppBackgroundBrush}">
                                         <!-- Draggable image container with Context Menu -->
-                                        <Grid CanDrag="True" DragStarting="ImageContainer_DragStarting">
+                                        <Grid CanDrag="{Binding IsHandMode}" DragStarting="ImageContainer_DragStarting">
                                             <Grid.ContextFlyout>
                                                 <MenuFlyout>
                                                     <MenuFlyoutItem Text="نسخ الصورة (Copy)" Click="MenuCopy_Click">
@@ -401,6 +401,16 @@
                                                         Background="#100078D7"
                                                         Tag="InTabCropBox"
                                                         Visibility="Collapsed" />
+
+                                                <!-- 8 Interactive Resize Handles (Corner & Edge Grabbers like MS Paint) -->
+                                                <Border Tag="CropHandle_NW" Width="12" Height="12" Background="White" BorderBrush="#0078D7" BorderThickness="2" CornerRadius="2" Visibility="Collapsed" />
+                                                <Border Tag="CropHandle_N"  Width="12" Height="12" Background="White" BorderBrush="#0078D7" BorderThickness="2" CornerRadius="2" Visibility="Collapsed" />
+                                                <Border Tag="CropHandle_NE" Width="12" Height="12" Background="White" BorderBrush="#0078D7" BorderThickness="2" CornerRadius="2" Visibility="Collapsed" />
+                                                <Border Tag="CropHandle_E"  Width="12" Height="12" Background="White" BorderBrush="#0078D7" BorderThickness="2" CornerRadius="2" Visibility="Collapsed" />
+                                                <Border Tag="CropHandle_SE" Width="12" Height="12" Background="White" BorderBrush="#0078D7" BorderThickness="2" CornerRadius="2" Visibility="Collapsed" />
+                                                <Border Tag="CropHandle_S"  Width="12" Height="12" Background="White" BorderBrush="#0078D7" BorderThickness="2" CornerRadius="2" Visibility="Collapsed" />
+                                                <Border Tag="CropHandle_SW" Width="12" Height="12" Background="White" BorderBrush="#0078D7" BorderThickness="2" CornerRadius="2" Visibility="Collapsed" />
+                                                <Border Tag="CropHandle_W"  Width="12" Height="12" Background="White" BorderBrush="#0078D7" BorderThickness="2" CornerRadius="2" Visibility="Collapsed" />
 
                                                 <!-- Apply / Cancel Crop Actions Floating Pill -->
                                                 <StackPanel Tag="InTabCropActionBar"
@@ -510,26 +520,38 @@
                 VerticalAlignment="Top"
                 Margin="0,12,0,0"
                 Background="#EE1E1E1E"
-                BorderBrush="{ThemeResource AppAccentBrush}"
-                BorderThickness="1.5"
-                CornerRadius="18"
-                Padding="14,6"
+                BorderBrush="#FFD700"
+                BorderThickness="2"
+                CornerRadius="20"
+                Padding="16,8"
                 Canvas.ZIndex="99"
                 Visibility="Collapsed">
-            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
-                <FontIcon x:Name="IconModeGuidance" Glyph="&#xED63;" FontSize="13" Foreground="{ThemeResource AppAccentBrush}" />
+            <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+                <FontIcon x:Name="IconModeGuidance" Glyph="&#xED63;" FontSize="14" Foreground="#FFD700" />
                 <TextBlock x:Name="TxtModeGuidance"
-                           Text="وضع القلم نشط — انقر عليه مجدداً أو اضغط Esc للعودة لوضع السحب 🖐️"
+                           Text="وضع التحرير نشط — تم قفل وضع السحب مؤقتاً لحماية الرسم ✏️"
                            FontSize="12"
                            FontWeight="SemiBold"
                            Foreground="White"
                            VerticalAlignment="Center" />
+                <Button Click="BtnCommitAndSaveEditing_Click"
+                        Padding="10,4"
+                        Height="28"
+                        CornerRadius="14"
+                        Background="#107C41"
+                        Foreground="White"
+                        BorderBrush="#0E6B38"
+                        BorderThickness="1">
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                        <FontIcon Glyph="&#xE73E;" FontSize="11" Foreground="White" />
+                        <TextBlock Text="حفظ وإنهاء (✓)" FontSize="11" FontWeight="SemiBold" Foreground="White" />
+                    </StackPanel>
+                </Button>
                 <Button Click="BtnRevertToHand_Click"
-                        Padding="8,2"
-                        Height="26"
-                        CornerRadius="13"
-                        Style="{ThemeResource AccentButtonStyle}">
-                    <TextBlock Text="رجوع لليد 🖐️" FontSize="11" />
+                        Padding="8,4"
+                        Height="28"
+                        CornerRadius="14">
+                    <TextBlock Text="إلغاء (Esc)" FontSize="11" />
                 </Button>
             </StackPanel>
         </Border>

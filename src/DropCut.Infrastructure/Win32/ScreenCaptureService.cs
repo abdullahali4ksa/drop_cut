@@ -376,4 +376,121 @@ public class ScreenCaptureService : IScreenCaptureService
         }
         return WrapInBmpContainer(pixels, width, height);
     }
+
+    public byte[] RenderAnnotations(byte[] sourceBmpBytes, IEnumerable<DropCut.Core.Domain.StrokeRenderData> strokes)
+    {
+        if (sourceBmpBytes == null || sourceBmpBytes.Length < 54 || strokes == null)
+        {
+            return sourceBmpBytes ?? Array.Empty<byte>();
+        }
+
+        try
+        {
+            var result = (byte[])sourceBmpBytes.Clone();
+            var pixelDataOffset = BitConverter.ToInt32(result, 10);
+            var srcWidth = BitConverter.ToInt32(result, 18);
+            var rawHeight = BitConverter.ToInt32(result, 22);
+            var isTopDown = rawHeight < 0;
+            var srcHeight = Math.Abs(rawHeight);
+            var bpp = BitConverter.ToInt16(result, 28);
+
+            if (bpp != 32 || srcWidth <= 0 || srcHeight <= 0)
+            {
+                return sourceBmpBytes;
+            }
+
+            foreach (var stroke in strokes)
+            {
+                if (stroke.Points == null || stroke.Points.Count < 2) continue;
+
+                // Parse stroke color
+                byte r = 255, g = 0, b = 0;
+                var hex = stroke.ColorHex?.TrimStart('#') ?? "FF0000";
+                if (hex.Length >= 6)
+                {
+                    if (hex.Length == 8) hex = hex.Substring(2);
+                    if (byte.TryParse(hex.Substring(0, 2), System.Globalization.NumberStyles.HexNumber, null, out var pr)) r = pr;
+                    if (byte.TryParse(hex.Substring(2, 2), System.Globalization.NumberStyles.HexNumber, null, out var pg)) g = pg;
+                    if (byte.TryParse(hex.Substring(4, 2), System.Globalization.NumberStyles.HexNumber, null, out var pb)) b = pb;
+                }
+
+                int radius = Math.Max(1, stroke.Thickness / 2);
+                bool isHighlight = stroke.IsHighlighter;
+
+                for (int i = 0; i < stroke.Points.Count - 1; i++)
+                {
+                    int x0 = (int)stroke.Points[i].X;
+                    int y0 = (int)stroke.Points[i].Y;
+                    int x1 = (int)stroke.Points[i + 1].X;
+                    int y1 = (int)stroke.Points[i + 1].Y;
+
+                    // Bresenham line algorithm with brush circle stamping
+                    int dx = Math.Abs(x1 - x0);
+                    int dy = Math.Abs(y1 - y0);
+                    int sx = x0 < x1 ? 1 : -1;
+                    int sy = y0 < y1 ? 1 : -1;
+                    int err = dx - dy;
+
+                    int curX = x0;
+                    int curY = y0;
+
+                    while (true)
+                    {
+                        // Stamp disk with radius
+                        for (int ry = -radius; ry <= radius; ry++)
+                        {
+                            int py = curY + ry;
+                            if (py < 0 || py >= srcHeight) continue;
+                            int rowIndex = isTopDown ? py : (srcHeight - 1 - py);
+
+                            for (int rx = -radius; rx <= radius; rx++)
+                            {
+                                if (rx * rx + ry * ry > radius * radius) continue;
+                                int px = curX + rx;
+                                if (px < 0 || px >= srcWidth) continue;
+
+                                int offset = pixelDataOffset + (rowIndex * srcWidth + px) * 4;
+                                if (offset + 3 < result.Length)
+                                {
+                                    if (isHighlight)
+                                    {
+                                        result[offset] = (byte)((result[offset] + b) / 2);
+                                        result[offset + 1] = (byte)((result[offset + 1] + g) / 2);
+                                        result[offset + 2] = (byte)((result[offset + 2] + r) / 2);
+                                        result[offset + 3] = 255;
+                                    }
+                                    else
+                                    {
+                                        result[offset] = b;
+                                        result[offset + 1] = g;
+                                        result[offset + 2] = r;
+                                        result[offset + 3] = 255;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (curX == x1 && curY == y1) break;
+                        int e2 = 2 * err;
+                        if (e2 > -dy)
+                        {
+                            err -= dy;
+                            curX += sx;
+                        }
+                        if (e2 < dx)
+                        {
+                            err += dx;
+                            curY += sy;
+                        }
+                    }
+                }
+            }
+
+            return result;
+        }
+        catch (Exception)
+        {
+            return sourceBmpBytes;
+        }
+    }
 }
