@@ -118,6 +118,14 @@ public class ShellTabModel : ObservableObject
 
     public string ZoomPercentageText => $"{(int)Math.Round(_zoomFactor * 100)}%";
 
+    private bool _isDrawingMode;
+
+    public bool IsDrawingMode
+    {
+        get => _isDrawingMode;
+        set => SetProperty(ref _isDrawingMode, value);
+    }
+
     public Guid? SnippetId { get; set; }
 
     public WorkspaceViewModel? Workspace { get; set; }

@@ -31,7 +31,7 @@ public partial class ShellViewModel : ObservableObject
     private CaptureMode _selectedMode = CaptureMode.Fullscreen;
     private bool _isVideoMode;
     private int _delaySeconds;
-    private ToolType _activeTool = ToolType.Pen;
+    private ToolType _activeTool = ToolType.Hand;
     private string _penColor = "#FF0000";
     private bool _isCapturing;
 
@@ -40,7 +40,13 @@ public partial class ShellViewModel : ObservableObject
     public ShellTabModel? SelectedTab
     {
         get => _selectedTab;
-        set => SetProperty(ref _selectedTab, value);
+        set
+        {
+            if (SetProperty(ref _selectedTab, value) && value != null)
+            {
+                value.IsDrawingMode = (_activeTool != ToolType.Hand && _activeTool != ToolType.Select);
+            }
+        }
     }
 
     public bool IsRtl
@@ -76,7 +82,13 @@ public partial class ShellViewModel : ObservableObject
     public ToolType ActiveTool
     {
         get => _activeTool;
-        set => SetProperty(ref _activeTool, value);
+        set
+        {
+            if (SetProperty(ref _activeTool, value) && SelectedTab != null)
+            {
+                SelectedTab.IsDrawingMode = (value != ToolType.Hand && value != ToolType.Select);
+            }
+        }
     }
 
     public string PenColor
@@ -146,6 +158,7 @@ public partial class ShellViewModel : ObservableObject
         {
             Tabs.Add(tab);
             SelectedTab = tab;
+            ActiveTool = ToolType.Hand;
         });
     }
 

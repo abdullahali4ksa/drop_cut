@@ -115,12 +115,12 @@
                     </Button>
 
                     <!-- Pen Tool with Color Flyout -->
-                    <DropDownButton Height="36" Padding="8,0">
+                    <SplitButton x:Name="BtnPenTool" Height="36" Padding="8,0" Click="ToolPen_Click">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <FontIcon Glyph="&#xED63;" FontSize="14" Foreground="#FF0000" />
                             <TextBlock Text="القلم" VerticalAlignment="Center" />
                         </StackPanel>
-                        <DropDownButton.Flyout>
+                        <SplitButton.Flyout>
                             <MenuFlyout>
                                 <MenuFlyoutItem Text="أحمر" Click="PenRed_Click" />
                                 <MenuFlyoutItem Text="أزرق" Click="PenBlue_Click" />
@@ -128,25 +128,25 @@
                                 <MenuFlyoutItem Text="أخضر" Click="PenGreen_Click" />
                                 <MenuFlyoutItem Text="أصفر" Click="PenYellow_Click" />
                             </MenuFlyout>
-                        </DropDownButton.Flyout>
+                        </SplitButton.Flyout>
                         <ToolTipService.ToolTip>
-                            <ToolTip Content="قلم الرسم الحر" />
+                            <ToolTip Content="قلم الرسم الحر (انقر لتفعيله، وانقر مجدداً أو Esc للعودة للسحب)" />
                         </ToolTipService.ToolTip>
-                    </DropDownButton>
+                    </SplitButton>
 
                     <!-- Highlighter Tool -->
-                    <Button Height="36" Padding="8,0" Click="ToolHighlighter_Click">
+                    <Button x:Name="BtnHighlighterTool" Height="36" Padding="8,0" Click="ToolHighlighter_Click">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <FontIcon Glyph="&#xE7E6;" FontSize="14" Foreground="#FFD700" />
                             <TextBlock Text="التمييز" VerticalAlignment="Center" />
                         </StackPanel>
                         <ToolTipService.ToolTip>
-                            <ToolTip Content="قلم التمييز الفسفوري" />
+                            <ToolTip Content="قلم التمييز الفسفوري (انقر لتفعيله، ومجدداً للإلغاء)" />
                         </ToolTipService.ToolTip>
                     </Button>
 
                     <!-- Eraser Tool -->
-                    <Button Width="36" Height="36" Padding="0" Click="ToolEraser_Click">
+                    <Button x:Name="BtnEraserTool" Width="36" Height="36" Padding="0" Click="ToolEraser_Click">
                         <FontIcon Glyph="&#xE75C;" FontSize="14" />
                         <ToolTipService.ToolTip>
                             <ToolTip Content="ممحاة التعديلات" />
@@ -162,7 +162,7 @@
                     </Button>
 
                     <!-- Ruler Tool -->
-                    <Button Width="36" Height="36" Padding="0" Click="ToolRuler_Click">
+                    <Button x:Name="BtnRulerTool" Width="36" Height="36" Padding="0" Click="ToolRuler_Click">
                         <FontIcon Glyph="&#xED5E;" FontSize="14" />
                         <ToolTipService.ToolTip>
                             <ToolTip Content="مسطرة القياس بالبكسل" />
@@ -170,7 +170,7 @@
                     </Button>
 
                     <!-- Text Actions / OCR -->
-                    <Button Width="36" Height="36" Padding="0" Click="ToolText_Click">
+                    <Button x:Name="BtnTextTool" Width="36" Height="36" Padding="0" Click="ToolText_Click">
                         <FontIcon Glyph="&#xE8D2;" FontSize="14" />
                         <ToolTipService.ToolTip>
                             <ToolTip Content="استخراج وقراءة النصوص الذكية (OCR)" />
@@ -178,7 +178,7 @@
                     </Button>
 
                     <!-- Crop Tool (Crops current open image) -->
-                    <Button Width="36" Height="36" Padding="0" Click="ToolCrop_Click">
+                    <Button x:Name="BtnCropTool" Width="36" Height="36" Padding="0" Click="ToolCrop_Click">
                         <FontIcon Glyph="&#xE7A8;" FontSize="14" />
                         <ToolTipService.ToolTip>
                             <ToolTip Content="اقتصاص الصورة الحالية في اللسان" />
@@ -248,18 +248,19 @@
         </Border>
 
         <!-- 3. Multi-Tab Document Layout (TabView) with External Drag Support -->
-        <TabView x:Name="MainTabView"
-                 Grid.Row="2"
-                 CanReorderTabs="True"
-                 CanDragTabs="True"
-                 AllowDrop="True"
-                 DragOver="MainTabView_DragOver"
-                 Drop="MainTabView_Drop"
-                 TabDragStarting="MainTabView_TabDragStarting"
-                 AddTabButtonClick="MainTabView_AddTabButtonClick"
-                 TabItemsSource="{x:Bind ViewModel.Tabs, Mode=OneWay}"
-                 SelectedItem="{x:Bind ViewModel.SelectedTab, Mode=TwoWay}"
-                 TabCloseRequested="MainTabView_TabCloseRequested">
+        <Grid Grid.Row="2">
+            <TabView x:Name="MainTabView"
+                     CanReorderTabs="True"
+                     CanDragTabs="True"
+                     AllowDrop="True"
+                     DragOver="MainTabView_DragOver"
+                     Drop="MainTabView_Drop"
+                     TabDragStarting="MainTabView_TabDragStarting"
+                     AddTabButtonClick="MainTabView_AddTabButtonClick"
+                     TabItemsSource="{x:Bind ViewModel.Tabs, Mode=OneWay}"
+                     SelectedItem="{x:Bind ViewModel.SelectedTab, Mode=TwoWay}"
+                     TabCloseRequested="MainTabView_TabCloseRequested"
+                     SelectionChanged="MainTabView_SelectionChanged">
             <TabView.TabItemTemplate>
                 <DataTemplate x:DataType="models:ShellTabModel">
                     <!-- Tab Item with external drag capability -->
@@ -318,8 +319,39 @@
                                             BorderThickness="1"
                                             CornerRadius="4"
                                             Background="{ThemeResource AppBackgroundBrush}">
-                                        <!-- Draggable image container -->
+                                        <!-- Draggable image container with Context Menu -->
                                         <Grid CanDrag="True" DragStarting="ImageContainer_DragStarting">
+                                            <Grid.ContextFlyout>
+                                                <MenuFlyout>
+                                                    <MenuFlyoutItem Text="نسخ الصورة (Copy)" Click="MenuCopy_Click">
+                                                        <MenuFlyoutItem.Icon>
+                                                            <FontIcon Glyph="&#xE8C8;" />
+                                                        </MenuFlyoutItem.Icon>
+                                                    </MenuFlyoutItem>
+                                                    <MenuFlyoutItem Text="حفظ باسم... (Save As)" Click="MenuSave_Click">
+                                                        <MenuFlyoutItem.Icon>
+                                                            <FontIcon Glyph="&#xE74E;" />
+                                                        </MenuFlyoutItem.Icon>
+                                                    </MenuFlyoutItem>
+                                                    <MenuFlyoutItem Text="مشاركة اللقطة" Click="ActionShare_Click">
+                                                        <MenuFlyoutItem.Icon>
+                                                            <FontIcon Glyph="&#xE72D;" />
+                                                        </MenuFlyoutItem.Icon>
+                                                    </MenuFlyoutItem>
+                                                    <MenuFlyoutSeparator />
+                                                    <MenuFlyoutItem Text="مسح كافة الرسومات" Click="ToolEraser_Click">
+                                                        <MenuFlyoutItem.Icon>
+                                                            <FontIcon Glyph="&#xE75C;" />
+                                                        </MenuFlyoutItem.Icon>
+                                                    </MenuFlyoutItem>
+                                                    <MenuFlyoutItem Text="الرجوع لوضع اليد 🖐️ (سحب وإفلات)" Click="BtnRevertToHand_Click">
+                                                        <MenuFlyoutItem.Icon>
+                                                            <FontIcon Glyph="&#xE768;" />
+                                                        </MenuFlyoutItem.Icon>
+                                                    </MenuFlyoutItem>
+                                                </MenuFlyout>
+                                            </Grid.ContextFlyout>
+
                                             <!-- Captured Screenshot Display -->
                                             <Image Source="{Binding ImageBytes, Converter={StaticResource BytesToBitmapImageConverter}}"
                                                    Stretch="None"
@@ -350,8 +382,9 @@
                                                 </ToolTipService.ToolTip>
                                             </Border>
 
-                                            <!-- Interactive Inking & Annotation Canvas Layer -->
+                                            <!-- Interactive Inking & Annotation Canvas Layer (Active only in Drawing Mode) -->
                                             <Canvas Background="Transparent"
+                                                    IsHitTestVisible="{Binding IsDrawingMode}"
                                                     PointerPressed="AnnotationCanvas_PointerPressed"
                                                     PointerMoved="AnnotationCanvas_PointerMoved"
                                                     PointerReleased="AnnotationCanvas_PointerReleased" />
@@ -470,6 +503,37 @@
                 </DataTemplate>
             </TabView.TabItemTemplate>
         </TabView>
+
+        <!-- Mode Status & Revert Guidance Floating Pill -->
+        <Border x:Name="ModeGuidancePill"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Top"
+                Margin="0,12,0,0"
+                Background="#EE1E1E1E"
+                BorderBrush="{ThemeResource AppAccentBrush}"
+                BorderThickness="1.5"
+                CornerRadius="18"
+                Padding="14,6"
+                Canvas.ZIndex="99"
+                Visibility="Collapsed">
+            <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                <FontIcon x:Name="IconModeGuidance" Glyph="&#xED63;" FontSize="13" Foreground="{ThemeResource AppAccentBrush}" />
+                <TextBlock x:Name="TxtModeGuidance"
+                           Text="وضع القلم نشط — انقر عليه مجدداً أو اضغط Esc للعودة لوضع السحب 🖐️"
+                           FontSize="12"
+                           FontWeight="SemiBold"
+                           Foreground="White"
+                           VerticalAlignment="Center" />
+                <Button Click="BtnRevertToHand_Click"
+                        Padding="8,2"
+                        Height="26"
+                        CornerRadius="13"
+                        Style="{ThemeResource AccentButtonStyle}">
+                    <TextBlock Text="رجوع لليد 🖐️" FontSize="11" />
+                </Button>
+            </StackPanel>
+        </Border>
+    </Grid>
 
         <!-- 4. Bottom Status & Auto-Save Indicator -->
         <Border Grid.Row="3" Background="{ThemeResource AppBorderBrush}" Padding="12,6">

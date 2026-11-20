@@ -89,6 +89,14 @@ public sealed partial class MainWindow : Window
             _hotkeyService.HotkeyPressed -= OnGlobalHotkeyPressed;
             _hotkeyService.Dispose();
         };
+
+        // Initialize with Hand tool as default
+        SetToolMode(ToolType.Hand);
+    }
+
+    private void MainTabView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+    {
+        SetToolMode(ToolType.Hand);
     }
 
     public FlowDirection GetFlowDirection(bool isRtl) =>
@@ -166,6 +174,11 @@ public sealed partial class MainWindow : Window
             {
                 e.Handled = true;
                 ToolHand_Click(this, new RoutedEventArgs());
+            }
+            else if (e.Key == VirtualKey.Escape)
+            {
+                e.Handled = true;
+                SetToolMode(ToolType.Hand);
             }
         }
         catch (Exception)
@@ -508,14 +521,13 @@ public sealed partial class MainWindow : Window
             return;
         }
 
-        tab.IsCropping = !tab.IsCropping;
-        if (tab.IsCropping)
+        if (ViewModel.ActiveTool == ToolType.Crop)
         {
-            NotifyToolChange("وضع اقتصاص الصورة الحالية: اسحب بالفأرة فوق الصورة لتحديد منطقة القص ثم اضغط 'تطبيق القص'");
+            SetToolMode(ToolType.Hand);
         }
         else
         {
-            NotifyToolChange("تم إغلاق وضع الاقتصاص");
+            SetToolMode(ToolType.Crop);
         }
     }
 
@@ -602,7 +614,7 @@ public sealed partial class MainWindow : Window
                 tab.ImageBytes = cropped;
                 tab.ImageWidth = (int)_tabCropW;
                 tab.ImageHeight = (int)_tabCropH;
-                tab.IsCropping = false;
+                SetToolMode(ToolType.Hand);
                 NotifyToolChange($"تم اقتصاص الصورة الحالية بنجاح إلى ({tab.ImageWidth} × {tab.ImageHeight} بكسل)");
                 CopyCurrentTabImage();
             }
@@ -617,11 +629,8 @@ public sealed partial class MainWindow : Window
     {
         try
         {
-            if (ViewModel.SelectedTab is not null)
-            {
-                ViewModel.SelectedTab.IsCropping = false;
-                NotifyToolChange("تم إلغاء الاقتصاص");
-            }
+            SetToolMode(ToolType.Hand);
+            NotifyToolChange("تم إلغاء الاقتصاص");
         }
         catch (Exception) { }
     }
@@ -638,15 +647,13 @@ public sealed partial class MainWindow : Window
             return;
         }
 
-        tab.IsBlurring = !tab.IsBlurring;
-        if (tab.IsBlurring)
+        if (ViewModel.ActiveTool == ToolType.BlurRedact)
         {
-            tab.IsCropping = false;
-            NotifyToolChange("وضع تمويه الخصوصية: اسحب بالفأرة لتحديد منطقة الأرقام أو البيانات الحساسة ثم اضغط 'تطبيق التمويه'");
+            SetToolMode(ToolType.Hand);
         }
         else
         {
-            NotifyToolChange("تم إغلاق وضع التمويه");
+            SetToolMode(ToolType.BlurRedact);
         }
     }
 
@@ -731,7 +738,7 @@ public sealed partial class MainWindow : Window
             if (blurred is { Length: > 0 })
             {
                 tab.ImageBytes = blurred;
-                tab.IsBlurring = false;
+                SetToolMode(ToolType.Hand);
                 NotifyToolChange("تم طمس وتمويه البيانات الحساسة بنجاح وحفظها بالذاكرة");
                 CopyCurrentTabImage();
             }
@@ -744,11 +751,8 @@ public sealed partial class MainWindow : Window
 
     private void BtnCancelInTabBlur_Click(object sender, RoutedEventArgs e)
     {
-        if (ViewModel.SelectedTab != null)
-        {
-            ViewModel.SelectedTab.IsBlurring = false;
-            NotifyToolChange("تم إلغاء التمويه");
-        }
+        SetToolMode(ToolType.Hand);
+        NotifyToolChange("تم إلغاء التمويه");
     }
 
     // ==========================================
@@ -756,8 +760,7 @@ public sealed partial class MainWindow : Window
     // ==========================================
     private void ToolHand_Click(object sender, RoutedEventArgs e)
     {
-        ViewModel.ActiveTool = ToolType.Hand;
-        NotifyToolChange("تم تفعيل يد التصفح والسحب (Hand Tool) - للتنقل والسحب بدون رسم خطوط");
+        SetToolMode(ToolType.Hand);
     }
 
     private ScrollViewer? GetActiveScrollViewer() =>
@@ -813,68 +816,254 @@ public sealed partial class MainWindow : Window
     }
 
     // ==========================================
-    // 5. Ribbon Tools: Pen, Highlighter, Eraser, Ruler, OCR
+    // 5. Ribbon Tools: Pen, Highlighter, Eraser, Ruler, OCR & Mode Switching
     // ==========================================
+    private void ToolPen_Click(SplitButton sender, SplitButtonClickEventArgs args)
+    {
+        if (ViewModel.ActiveTool == ToolType.Pen)
+        {
+            SetToolMode(ToolType.Hand);
+        }
+        else
+        {
+            SetToolMode(ToolType.Pen);
+        }
+    }
+
     private void PenRed_Click(object sender, RoutedEventArgs e)
     {
         ViewModel.PenColor = "#FF0000";
-        ViewModel.ActiveTool = ToolType.Pen;
+        SetToolMode(ToolType.Pen);
         NotifyToolChange("تم اختيار القلم باللون الأحمر");
     }
 
     private void PenBlue_Click(object sender, RoutedEventArgs e)
     {
         ViewModel.PenColor = "#0078D7";
-        ViewModel.ActiveTool = ToolType.Pen;
+        SetToolMode(ToolType.Pen);
         NotifyToolChange("تم اختيار القلم باللون الأزرق");
     }
 
     private void PenBlack_Click(object sender, RoutedEventArgs e)
     {
         ViewModel.PenColor = "#000000";
-        ViewModel.ActiveTool = ToolType.Pen;
+        SetToolMode(ToolType.Pen);
         NotifyToolChange("تم اختيار القلم باللون الأسود");
     }
 
     private void PenGreen_Click(object sender, RoutedEventArgs e)
     {
         ViewModel.PenColor = "#107C41";
-        ViewModel.ActiveTool = ToolType.Pen;
+        SetToolMode(ToolType.Pen);
         NotifyToolChange("تم اختيار القلم باللون الأخضر");
     }
 
     private void PenYellow_Click(object sender, RoutedEventArgs e)
     {
         ViewModel.PenColor = "#FFD700";
-        ViewModel.ActiveTool = ToolType.Pen;
+        SetToolMode(ToolType.Pen);
         NotifyToolChange("تم اختيار القلم باللون الأصفر");
     }
 
     private void ToolHighlighter_Click(object sender, RoutedEventArgs e)
     {
-        ViewModel.ActiveTool = ToolType.Highlighter;
-        ViewModel.PenColor = "#80FFD700";
-        NotifyToolChange("تم اختيار قلم التمييز الفسفوري");
+        if (ViewModel.ActiveTool == ToolType.Highlighter)
+        {
+            SetToolMode(ToolType.Hand);
+        }
+        else
+        {
+            ViewModel.PenColor = "#80FFD700";
+            SetToolMode(ToolType.Highlighter);
+        }
     }
 
     private void ToolEraser_Click(object sender, RoutedEventArgs e)
     {
-        ViewModel.ActiveTool = ToolType.Select; // Eraser Mode
         if (_activeDrawingCanvas != null && _activeDrawingCanvas.Children.Count > 0)
         {
             _activeDrawingCanvas.Children.Clear();
             NotifyToolChange("تم مسح كافة الرسومات من الصورة");
         }
-        else
-        {
-            NotifyToolChange("وضع الممحاة نشط");
-        }
+        SetToolMode(ToolType.Hand);
     }
 
     private void ToolRuler_Click(object sender, RoutedEventArgs e)
     {
-        ViewModel.ActiveTool = ToolType.Shape;
-        NotifyToolChange("مسطرة القياس: انقر واسحب للقياس المباشر بالبكسل");
+        if (ViewModel.ActiveTool == ToolType.Shape)
+        {
+            SetToolMode(ToolType.Hand);
+        }
+        else
+        {
+            SetToolMode(ToolType.Shape);
+        }
+    }
+
+    private void MenuCopy_Click(object sender, RoutedEventArgs e) => CopyCurrentTabImage();
+    private void MenuSave_Click(object sender, RoutedEventArgs e) => SaveCurrentTabImage();
+    private void BtnRevertToHand_Click(object sender, RoutedEventArgs e) => SetToolMode(ToolType.Hand);
+
+    private void SetToolMode(ToolType tool)
+    {
+        try
+        {
+            ViewModel.ActiveTool = tool;
+            var tab = ViewModel.SelectedTab;
+
+            if (tool == ToolType.Hand)
+            {
+                if (tab != null)
+                {
+                    tab.IsCropping = false;
+                    tab.IsBlurring = false;
+                    tab.IsDrawingMode = false;
+                }
+                NotifyToolChange("وضع اليد نشط 🖐️: جاهز للسحب والمشاركة أو تحريك الصورة، والنقر الأيمن للخيارات");
+            }
+            else if (tool == ToolType.Crop)
+            {
+                if (tab != null)
+                {
+                    tab.IsCropping = true;
+                    tab.IsBlurring = false;
+                    tab.IsDrawingMode = false;
+                }
+                NotifyToolChange("وضع الاقتصاص نشط: حدد المستطيل المراد قصه، أو اضغط Esc للعودة للسحب");
+            }
+            else if (tool == ToolType.BlurRedact)
+            {
+                if (tab != null)
+                {
+                    tab.IsCropping = false;
+                    tab.IsBlurring = true;
+                    tab.IsDrawingMode = false;
+                }
+                NotifyToolChange("وضع طمس البيانات نشط: حدد المستطيل المراد تمويهه، أو اضغط Esc للعودة للسحب");
+            }
+            else
+            {
+                if (tab != null)
+                {
+                    tab.IsCropping = false;
+                    tab.IsBlurring = false;
+                    tab.IsDrawingMode = true;
+                }
+            }
+
+            UpdateActiveToolUI(tool);
+        }
+        catch (Exception)
+        {
+            // Zero-Crash Mandate
+        }
+    }
+
+    private void UpdateActiveToolUI(ToolType tool)
+    {
+        try
+        {
+            var accentStyle = (Style)Application.Current.Resources["AccentButtonStyle"];
+
+            // 1. Reset all button styles to standard
+            if (BtnHandTool != null) BtnHandTool.Style = null;
+            if (BtnPenTool != null) BtnPenTool.Style = null;
+            if (BtnHighlighterTool != null) BtnHighlighterTool.Style = null;
+            if (BtnEraserTool != null) BtnEraserTool.Style = null;
+            if (BtnBlurTool != null) BtnBlurTool.Style = null;
+            if (BtnRulerTool != null) BtnRulerTool.Style = null;
+            if (BtnTextTool != null) BtnTextTool.Style = null;
+            if (BtnCropTool != null) BtnCropTool.Style = null;
+
+            // 2. Set accent style on active tool and update cursor & guidance
+            switch (tool)
+            {
+                case ToolType.Hand:
+                    if (BtnHandTool != null) BtnHandTool.Style = accentStyle;
+                    HideModeGuidance();
+                    SetCanvasCursor(InputSystemCursorShape.Hand);
+                    break;
+
+                case ToolType.Pen:
+                    if (BtnPenTool != null) BtnPenTool.Style = accentStyle;
+                    ShowModeGuidance("\uED63", "وضع القلم نشط — انقر عليه مجدداً أو اضغط Esc للعودة لوضع السحب 🖐️");
+                    SetCanvasCursor(InputSystemCursorShape.Cross);
+                    break;
+
+                case ToolType.Highlighter:
+                    if (BtnHighlighterTool != null) BtnHighlighterTool.Style = accentStyle;
+                    ShowModeGuidance("\uE7E6", "وضع قلم التمييز نشط — انقر عليه مجدداً أو اضغط Esc للعودة لوضع السحب 🖐️");
+                    SetCanvasCursor(InputSystemCursorShape.Cross);
+                    break;
+
+                case ToolType.BlurRedact:
+                    if (BtnBlurTool != null) BtnBlurTool.Style = accentStyle;
+                    ShowModeGuidance("\uE790", "وضع طمس البيانات الحساسة نشط — انقر مجدداً أو اضغط Esc للعودة 🖐️");
+                    SetCanvasCursor(InputSystemCursorShape.Cross);
+                    break;
+
+                case ToolType.Crop:
+                    if (BtnCropTool != null) BtnCropTool.Style = accentStyle;
+                    ShowModeGuidance("\uE7A8", "وضع اقتصاص الصورة نشط — انقر مجدداً أو اضغط Esc للعودة 🖐️");
+                    SetCanvasCursor(InputSystemCursorShape.Cross);
+                    break;
+
+                case ToolType.Select:
+                    if (BtnEraserTool != null) BtnEraserTool.Style = accentStyle;
+                    ShowModeGuidance("\uE75C", "وضع الممحاة نشط — اضغط Esc للعودة لوضع السحب 🖐️");
+                    SetCanvasCursor(InputSystemCursorShape.Arrow);
+                    break;
+
+                case ToolType.Shape:
+                    if (BtnRulerTool != null) BtnRulerTool.Style = accentStyle;
+                    ShowModeGuidance("\uED5E", "وضع مسطرة القياس نشط — اضغط Esc للعودة 🖐️");
+                    SetCanvasCursor(InputSystemCursorShape.Cross);
+                    break;
+
+                default:
+                    if (BtnHandTool != null) BtnHandTool.Style = accentStyle;
+                    HideModeGuidance();
+                    SetCanvasCursor(InputSystemCursorShape.Hand);
+                    break;
+            }
+        }
+        catch (Exception)
+        {
+            // Zero-Crash Mandate
+        }
+    }
+
+    private void ShowModeGuidance(string glyph, string message)
+    {
+        if (ModeGuidancePill != null)
+        {
+            IconModeGuidance.Glyph = glyph;
+            TxtModeGuidance.Text = message;
+            ModeGuidancePill.Visibility = Visibility.Visible;
+        }
+    }
+
+    private void HideModeGuidance()
+    {
+        if (ModeGuidancePill != null)
+        {
+            ModeGuidancePill.Visibility = Visibility.Collapsed;
+        }
+    }
+
+    private void SetCanvasCursor(InputSystemCursorShape shape)
+    {
+        try
+        {
+            var cursor = InputSystemCursor.Create(shape);
+            var prop = typeof(UIElement).GetProperty(
+                "ProtectedCursor",
+                System.Reflection.BindingFlags.Instance |
+                System.Reflection.BindingFlags.Public |
+                System.Reflection.BindingFlags.NonPublic);
+            prop?.SetValue(MainTabView, cursor);
+        }
+        catch (Exception) { }
     }
 
     private async void ToolText_Click(object sender, RoutedEventArgs e)
