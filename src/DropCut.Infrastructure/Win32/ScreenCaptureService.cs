@@ -377,7 +377,7 @@ public class ScreenCaptureService : IScreenCaptureService
         return WrapInBmpContainer(pixels, width, height);
     }
 
-    public byte[] RenderAnnotations(byte[] sourceBmpBytes, IEnumerable<DropCut.Core.Domain.StrokeRenderData> strokes)
+    public byte[] RenderAnnotations(byte[] sourceBmpBytes, IEnumerable<DropCut.Core.Domain.StrokeRenderData> strokes, IEnumerable<DropCut.Core.Domain.BadgeRenderData>? badges = null)
     {
         if (sourceBmpBytes == null || sourceBmpBytes.Length < 54 || strokes == null)
         {
@@ -491,11 +491,146 @@ public class ScreenCaptureService : IScreenCaptureService
                 }
             }
 
+            // Render Numbered Step Badges if provided
+            if (badges != null)
+            {
+                foreach (var badge in badges)
+                {
+                    int cx = (int)badge.X;
+                    int cy = (int)badge.Y;
+                    int r = Math.Max(8, badge.Diameter / 2);
+                    int r2 = r * r;
+                    int innerBorder2 = Math.Max(1, (r - 2) * (r - 2));
+
+                    // Parse background color
+                    byte bgR = 0, bgG = 120, bgB = 215;
+                    var bHex = badge.BackgroundHex?.TrimStart('#') ?? "0078D7";
+                    if (bHex.Length >= 6)
+                    {
+                        if (bHex.Length == 8) bHex = bHex.Substring(2);
+                        if (byte.TryParse(bHex.Substring(0, 2), System.Globalization.NumberStyles.HexNumber, null, out var bR)) bgR = bR;
+                        if (byte.TryParse(bHex.Substring(2, 2), System.Globalization.NumberStyles.HexNumber, null, out var bG)) bgG = bG;
+                        if (byte.TryParse(bHex.Substring(4, 2), System.Globalization.NumberStyles.HexNumber, null, out var bB)) bgB = bB;
+                    }
+
+                    // 1. Draw circular badge body with white outer border
+                    for (int dy = -r; dy <= r; dy++)
+                    {
+                        int py = cy + dy;
+                        if (py < 0 || py >= srcHeight) continue;
+                        int rowIndex = isTopDown ? py : (srcHeight - 1 - py);
+
+                        for (int dx = -r; dx <= r; dx++)
+                        {
+                            int dist2 = dx * dx + dy * dy;
+                            if (dist2 > r2) continue;
+                            int px = cx + dx;
+                            if (px < 0 || px >= srcWidth) continue;
+
+                            int offset = pixelDataOffset + (rowIndex * srcWidth + px) * 4;
+                            if (offset + 3 < result.Length)
+                            {
+                                if (dist2 >= innerBorder2)
+                                {
+                                    // 2px crisp white outer ring
+                                    result[offset] = 255;
+                                    result[offset + 1] = 255;
+                                    result[offset + 2] = 255;
+                                    result[offset + 3] = 255;
+                                }
+                                else
+                                {
+                                    // Badge solid fill
+                                    result[offset] = bgB;
+                                    result[offset + 1] = bgG;
+                                    result[offset + 2] = bgR;
+                                    result[offset + 3] = 255;
+                                }
+                            }
+                        }
+                    }
+
+                    // 2. Draw centered step number (1-99) in white pixels
+                    RenderBadgeNumber(result, pixelDataOffset, srcWidth, srcHeight, isTopDown, cx, cy, badge.Number, r);
+                }
+            }
+
             return result;
         }
         catch (Exception)
         {
             return sourceBmpBytes;
         }
+    }
+
+    private static void RenderBadgeNumber(byte[] buffer, int offset, int width, int height, bool isTopDown, int cx, int cy, int number, int radius)
+    {
+        var text = Math.Clamp(number, 1, 99).ToString();
+        int scale = radius >= 16 ? 2 : 1;
+        int charW = 3 * scale;
+        int charH = 5 * scale;
+        int spacing = 1 * scale;
+        int totalW = text.Length * charW + (text.Length - 1) * spacing;
+
+        int startX = cx - totalW / 2;
+        int startY = cy - charH / 2;
+
+        for (int i = 0; i < text.Length; i++)
+        {
+            int digit = text[i] - '0';
+            ushort glyph = GetDigitGlyph(digit);
+            int digitX = startX + i * (charW + spacing);
+
+            for (int gy = 0; gy < 5; gy++)
+            {
+                for (int gx = 0; gx < 3; gx++)
+                {
+                    int bitIndex = 14 - (gy * 3 + gx);
+                    if ((glyph & (1 << bitIndex)) != 0)
+                    {
+                        for (int sy = 0; sy < scale; sy++)
+                        {
+                            int py = startY + gy * scale + sy;
+                            if (py < 0 || py >= height) continue;
+                            int rowIndex = isTopDown ? py : (height - 1 - py);
+
+                            for (int sx = 0; sx < scale; sx++)
+                            {
+                                int px = digitX + gx * scale + sx;
+                                if (px < 0 || px >= width) continue;
+
+                                int pixOffset = offset + (rowIndex * width + px) * 4;
+                                if (pixOffset + 3 < buffer.Length)
+                                {
+                                    buffer[pixOffset] = 255;
+                                    buffer[pixOffset + 1] = 255;
+                                    buffer[pixOffset + 2] = 255;
+                                    buffer[pixOffset + 3] = 255;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private static ushort GetDigitGlyph(int digit)
+    {
+        // 3x5 matrix encoded as 15 bits
+        return digit switch
+        {
+            0 => 0b111_101_101_101_111,
+            1 => 0b010_110_010_010_111,
+            2 => 0b111_001_111_100_111,
+            3 => 0b111_001_111_001_111,
+            4 => 0b101_101_111_001_001,
+            5 => 0b111_100_111_001_111,
+            6 => 0b111_100_111_101_111,
+            7 => 0b111_001_010_010_010,
+            8 => 0b111_101_111_101_111,
+            9 => 0b111_101_111_001_111,
+            _ => 0b000_000_000_000_000
+        };
     }
 }

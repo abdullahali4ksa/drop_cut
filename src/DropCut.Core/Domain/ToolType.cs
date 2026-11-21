@@ -12,5 +12,6 @@ public enum ToolType
     Text = 4,
     BlurRedact = 5,
     Crop = 6,
-    Hand = 7
+    Hand = 7,
+    Badge = 8
 }

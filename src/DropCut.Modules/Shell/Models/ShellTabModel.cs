@@ -22,8 +22,57 @@ public class ShellTabModel : ObservableObject
     private double _zoomFactor = 1.0;
     private string _sharePillText = "Drag to share into WhatsApp / Telegram / Explorer";
     private string _sharePillToolTip = "Click and drag to drop directly into WhatsApp, Telegram, Explorer, etc.";
+    private string _cropApplyText = "Apply Crop";
+    private string _cropCancelText = "Cancel";
+    private string _blurApplyText = "Apply Blur";
+    private string _blurCancelText = "Cancel";
+    private string _landingSnipHint = "Click New above or press PrintScreen to capture screen";
+    private string _landingDropHint = "You can also drag and drop any image here to open and share";
+    private string _landingHotkeyHint = "Global background hotkey: Ctrl + B + B or PrintScreen";
 
     public Guid Id { get; } = Guid.NewGuid();
+
+    public string CropApplyText
+    {
+        get => _cropApplyText;
+        set => SetProperty(ref _cropApplyText, value);
+    }
+
+    public string CropCancelText
+    {
+        get => _cropCancelText;
+        set => SetProperty(ref _cropCancelText, value);
+    }
+
+    public string BlurApplyText
+    {
+        get => _blurApplyText;
+        set => SetProperty(ref _blurApplyText, value);
+    }
+
+    public string BlurCancelText
+    {
+        get => _blurCancelText;
+        set => SetProperty(ref _blurCancelText, value);
+    }
+
+    public string LandingSnipHint
+    {
+        get => _landingSnipHint;
+        set => SetProperty(ref _landingSnipHint, value);
+    }
+
+    public string LandingDropHint
+    {
+        get => _landingDropHint;
+        set => SetProperty(ref _landingDropHint, value);
+    }
+
+    public string LandingHotkeyHint
+    {
+        get => _landingHotkeyHint;
+        set => SetProperty(ref _landingHotkeyHint, value);
+    }
 
     public string SharePillText
     {

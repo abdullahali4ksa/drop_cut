@@ -45,6 +45,23 @@ public sealed partial class MainWindow : Window
     private int _highlighterThickness = 20;
     private int _penThickness = 4;
 
+    // Version 2.0: Geometric Shapes & Vector Tool state
+    private ShapeType _currentShapeType = ShapeType.Rectangle;
+    private string _shapeColor = "#FF0000";
+    private int _shapeThickness = 4;
+    private bool _shapeFill = false;
+    private bool _isDrawingShape;
+    private Point _shapeStartPoint;
+    private FrameworkElement? _activeShapeElement;
+
+    // Version 2.0: Sequential Numbered Step Badges state (①, ②, ③...)
+    private int _nextBadgeNumber = 1;
+    private string _badgeColor = "#0078D7";
+    private int _badgeSize = 32;
+
+    // Version 2.0: Redo Stack
+    private readonly Stack<UIElement> _redoStack = new();
+
     // In-tab cropping state (8-point interactive handles like MS Paint)
     private Point _tabCropStart;
     private double _tabCropX;
@@ -139,6 +156,10 @@ public sealed partial class MainWindow : Window
     private void MainTabView_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         SetToolMode(ToolType.Hand);
+        if (ViewModel.SelectedTab?.HasImage == true && ViewModel.SelectedTab.ZoomFactor == 1.0)
+        {
+            AutoFitImageToViewport(ViewModel.SelectedTab);
+        }
     }
 
     public FlowDirection GetFlowDirection(bool isRtl) =>
@@ -207,10 +228,25 @@ public sealed partial class MainWindow : Window
                 e.Handled = true;
                 ZoomOutCurrentTab();
             }
+            else if (isCtrlDown && e.Key == VirtualKey.P)
+            {
+                e.Handled = true;
+                ActionPrint_Click(this, new RoutedEventArgs());
+            }
             else if (isCtrlDown && (e.Key == VirtualKey.Number0 || e.Key == VirtualKey.NumberPad0))
             {
                 e.Handled = true;
                 ZoomResetCurrentTab();
+            }
+            else if (isCtrlDown && (e.Key == VirtualKey.Number9 || e.Key == VirtualKey.NumberPad9))
+            {
+                e.Handled = true;
+                AutoFitImageToViewport(ViewModel.SelectedTab);
+            }
+            else if (isCtrlDown && e.Key == VirtualKey.Y)
+            {
+                e.Handled = true;
+                ActionRedo_Click(this, new RoutedEventArgs());
             }
             else if (!isCtrlDown && e.Key == VirtualKey.H)
             {
@@ -293,7 +329,10 @@ public sealed partial class MainWindow : Window
                 tab.ImageWidth = width;
                 tab.ImageHeight = height;
                 tab.IsCropping = false;
-                tab.AutoSaveStatus = $"تم أخذ لقطة الشاشة ({width} × {height} بكسل) وحفظها بالذاكرة";
+                tab.AutoSaveStatus = _localizationService.GetString("Status_Captured", width, height);
+
+                // Version 2.0: Smart Auto-Fit Viewport Scaling (P08-T001)
+                AutoFitImageToViewport(tab);
             }
 
             // Copy to clipboard immediately like Snipping Tool
@@ -390,9 +429,9 @@ public sealed partial class MainWindow : Window
             // 3. Text fallback
             data.SetText(filePath);
 
-            // 4. Set rich drag metadata and thumbnail on DataPackage
-            data.Properties.Title = "اسحبها وشاركها إلينا (WhatsApp / Telegram / Explorer)";
-            data.Properties.Description = "اسحب وأفلت داخل أي محادثة أو مجلد للمشاركة الفورية";
+            // 4. Set rich drag metadata and thumbnail on DataPackage (Pure Localized Strings)
+            data.Properties.Title = _localizationService.GetString("Action_DragDropPill");
+            data.Properties.Description = _localizationService.GetString("Action_DragDropPillToolTip");
             data.Properties.Thumbnail = RandomAccessStreamReference.CreateFromStream(stream);
         }
         catch (Exception)
@@ -558,7 +597,8 @@ public sealed partial class MainWindow : Window
                         {
                             ViewModel.SelectedTab.Title = file.Name;
                             ViewModel.SelectedTab.ImageBytes = bytes;
-                            ViewModel.SelectedTab.AutoSaveStatus = $"تم تحميل الصورة من {file.Name}";
+                            ViewModel.SelectedTab.AutoSaveStatus = _localizationService.GetString("Status_ImageLoaded", file.Name);
+                            AutoFitImageToViewport(ViewModel.SelectedTab);
                         }
                     }
                 }
@@ -588,19 +628,21 @@ public sealed partial class MainWindow : Window
         }
         else
         {
-            int imgW = tab.ImageWidth > 0 ? tab.ImageWidth : 800;
-            int imgH = tab.ImageHeight > 0 ? tab.ImageHeight : 600;
+            var scroll = GetActiveScrollViewer();
+            var cropBox = scroll != null ? FindChildByTag<Border>(scroll, "InTabCropBox") : null;
+            var cropCanvas = cropBox?.Parent as Canvas;
+            double displayW = cropCanvas?.ActualWidth > 0 ? cropCanvas.ActualWidth : (tab.ImageWidth > 0 ? tab.ImageWidth : 800);
+            double displayH = cropCanvas?.ActualHeight > 0 ? cropCanvas.ActualHeight : (tab.ImageHeight > 0 ? tab.ImageHeight : 600);
 
-            int insetX = Math.Min(30, Math.Max(10, imgW / 12));
-            int insetY = Math.Min(30, Math.Max(10, imgH / 12));
+            int insetX = (int)Math.Min(30, Math.Max(10, displayW / 12));
+            int insetY = (int)Math.Min(30, Math.Max(10, displayH / 12));
             _tabCropX = insetX;
             _tabCropY = insetY;
-            _tabCropW = Math.Max(50, imgW - insetX * 2);
-            _tabCropH = Math.Max(50, imgH - insetY * 2);
+            _tabCropW = Math.Max(50, displayW - insetX * 2);
+            _tabCropH = Math.Max(50, displayH - insetY * 2);
 
             SetToolMode(ToolType.Crop);
 
-            var scroll = GetActiveScrollViewer();
             if (scroll != null)
             {
                 var box = FindChildByTag<Border>(scroll, "InTabCropBox");
@@ -617,6 +659,7 @@ public sealed partial class MainWindow : Window
         try
         {
             if (sender is not Canvas canvas) return;
+            try { canvas.CapturePointer(e.Pointer); } catch { }
             var pt = e.GetCurrentPoint(canvas).Position;
 
             var hitHandle = HitTestCropHandle(pt, _tabCropX, _tabCropY, _tabCropW, _tabCropH);
@@ -780,6 +823,7 @@ public sealed partial class MainWindow : Window
         try
         {
             if (sender is not Canvas canvas) return;
+            try { canvas.ReleasePointerCapture(e.Pointer); } catch { }
             _isTabCropDragging = false;
             _activeCropHandle = null;
             _isMovingCropBox = false;
@@ -880,12 +924,25 @@ public sealed partial class MainWindow : Window
                 return;
             }
 
-            var cropped = _screenCaptureService.CropBitmap(bytes, (int)_tabCropX, (int)_tabCropY, (int)_tabCropW, (int)_tabCropH);
+            var scroll = GetActiveScrollViewer();
+            var cropBox = scroll != null ? FindChildByTag<Border>(scroll, "InTabCropBox") : null;
+            var cropCanvas = cropBox?.Parent as Canvas;
+            double cW = cropCanvas?.ActualWidth > 0 ? cropCanvas.ActualWidth : (tab.ImageWidth > 0 ? tab.ImageWidth : _tabCropW);
+            double cH = cropCanvas?.ActualHeight > 0 ? cropCanvas.ActualHeight : (tab.ImageHeight > 0 ? tab.ImageHeight : _tabCropH);
+            double scaleX = cW > 0 && tab.ImageWidth > 0 ? (double)tab.ImageWidth / cW : 1.0;
+            double scaleY = cH > 0 && tab.ImageHeight > 0 ? (double)tab.ImageHeight / cH : 1.0;
+
+            int cropX = (int)Math.Round(_tabCropX * scaleX);
+            int cropY = (int)Math.Round(_tabCropY * scaleY);
+            int cropW = (int)Math.Round(_tabCropW * scaleX);
+            int cropH = (int)Math.Round(_tabCropH * scaleY);
+
+            var cropped = _screenCaptureService.CropBitmap(bytes, cropX, cropY, cropW, cropH);
             if (cropped is { Length: > 0 })
             {
                 tab.ImageBytes = cropped;
-                tab.ImageWidth = (int)_tabCropW;
-                tab.ImageHeight = (int)_tabCropH;
+                tab.ImageWidth = cropW;
+                tab.ImageHeight = cropH;
                 SetToolMode(ToolType.Hand);
                 NotifyToolChange(_localizationService.GetString("Status_CropCommitted"));
                 CopyCurrentTabImage();
@@ -1006,7 +1063,20 @@ public sealed partial class MainWindow : Window
                 return;
             }
 
-            var blurred = _screenCaptureService.BlurRegion(bytes, (int)_tabBlurX, (int)_tabBlurY, (int)_tabBlurW, (int)_tabBlurH);
+            var scroll = GetActiveScrollViewer();
+            var blurBox = scroll != null ? FindChildByTag<Border>(scroll, "InTabBlurBox") : null;
+            var blurCanvas = blurBox?.Parent as Canvas;
+            double cW = blurCanvas?.ActualWidth > 0 ? blurCanvas.ActualWidth : (tab.ImageWidth > 0 ? tab.ImageWidth : _tabBlurW);
+            double cH = blurCanvas?.ActualHeight > 0 ? blurCanvas.ActualHeight : (tab.ImageHeight > 0 ? tab.ImageHeight : _tabBlurH);
+            double scaleX = cW > 0 && tab.ImageWidth > 0 ? (double)tab.ImageWidth / cW : 1.0;
+            double scaleY = cH > 0 && tab.ImageHeight > 0 ? (double)tab.ImageHeight / cH : 1.0;
+
+            int blurX = (int)Math.Round(_tabBlurX * scaleX);
+            int blurY = (int)Math.Round(_tabBlurY * scaleY);
+            int blurW = (int)Math.Round(_tabBlurW * scaleX);
+            int blurH = (int)Math.Round(_tabBlurH * scaleY);
+
+            var blurred = _screenCaptureService.BlurRegion(bytes, blurX, blurY, blurW, blurH);
             if (blurred is { Length: > 0 })
             {
                 tab.ImageBytes = blurred;
@@ -1040,7 +1110,66 @@ public sealed partial class MainWindow : Window
 
     private void BtnZoomIn_Click(object sender, RoutedEventArgs e) => ZoomInCurrentTab();
     private void BtnZoomOut_Click(object sender, RoutedEventArgs e) => ZoomOutCurrentTab();
-    private void BtnZoomReset_Click(object sender, RoutedEventArgs e) => ZoomResetCurrentTab();
+    private void BtnZoomReset_Click(object sender, RoutedEventArgs e)
+    {
+        var tab = ViewModel.SelectedTab;
+        if (tab == null) return;
+        // Toggle between 100% and Auto-Fit for maximum user convenience
+        if (Math.Abs(tab.ZoomFactor - 1.0) < 0.05)
+        {
+            AutoFitImageToViewport(tab);
+        }
+        else
+        {
+            ZoomResetCurrentTab();
+        }
+    }
+
+    private void AutoFitImageToViewport(ShellTabModel? tab)
+    {
+        if (tab == null) return;
+
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            try
+            {
+                var scroll = GetActiveScrollViewer();
+                if (scroll == null) return;
+
+                double viewW = scroll.ActualWidth > 0 ? scroll.ActualWidth : 1200;
+                double viewH = scroll.ActualHeight > 0 ? scroll.ActualHeight : 800;
+
+                double availW = Math.Max(200, viewW - 64);
+                double availH = Math.Max(200, viewH - 64);
+
+                double imgW = tab.ImageWidth > 0 ? tab.ImageWidth : 1920;
+                double imgH = tab.ImageHeight > 0 ? tab.ImageHeight : 1080;
+
+                if (imgW > availW || imgH > availH)
+                {
+                    double ratioW = availW / imgW;
+                    double ratioH = availH / imgH;
+                    double fitRatio = Math.Min(ratioW, ratioH);
+
+                    fitRatio = Math.Floor(fitRatio * 100.0) / 100.0;
+                    fitRatio = Math.Clamp(fitRatio, 0.15, 1.0);
+
+                    tab.ZoomFactor = fitRatio;
+                    scroll.ChangeView(null, null, (float)fitRatio);
+                    NotifyToolChange(_localizationService.GetString("Status_AutoFit", (int)(fitRatio * 100)));
+                }
+                else
+                {
+                    tab.ZoomFactor = 1.0;
+                    scroll.ChangeView(null, null, 1.0f);
+                }
+            }
+            catch (Exception)
+            {
+                // Protected Zero-Crash boundary
+            }
+        });
+    }
 
     private void ZoomInCurrentTab()
     {
@@ -1176,11 +1305,160 @@ public sealed partial class MainWindow : Window
         catch (Exception) { }
     }
 
+    // ==========================================
+    // 5. Version 2.0: Geometric Shapes & Vector Tool Handlers (P08-T003)
+    // ==========================================
+    private void ToolShape_Click(SplitButton sender, SplitButtonClickEventArgs args)
+    {
+        if (ViewModel.ActiveTool == ToolType.Shape)
+            SetToolMode(ToolType.Hand);
+        else
+            SetToolMode(ToolType.Shape);
+    }
+
+    private void ShapeSelect_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuFlyoutItem item && Enum.TryParse<ShapeType>(item.Tag?.ToString(), out var shapeType))
+        {
+            _currentShapeType = shapeType;
+            SetToolMode(ToolType.Shape);
+            NotifyToolChange($"{_localizationService.GetString("Tool_Shape")}: {_localizationService.GetString($"Shape_{shapeType}")}");
+        }
+    }
+
+    private void ShapeColor_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuFlyoutItem item && item.Tag is string hex)
+        {
+            _shapeColor = hex;
+            var color = ParseColorHex(hex);
+            if (IndicatorShapeColor != null) IndicatorShapeColor.Background = new SolidColorBrush(color);
+            if (IconShapeGlyph != null) IconShapeGlyph.Foreground = new SolidColorBrush(color);
+            SetToolMode(ToolType.Shape);
+        }
+    }
+
+    private void ShapeSize_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuFlyoutItem item && int.TryParse(item.Tag?.ToString(), out var thickness))
+        {
+            _shapeThickness = thickness;
+            SetToolMode(ToolType.Shape);
+        }
+    }
+
+    private void ShapeFill_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is ToggleMenuFlyoutItem toggle)
+        {
+            _shapeFill = toggle.IsChecked;
+            SetToolMode(ToolType.Shape);
+        }
+    }
+
+    // ==========================================
+    // 6. Version 2.0: Sequential Numbered Step Badges Handlers (P08-T004)
+    // ==========================================
+    private void ToolBadge_Click(SplitButton sender, SplitButtonClickEventArgs args)
+    {
+        if (ViewModel.ActiveTool == ToolType.Badge)
+            SetToolMode(ToolType.Hand);
+        else
+            SetToolMode(ToolType.Badge);
+    }
+
+    private void BadgeColor_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuFlyoutItem item && item.Tag is string hex)
+        {
+            _badgeColor = hex;
+            var color = ParseColorHex(hex);
+            if (IndicatorBadgeColor != null) IndicatorBadgeColor.Background = new SolidColorBrush(color);
+            if (IconBadgeGlyph != null) IconBadgeGlyph.Foreground = new SolidColorBrush(color);
+            SetToolMode(ToolType.Badge);
+        }
+    }
+
+    private void BadgeSize_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is MenuFlyoutItem item && int.TryParse(item.Tag?.ToString(), out var size))
+        {
+            _badgeSize = size;
+            SetToolMode(ToolType.Badge);
+        }
+    }
+
+    private void BadgeReset_Click(object sender, RoutedEventArgs e)
+    {
+        _nextBadgeNumber = 1;
+        NotifyToolChange(_localizationService.GetString("Badge_Reset"));
+    }
+
+    // ==========================================
+    // 7. Version 2.0: Native Windows Print Pipeline (P08-T002)
+    // ==========================================
+    private async void ActionPrint_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            var tab = ViewModel.SelectedTab;
+            if (tab?.ImageBytes is not { Length: > 0 } bytes)
+            {
+                NotifyToolChange(_localizationService.GetString("Action_NewSnip_Tip"));
+                return;
+            }
+
+            // 1. Bake any active drawing canvas annotations before printing
+            if (_activeDrawingCanvas != null && _activeDrawingCanvas.Children.Count > 0)
+            {
+                BtnCommitAndSaveEditing_Click(sender, e);
+                bytes = tab.ImageBytes!;
+            }
+
+            NotifyToolChange(_localizationService.GetString("Status_Printing"));
+
+            // 2. Write temp image file for native Windows printing wizard
+            var tempFolder = System.IO.Path.Combine(System.IO.Path.GetTempPath(), "DropCut");
+            System.IO.Directory.CreateDirectory(tempFolder);
+            var safeTitle = string.Join("_", tab.Title.Split(System.IO.Path.GetInvalidFileNameChars()));
+            var printPath = System.IO.Path.Combine(tempFolder, $"Print_{safeTitle}_{DateTime.Now:yyyyMMdd_HHmmss}.png");
+            await System.IO.File.WriteAllBytesAsync(printPath, bytes);
+
+            // 3. Launch native Windows Print Picture dialog (supports printer selection, A4/Letter, PDF export, orientation)
+            try
+            {
+                var psi = new ProcessStartInfo
+                {
+                    FileName = printPath,
+                    Verb = "print",
+                    UseShellExecute = true
+                };
+                Process.Start(psi);
+            }
+            catch (Exception)
+            {
+                // Fallback to photo viewer print verb
+                var fallbackPsi = new ProcessStartInfo
+                {
+                    FileName = "rundll32.exe",
+                    Arguments = $"\"%ProgramFiles%\\Windows Photo Viewer\\PhotoViewer.dll\",ImageView_PrintTo /pt \"{printPath}\"",
+                    UseShellExecute = true
+                };
+                Process.Start(fallbackPsi);
+            }
+        }
+        catch (Exception ex)
+        {
+            NotifyToolChange($"Print error: {ex.Message}");
+        }
+    }
+
     private void ToolEraser_Click(object sender, RoutedEventArgs e)
     {
         if (_activeDrawingCanvas != null && _activeDrawingCanvas.Children.Count > 0)
         {
             _activeDrawingCanvas.Children.Clear();
+            _redoStack.Clear();
             NotifyToolChange(_localizationService.GetString("Status_AllCleared"));
         }
         SetToolMode(ToolType.Hand);
@@ -1194,6 +1472,7 @@ public sealed partial class MainWindow : Window
         }
         else
         {
+            _currentShapeType = ShapeType.Line;
             SetToolMode(ToolType.Shape);
         }
     }
@@ -1239,6 +1518,26 @@ public sealed partial class MainWindow : Window
                 }
                 NotifyToolChange(_localizationService.GetString("Status_BlurActive"));
             }
+            else if (tool == ToolType.Shape)
+            {
+                if (tab != null)
+                {
+                    tab.IsCropping = false;
+                    tab.IsBlurring = false;
+                    tab.IsDrawingMode = true;
+                }
+                NotifyToolChange(_localizationService.GetString("Tool_Shape_Tip"));
+            }
+            else if (tool == ToolType.Badge)
+            {
+                if (tab != null)
+                {
+                    tab.IsCropping = false;
+                    tab.IsBlurring = false;
+                    tab.IsDrawingMode = true;
+                }
+                NotifyToolChange(_localizationService.GetString("Tool_Badge_Tip"));
+            }
             else
             {
                 if (tab != null)
@@ -1268,6 +1567,8 @@ public sealed partial class MainWindow : Window
             ResetButtonStyle(BtnHandTool);
             ResetButtonStyle(BtnPenTool);
             ResetButtonStyle(BtnHighlighterTool);
+            ResetButtonStyle(BtnShapeTool);
+            ResetButtonStyle(BtnBadgeTool);
             ResetButtonStyle(BtnEraserTool);
             ResetButtonStyle(BtnBlurTool);
             ResetButtonStyle(BtnRulerTool);
@@ -1279,6 +1580,10 @@ public sealed partial class MainWindow : Window
             if (IndicatorPenColor != null) IndicatorPenColor.Background = new SolidColorBrush(ParseColorHex(ViewModel.PenColor));
             if (IconHighlighterGlyph != null) IconHighlighterGlyph.Foreground = new SolidColorBrush(ParseColorHex(_highlighterColor));
             if (IndicatorHighlighterColor != null) IndicatorHighlighterColor.Background = new SolidColorBrush(ParseColorHex(_highlighterColor));
+            if (IconShapeGlyph != null) IconShapeGlyph.Foreground = new SolidColorBrush(ParseColorHex(_shapeColor));
+            if (IndicatorShapeColor != null) IndicatorShapeColor.Background = new SolidColorBrush(ParseColorHex(_shapeColor));
+            if (IconBadgeGlyph != null) IconBadgeGlyph.Foreground = new SolidColorBrush(ParseColorHex(_badgeColor));
+            if (IndicatorBadgeColor != null) IndicatorBadgeColor.Background = new SolidColorBrush(ParseColorHex(_badgeColor));
 
             // 2. Apply vibrant active styling (Golden Yellow for editing tools, Fluent Blue for Hand tool)
             switch (tool)
@@ -1291,38 +1596,44 @@ public sealed partial class MainWindow : Window
 
                 case ToolType.Pen:
                     ApplyActiveYellowStyle(BtnPenTool);
-                    ShowModeGuidance("\uED63", "وضع القلم نشط — تم قفل وضع السحب مؤقتاً لحماية الرسم ✏️");
+                    ShowModeGuidance("\uED63", _localizationService.GetString("Action_ModeGuidance"));
                     SetCanvasCursor(InputSystemCursorShape.Cross);
                     break;
 
                 case ToolType.Highlighter:
                     ApplyActiveYellowStyle(BtnHighlighterTool);
-                    ShowModeGuidance("\uE7E6", "وضع قلم التمييز نشط — تم قفل وضع السحب لحماية الرسم ✏️");
+                    ShowModeGuidance("\uE7E6", _localizationService.GetString("Action_ModeGuidance"));
                     SetCanvasCursor(InputSystemCursorShape.Cross);
+                    break;
+
+                case ToolType.Shape:
+                    ApplyActiveYellowStyle(BtnShapeTool);
+                    ShowModeGuidance("\uE73B", _localizationService.GetString("Action_ModeGuidance"));
+                    SetCanvasCursor(InputSystemCursorShape.Cross);
+                    break;
+
+                case ToolType.Badge:
+                    ApplyActiveYellowStyle(BtnBadgeTool);
+                    ShowModeGuidance("\uE735", _localizationService.GetString("Action_ModeGuidance"));
+                    SetCanvasCursor(InputSystemCursorShape.Hand);
                     break;
 
                 case ToolType.BlurRedact:
                     ApplyActiveYellowStyle(BtnBlurTool);
-                    ShowModeGuidance("\uE790", "وضع طمس البيانات الحساسة نشط — تم قفل وضع السحب مؤقتاً 🫥");
+                    ShowModeGuidance("\uE790", _localizationService.GetString("Action_ModeGuidance"));
                     SetCanvasCursor(InputSystemCursorShape.Cross);
                     break;
 
                 case ToolType.Crop:
                     ApplyActiveYellowStyle(BtnCropTool);
-                    ShowModeGuidance("\uE7A8", "وضع اقتصاص الصورة نشط — اسحب من أي مقبض من الـ 8 نقاط للتقليص 🔲");
+                    ShowModeGuidance("\uE7A8", _localizationService.GetString("Action_ModeGuidance"));
                     SetCanvasCursor(InputSystemCursorShape.Cross);
                     break;
 
                 case ToolType.Select:
                     ApplyActiveYellowStyle(BtnEraserTool);
-                    ShowModeGuidance("\uE75C", "وضع الممحاة نشط 🧹");
+                    ShowModeGuidance("\uE75C", _localizationService.GetString("Action_ModeGuidance"));
                     SetCanvasCursor(InputSystemCursorShape.Arrow);
-                    break;
-
-                case ToolType.Shape:
-                    ApplyActiveYellowStyle(BtnRulerTool);
-                    ShowModeGuidance("\uED5E", "مسطرة القياس نشطة 📏");
-                    SetCanvasCursor(InputSystemCursorShape.Cross);
                     break;
 
                 default:
@@ -1425,29 +1736,90 @@ public sealed partial class MainWindow : Window
                 return;
             }
 
-            // 3. If currently in Inking mode -> Rasterize annotations!
+            // 3. If currently in Inking / Shapes / Badges mode -> Rasterize annotations!
             if (tab.ImageBytes is { Length: > 0 } bytes && _activeDrawingCanvas != null && _activeDrawingCanvas.Children.Count > 0)
             {
                 var strokes = new List<StrokeRenderData>();
+                var badges = new List<BadgeRenderData>();
+
+                double cW = _activeDrawingCanvas.ActualWidth > 0 ? _activeDrawingCanvas.ActualWidth : (tab.ImageWidth > 0 ? tab.ImageWidth : 1);
+                double cH = _activeDrawingCanvas.ActualHeight > 0 ? _activeDrawingCanvas.ActualHeight : (tab.ImageHeight > 0 ? tab.ImageHeight : 1);
+                double scaleX = cW > 0 && tab.ImageWidth > 0 ? (double)tab.ImageWidth / cW : 1.0;
+                double scaleY = cH > 0 && tab.ImageHeight > 0 ? (double)tab.ImageHeight / cH : 1.0;
+
                 foreach (var child in _activeDrawingCanvas.Children)
                 {
                     if (child is Polyline poly && poly.Points.Count >= 2)
                     {
-                        var pts = poly.Points.Select(p => (p.X, p.Y)).ToList();
+                        var pts = poly.Points.Select(p => (p.X * scaleX, p.Y * scaleY)).ToList();
                         var hex = (poly.Stroke as SolidColorBrush)?.Color.ToString() ?? "#FF0000";
-                        var thickness = (int)poly.StrokeThickness;
-                        bool isHighlight = poly.Opacity < 0.9 || thickness >= 10;
-                        strokes.Add(new StrokeRenderData(pts, hex, thickness, isHighlight));
+                        var thickness = (int)Math.Round(poly.StrokeThickness * scaleX);
+                        bool isHighlight = poly.Opacity < 0.9 || poly.StrokeThickness >= 10;
+                        strokes.Add(new StrokeRenderData(pts, hex, Math.Max(1, thickness), isHighlight));
+                    }
+                    else if (child is Microsoft.UI.Xaml.Shapes.Rectangle rect)
+                    {
+                        double l = Canvas.GetLeft(rect) * scaleX;
+                        double t = Canvas.GetTop(rect) * scaleY;
+                        double w = (rect.Width > 0 ? rect.Width : 20) * scaleX;
+                        double h = (rect.Height > 0 ? rect.Height : 20) * scaleY;
+                        var rectPts = new List<(double X, double Y)>
+                        {
+                            (l, t), (l + w, t), (l + w, t + h), (l, t + h), (l, t)
+                        };
+                        var hex = (rect.Stroke as SolidColorBrush)?.Color.ToString() ?? "#FF0000";
+                        var thick = (int)Math.Round(rect.StrokeThickness * scaleX);
+                        strokes.Add(new StrokeRenderData(rectPts, hex, Math.Max(1, thick), false));
+                    }
+                    else if (child is Microsoft.UI.Xaml.Shapes.Line line)
+                    {
+                        var linePts = new List<(double X, double Y)>
+                        {
+                            (line.X1 * scaleX, line.Y1 * scaleY),
+                            (line.X2 * scaleX, line.Y2 * scaleY)
+                        };
+                        var hex = (line.Stroke as SolidColorBrush)?.Color.ToString() ?? "#FF0000";
+                        var thick = (int)Math.Round(line.StrokeThickness * scaleX);
+                        strokes.Add(new StrokeRenderData(linePts, hex, Math.Max(1, thick), false));
+                    }
+                    else if (child is Microsoft.UI.Xaml.Shapes.Ellipse ell)
+                    {
+                        double cx = (Canvas.GetLeft(ell) + ell.Width / 2.0) * scaleX;
+                        double cy = (Canvas.GetTop(ell) + ell.Height / 2.0) * scaleY;
+                        double rx = (ell.Width / 2.0) * scaleX;
+                        double ry = (ell.Height / 2.0) * scaleY;
+                        var ellPts = new List<(double X, double Y)>();
+                        for (int deg = 0; deg <= 360; deg += 10)
+                        {
+                            double rad = deg * Math.PI / 180.0;
+                            ellPts.Add((cx + rx * Math.Cos(rad), cy + ry * Math.Sin(rad)));
+                        }
+                        var hex = (ell.Stroke as SolidColorBrush)?.Color.ToString() ?? "#FF0000";
+                        var thick = (int)Math.Round(ell.StrokeThickness * scaleX);
+                        strokes.Add(new StrokeRenderData(ellPts, hex, Math.Max(1, thick), false));
+                    }
+                    else if (child is Grid badgeGrid && badgeGrid.Tag is string tag && tag.StartsWith("Badge_"))
+                    {
+                        if (int.TryParse(tag.Substring(6), out var num))
+                        {
+                            double bx = (Canvas.GetLeft(badgeGrid) + badgeGrid.Width / 2.0) * scaleX;
+                            double by = (Canvas.GetTop(badgeGrid) + badgeGrid.Height / 2.0) * scaleY;
+                            var ellChild = badgeGrid.Children.OfType<Microsoft.UI.Xaml.Shapes.Ellipse>().FirstOrDefault();
+                            var bgHex = (ellChild?.Fill as SolidColorBrush)?.Color.ToString() ?? "#0078D7";
+                            var diam = (int)Math.Round(badgeGrid.Width * scaleX);
+                            badges.Add(new BadgeRenderData(bx, by, num, bgHex, Math.Max(16, diam)));
+                        }
                     }
                 }
 
-                if (strokes.Count > 0)
+                if (strokes.Count > 0 || badges.Count > 0)
                 {
-                    var baked = _screenCaptureService.RenderAnnotations(bytes, strokes);
+                    var baked = _screenCaptureService.RenderAnnotations(bytes, strokes, badges);
                     if (baked != null && baked.Length > 0)
                     {
                         tab.ImageBytes = baked;
                         _activeDrawingCanvas.Children.Clear();
+                        _redoStack.Clear();
                         CopyCurrentTabImage();
                         NotifyToolChange(_localizationService.GetString("Status_Saved"));
                     }
@@ -1532,7 +1904,7 @@ public sealed partial class MainWindow : Window
         catch (Exception ex)
         {
             ResetButtonStyle(BtnTextTool);
-            NotifyToolChange($"تعذر استخراج النصوص: {ex.Message}");
+            NotifyToolChange(_localizationService.GetString("Status_TextExtractionFailed", ex.Message));
         }
     }
 
@@ -1554,6 +1926,7 @@ public sealed partial class MainWindow : Window
             if (ViewModel.SelectedTab?.IsCropping == true || ViewModel.SelectedTab?.IsBlurring == true || ViewModel.ActiveTool == ToolType.Hand) return;
             if (sender is not Canvas canvas) return;
             _activeDrawingCanvas = canvas;
+            try { canvas.CapturePointer(e.Pointer); } catch { }
 
             var pt = e.GetCurrentPoint(canvas).Position;
 
@@ -1591,6 +1964,151 @@ public sealed partial class MainWindow : Window
                 _activePolyline.Points.Add(pt);
                 canvas.Children.Add(_activePolyline);
             }
+            else if (ViewModel.ActiveTool == ToolType.Shape)
+            {
+                _redoStack.Clear();
+                _shapeStartPoint = pt;
+                _isDrawingShape = true;
+                var color = ParseColorHex(_shapeColor);
+                var strokeBrush = new SolidColorBrush(color);
+                var fillBrush = _shapeFill
+                    ? new SolidColorBrush(Color.FromArgb(50, color.R, color.G, color.B))
+                    : new SolidColorBrush(Microsoft.UI.Colors.Transparent);
+
+                switch (_currentShapeType)
+                {
+                    case ShapeType.Rectangle:
+                        var rect = new Microsoft.UI.Xaml.Shapes.Rectangle
+                        {
+                            Stroke = strokeBrush,
+                            StrokeThickness = _shapeThickness,
+                            Fill = fillBrush,
+                            Tag = "Shape_Rectangle"
+                        };
+                        Canvas.SetLeft(rect, pt.X);
+                        Canvas.SetTop(rect, pt.Y);
+                        canvas.Children.Add(rect);
+                        _activeShapeElement = rect;
+                        break;
+
+                    case ShapeType.RoundedRectangle:
+                        var rrect = new Microsoft.UI.Xaml.Shapes.Rectangle
+                        {
+                            Stroke = strokeBrush,
+                            StrokeThickness = _shapeThickness,
+                            RadiusX = 12,
+                            RadiusY = 12,
+                            Fill = fillBrush,
+                            Tag = "Shape_RoundedRectangle"
+                        };
+                        Canvas.SetLeft(rrect, pt.X);
+                        Canvas.SetTop(rrect, pt.Y);
+                        canvas.Children.Add(rrect);
+                        _activeShapeElement = rrect;
+                        break;
+
+                    case ShapeType.Ellipse:
+                        var ell = new Microsoft.UI.Xaml.Shapes.Ellipse
+                        {
+                            Stroke = strokeBrush,
+                            StrokeThickness = _shapeThickness,
+                            Fill = fillBrush,
+                            Tag = "Shape_Ellipse"
+                        };
+                        Canvas.SetLeft(ell, pt.X);
+                        Canvas.SetTop(ell, pt.Y);
+                        canvas.Children.Add(ell);
+                        _activeShapeElement = ell;
+                        break;
+
+                    case ShapeType.Line:
+                        var line = new Microsoft.UI.Xaml.Shapes.Line
+                        {
+                            X1 = pt.X,
+                            Y1 = pt.Y,
+                            X2 = pt.X,
+                            Y2 = pt.Y,
+                            Stroke = strokeBrush,
+                            StrokeThickness = _shapeThickness,
+                            StrokeStartLineCap = PenLineCap.Round,
+                            StrokeEndLineCap = PenLineCap.Round,
+                            Tag = "Shape_Line"
+                        };
+                        canvas.Children.Add(line);
+                        _activeShapeElement = line;
+                        break;
+
+                    case ShapeType.Arrow:
+                        var arrow = new Polyline
+                        {
+                            Stroke = strokeBrush,
+                            StrokeThickness = _shapeThickness,
+                            StrokeStartLineCap = PenLineCap.Round,
+                            StrokeEndLineCap = PenLineCap.Round,
+                            StrokeLineJoin = PenLineJoin.Round,
+                            Tag = "Shape_Arrow"
+                        };
+                        arrow.Points.Add(pt);
+                        arrow.Points.Add(pt);
+                        canvas.Children.Add(arrow);
+                        _activeShapeElement = arrow;
+                        break;
+
+                    case ShapeType.Callout:
+                        var callout = new Microsoft.UI.Xaml.Shapes.Rectangle
+                        {
+                            Stroke = strokeBrush,
+                            StrokeThickness = _shapeThickness,
+                            RadiusX = 16,
+                            RadiusY = 16,
+                            Fill = fillBrush,
+                            Tag = "Shape_Callout"
+                        };
+                        Canvas.SetLeft(callout, pt.X);
+                        Canvas.SetTop(callout, pt.Y);
+                        canvas.Children.Add(callout);
+                        _activeShapeElement = callout;
+                        break;
+                }
+            }
+            else if (ViewModel.ActiveTool == ToolType.Badge)
+            {
+                _redoStack.Clear();
+                int num = _nextBadgeNumber++;
+                int diameter = _badgeSize;
+                var bColor = ParseColorHex(_badgeColor);
+
+                var grid = new Grid
+                {
+                    Width = diameter,
+                    Height = diameter,
+                    Tag = $"Badge_{num}"
+                };
+
+                var ellipse = new Microsoft.UI.Xaml.Shapes.Ellipse
+                {
+                    Fill = new SolidColorBrush(bColor),
+                    Stroke = new SolidColorBrush(Microsoft.UI.Colors.White),
+                    StrokeThickness = 2
+                };
+
+                var tb = new TextBlock
+                {
+                    Text = num.ToString(),
+                    Foreground = new SolidColorBrush(Microsoft.UI.Colors.White),
+                    FontWeight = Microsoft.UI.Text.FontWeights.Bold,
+                    FontSize = Math.Max(10, diameter * 0.45),
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center
+                };
+
+                grid.Children.Add(ellipse);
+                grid.Children.Add(tb);
+                Canvas.SetLeft(grid, pt.X - diameter / 2.0);
+                Canvas.SetTop(grid, pt.Y - diameter / 2.0);
+                canvas.Children.Add(grid);
+                NotifyToolChange(_localizationService.GetString("Status_BadgeStamped", num));
+            }
         }
         catch (Exception)
         {
@@ -1602,10 +2120,54 @@ public sealed partial class MainWindow : Window
     {
         try
         {
-            if (_activePolyline != null && sender is Canvas canvas && ViewModel.SelectedTab?.IsCropping != true)
+            if (sender is not Canvas canvas || ViewModel.SelectedTab?.IsCropping == true) return;
+            var pt = e.GetCurrentPoint(canvas).Position;
+
+            if (_activePolyline != null)
             {
-                var pt = e.GetCurrentPoint(canvas).Position;
                 _activePolyline.Points.Add(pt);
+            }
+            else if (_isDrawingShape && _activeShapeElement != null)
+            {
+                double x = Math.Min(_shapeStartPoint.X, pt.X);
+                double y = Math.Min(_shapeStartPoint.Y, pt.Y);
+                double w = Math.Max(2, Math.Abs(pt.X - _shapeStartPoint.X));
+                double h = Math.Max(2, Math.Abs(pt.Y - _shapeStartPoint.Y));
+
+                if (_activeShapeElement is Microsoft.UI.Xaml.Shapes.Rectangle || _activeShapeElement is Microsoft.UI.Xaml.Shapes.Ellipse)
+                {
+                    _activeShapeElement.Width = w;
+                    _activeShapeElement.Height = h;
+                    Canvas.SetLeft(_activeShapeElement, x);
+                    Canvas.SetTop(_activeShapeElement, y);
+                }
+                else if (_activeShapeElement is Microsoft.UI.Xaml.Shapes.Line line)
+                {
+                    line.X1 = _shapeStartPoint.X;
+                    line.Y1 = _shapeStartPoint.Y;
+                    line.X2 = pt.X;
+                    line.Y2 = pt.Y;
+                }
+                else if (_activeShapeElement is Polyline arrow && string.Equals(arrow.Tag?.ToString(), "Shape_Arrow", StringComparison.OrdinalIgnoreCase))
+                {
+                    double dx = pt.X - _shapeStartPoint.X;
+                    double dy = pt.Y - _shapeStartPoint.Y;
+                    double angle = Math.Atan2(dy, dx);
+                    double barbLen = Math.Max(12, _shapeThickness * 3.5);
+                    double barbAngle = Math.PI / 6.0;
+
+                    double xA = pt.X - barbLen * Math.Cos(angle - barbAngle);
+                    double yA = pt.Y - barbLen * Math.Sin(angle - barbAngle);
+                    double xB = pt.X - barbLen * Math.Cos(angle + barbAngle);
+                    double yB = pt.Y - barbLen * Math.Sin(angle + barbAngle);
+
+                    arrow.Points.Clear();
+                    arrow.Points.Add(_shapeStartPoint);
+                    arrow.Points.Add(pt);
+                    arrow.Points.Add(new Point(xA, yA));
+                    arrow.Points.Add(pt);
+                    arrow.Points.Add(new Point(xB, yB));
+                }
             }
         }
         catch (Exception)
@@ -1618,7 +2180,13 @@ public sealed partial class MainWindow : Window
     {
         try
         {
+            if (_activeDrawingCanvas != null)
+            {
+                try { _activeDrawingCanvas.ReleasePointerCapture(e.Pointer); } catch { }
+            }
             _activePolyline = null;
+            _isDrawingShape = false;
+            _activeShapeElement = null;
         }
         catch (Exception)
         {
@@ -1660,15 +2228,36 @@ public sealed partial class MainWindow : Window
         {
             if (_activeDrawingCanvas != null && _activeDrawingCanvas.Children.Count > 0)
             {
+                var last = _activeDrawingCanvas.Children[_activeDrawingCanvas.Children.Count - 1];
                 _activeDrawingCanvas.Children.RemoveAt(_activeDrawingCanvas.Children.Count - 1);
+                _redoStack.Push(last);
+                if (last is FrameworkElement fe && fe.Tag is string s && s.StartsWith("Badge_"))
+                {
+                    if (_nextBadgeNumber > 1) _nextBadgeNumber--;
+                }
                 NotifyToolChange(_localizationService.GetString("Action_Undo"));
             }
         }
         catch (Exception) { }
     }
 
-    private void ActionRedo_Click(object sender, RoutedEventArgs e) =>
-        NotifyToolChange(_localizationService.GetString("Action_Redo"));
+    private void ActionRedo_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            if (_redoStack.Count > 0 && _activeDrawingCanvas != null)
+            {
+                var item = _redoStack.Pop();
+                _activeDrawingCanvas.Children.Add(item);
+                if (item is FrameworkElement fe && fe.Tag is string s && s.StartsWith("Badge_"))
+                {
+                    _nextBadgeNumber++;
+                }
+                NotifyToolChange(_localizationService.GetString("Action_Redo"));
+            }
+        }
+        catch (Exception) { }
+    }
 
     private void ActionSave_Click(object sender, RoutedEventArgs e) => SaveCurrentTabImage();
 
@@ -1783,6 +2372,8 @@ public sealed partial class MainWindow : Window
             ToolTipService.SetToolTip(BtnHandTool, _localizationService.GetString("Tool_Hand_Tip"));
             ToolTipService.SetToolTip(BtnPenTool, _localizationService.GetString("Tool_Pen_Tip"));
             ToolTipService.SetToolTip(BtnHighlighterTool, _localizationService.GetString("Tool_Highlighter_Tip"));
+            if (BtnShapeTool != null) ToolTipService.SetToolTip(BtnShapeTool, _localizationService.GetString("Tool_Shape_Tip"));
+            if (BtnBadgeTool != null) ToolTipService.SetToolTip(BtnBadgeTool, _localizationService.GetString("Tool_Badge_Tip"));
             ToolTipService.SetToolTip(BtnEraserTool, _localizationService.GetString("Tool_Eraser_Tip"));
             ToolTipService.SetToolTip(BtnBlurTool, _localizationService.GetString("Tool_Blur_Tip"));
             ToolTipService.SetToolTip(BtnRulerTool, _localizationService.GetString("Tool_Ruler_Tip"));
@@ -1793,6 +2384,7 @@ public sealed partial class MainWindow : Window
             ToolTipService.SetToolTip(BtnRedo, _localizationService.GetString("Action_Redo_Tip"));
             ToolTipService.SetToolTip(BtnSave, _localizationService.GetString("Action_Save_Tip"));
             ToolTipService.SetToolTip(BtnCopy, _localizationService.GetString("Action_Copy_Tip"));
+            if (BtnPrint != null) ToolTipService.SetToolTip(BtnPrint, _localizationService.GetString("Action_Print_Tip"));
             ToolTipService.SetToolTip(BtnShare, _localizationService.GetString("Action_Share_Tip"));
             ToolTipService.SetToolTip(BtnMoreOptions, _localizationService.GetString("Action_Settings_Tip"));
 
@@ -1807,6 +2399,38 @@ public sealed partial class MainWindow : Window
             if (MenuDelay5s != null) MenuDelay5s.Text = _localizationService.GetString("Delay_5s");
             if (MenuDelay10s != null) MenuDelay10s.Text = _localizationService.GetString("Delay_10s");
 
+            if (MenuShapeRect != null) MenuShapeRect.Text = _localizationService.GetString("Shape_Rect");
+            if (MenuShapeRoundedRect != null) MenuShapeRoundedRect.Text = _localizationService.GetString("Shape_RoundedRect");
+            if (MenuShapeEllipse != null) MenuShapeEllipse.Text = _localizationService.GetString("Shape_Ellipse");
+            if (MenuShapeArrow != null) MenuShapeArrow.Text = _localizationService.GetString("Shape_Arrow");
+            if (MenuShapeLine != null) MenuShapeLine.Text = _localizationService.GetString("Shape_Line");
+            if (MenuShapeCallout != null) MenuShapeCallout.Text = _localizationService.GetString("Shape_Callout");
+            if (MenuShapeFill != null) MenuShapeFill.Text = _localizationService.GetString("Shape_Fill");
+
+            if (MenuShapeThickness2 != null) MenuShapeThickness2.Text = _localizationService.GetString("Shape_Thickness_Fine");
+            if (MenuShapeThickness4 != null) MenuShapeThickness4.Text = _localizationService.GetString("Shape_Thickness_Medium");
+            if (MenuShapeThickness8 != null) MenuShapeThickness8.Text = _localizationService.GetString("Shape_Thickness_Bold");
+            if (MenuShapeThickness12 != null) MenuShapeThickness12.Text = _localizationService.GetString("Shape_Thickness_ExtraBold");
+
+            if (MenuShapeColorRed != null) MenuShapeColorRed.Text = _localizationService.GetString("Color_Red");
+            if (MenuShapeColorBlue != null) MenuShapeColorBlue.Text = _localizationService.GetString("Color_Blue");
+            if (MenuShapeColorGreen != null) MenuShapeColorGreen.Text = _localizationService.GetString("Color_Green");
+            if (MenuShapeColorYellow != null) MenuShapeColorYellow.Text = _localizationService.GetString("Color_Yellow");
+            if (MenuShapeColorBlack != null) MenuShapeColorBlack.Text = _localizationService.GetString("Color_Black");
+            if (MenuShapeColorWhite != null) MenuShapeColorWhite.Text = _localizationService.GetString("Color_White");
+
+            if (MenuBadgeColorAccent != null) MenuBadgeColorAccent.Text = _localizationService.GetString("Color_Accent");
+            if (MenuBadgeColorRed != null) MenuBadgeColorRed.Text = _localizationService.GetString("Color_Red");
+            if (MenuBadgeColorOrange != null) MenuBadgeColorOrange.Text = _localizationService.GetString("Color_Orange");
+            if (MenuBadgeColorGreen != null) MenuBadgeColorGreen.Text = _localizationService.GetString("Color_Green");
+            if (MenuBadgeColorPurple != null) MenuBadgeColorPurple.Text = _localizationService.GetString("Color_Purple");
+
+            if (MenuBadgeSizeSmall != null) MenuBadgeSizeSmall.Text = _localizationService.GetString("Badge_Size_Small");
+            if (MenuBadgeSizeMedium != null) MenuBadgeSizeMedium.Text = _localizationService.GetString("Badge_Size_Medium");
+            if (MenuBadgeSizeLarge != null) MenuBadgeSizeLarge.Text = _localizationService.GetString("Badge_Size_Large");
+            if (MenuBadgeReset != null) MenuBadgeReset.Text = _localizationService.GetString("Badge_Reset");
+
+            if (MenuPrint != null) MenuPrint.Text = _localizationService.GetString("Action_Print");
             if (MenuSettings != null) MenuSettings.Text = _localizationService.GetString("Nav_Settings");
             if (MenuOpenVault != null) MenuOpenVault.Text = _localizationService.GetString("Nav_Vault");
             if (MenuAbout != null) MenuAbout.Text = _localizationService.GetString("Nav_About");

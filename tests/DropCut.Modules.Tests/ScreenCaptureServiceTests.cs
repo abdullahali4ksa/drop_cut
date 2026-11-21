@@ -60,4 +60,29 @@ public class ScreenCaptureServiceTests
         Assert.True(croppedWidth <= 50);
         Assert.True(croppedHeight <= 50);
     }
+
+    [Fact]
+    public async Task RenderAnnotations_WithStrokesAndBadges_RendersSafelyWithoutCrashing()
+    {
+        var service = new ScreenCaptureService();
+        var sourceBmp = await service.CaptureRegionAsync(0, 0, 200, 200);
+
+        var strokes = new List<DropCut.Core.Domain.StrokeRenderData>
+        {
+            new(new List<(double X, double Y)> { (10, 10), (100, 100) }, "#FF0000", 4, false),
+            new(new List<(double X, double Y)> { (20, 20), (80, 20), (80, 80), (20, 80), (20, 20) }, "#0078D7", 2, false)
+        };
+
+        var badges = new List<DropCut.Core.Domain.BadgeRenderData>
+        {
+            new(50, 50, 1, "#0078D7", 32),
+            new(120, 120, 2, "#E81123", 24)
+        };
+
+        var result = service.RenderAnnotations(sourceBmp, strokes, badges);
+
+        Assert.NotNull(result);
+        Assert.Equal(sourceBmp.Length, result.Length);
+        Assert.True(result.Length > 54);
+    }
 }

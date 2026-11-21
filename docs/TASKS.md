@@ -247,14 +247,14 @@
 > **Scope Rule:** Only the approved tasks below are part of Version 2.0. All other exploratory suggestions (macOS/Linux cross-platform, Chrome extension, scrolling capture, etc.) are strictly deferred until explicitly requested.
 
 ### [P08-T001] Smart Auto-Fit Viewport Scaling (احتواء ذكي للصورة داخل أبعاد التاب) (Linear: `JMD-65`)
-- **STATUS:** `READY`
+- **STATUS:** `DONE`
 - **POLICY_REF:** `docs/PROJECT_RULES.md (Ergonomic UI Standards, High-DPI Viewport Math)`
 - **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Bounded Zoom Clamping, Safe Viewport Aspect Ratio Calculation)`
 - **DESCRIPTION:** Automatically calculate the aspect ratio of captured images relative to the active tab viewport (`ScrollViewer.ViewportWidth / ImageWidth`, `ScrollViewer.ViewportHeight / ImageHeight`) with comfortable padding (24px). When a large screenshot (e.g., 1080p, 2K, 4K) is taken, automatically scale it down to "Fit to Window" so the entire capture is immediately visible without appearing huge or requiring immediate scrolling, while updating the status zoom level (e.g. `65%`) and allowing 1-click toggling back to 100% (Actual Size via `Ctrl + 0`).
 - **VERIFICATION:** Capturing a fullscreen 1080p or 4K screenshot fits cleanly inside the active tab viewport without exceeding borders; status bar reflects exact fit zoom percentage, and `Ctrl + 0` resets to `100%`.
 
 ### [P08-T002] Native Windows Print Pipeline & Print Hotkey (Ctrl+P) (نظام الطباعة المتكامل واختصار Ctrl+P) (Linear: `JMD-66`)
-- **STATUS:** `READY`
+- **STATUS:** `DONE`
 - **POLICY_REF:** `docs/PROJECT_RULES.md (Windows Integration, Fluent Native Tools)`
 - **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Protected PrintDocument Lifecycle, Memory Stream Disposal)`
 - **DESCRIPTION:** Implement direct printing capabilities via `Windows.Graphics.Printing` / `PrintManagerInterop` / `PrintDocument`:
@@ -264,7 +264,7 @@
 - **VERIFICATION:** Pressing `Ctrl + P` or clicking Print opens the native Windows print preview dialog with the active tab image rendered accurately; zero crashes if print spooler is busy or cancelled.
 
 ### [P08-T003] Geometric Shapes Annotation Tool & Dropdown Flyout (أداة الأشكال الهندسية والأسهم والشروحات) (Linear: `JMD-67`)
-- **STATUS:** `READY`
+- **STATUS:** `DONE`
 - **POLICY_REF:** `docs/PROJECT_RULES.md (Modular Vertical-Slice, Clean Fluent Ribbon, Store UI Standards)`
 - **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Vector Geometry Math, Bounds Validation, Hit-Testing Isolation)`
 - **DESCRIPTION:** Introduce a dedicated Shapes SplitButton (`&#xE73B;` / Shape Tool) in Section 2 of the top ribbon toolbar with an interactive dropdown flyout:
@@ -286,7 +286,7 @@
 - **VERIFICATION:** Selecting Arrow or Rectangle allows smooth click-and-drag drawing on the screenshot; shapes render with crisp anti-aliased geometry, undoable via `Ctrl + Z`, and cleanly rasterized into the export bitmap.
 
 ### [P08-T004] Step Numbering Badges Tool (أداة الترقيم المتسلسل التلقائي للشروحات ①, ②, ③...) (Linear: `JMD-68`)
-- **STATUS:** `READY`
+- **STATUS:** `DONE`
 - **POLICY_REF:** `docs/PROJECT_RULES.md (Clean Fluent Ribbon, Educational Annotation Suite)`
 - **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Stateful Badge Counter, Undo-Stack Synchronization)`
 - **DESCRIPTION:** Introduce an auto-incrementing Step Numbering Badge tool (`&#xE735;` / Badge Number Tool) in Section 2 of the ribbon toolbar:
@@ -298,7 +298,7 @@
 - **VERIFICATION:** Clicking sequentially on 3 areas stamps badges 1, 2, 3; pressing `Ctrl + Z` removes badge 3 and sets next counter to 3; exporting image preserves clean numbers.
 
 ### [P08-T005] Dual Architecture Packaging: Native Arm64 & Universal Store Bundle (حزم x64 و Arm64 المزدوجة) (Linear: `JMD-69`)
-- **STATUS:** `READY`
+- **STATUS:** `DONE`
 - **POLICY_REF:** `docs/PROJECT_RULES.md (Microsoft Store Standards, Future-Proof Architecture)`
 - **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Cross-Platform Native Binaries, Multi-Target MSBuild)`
 - **DESCRIPTION:** Build native Arm64 target (`-r win-arm64`) alongside x64 (`-r win-x64`) for Snapdragon X Elite and Surface Pro Copilot+ PCs, eliminating emulation overhead and ensuring 100% compliance with Microsoft Store's latest recommendations for Windows on Arm.

@@ -193,6 +193,133 @@
                         </SplitButton.Flyout>
                     </SplitButton>
 
+                    <!-- Geometric Shapes & Arrows Tool (Section 2, SplitButton with Dropdown Flyout) -->
+                    <SplitButton x:Name="BtnShapeTool" Height="36" Padding="8,0" Click="ToolShape_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+                            <FontIcon x:Name="IconShapeGlyph" Glyph="&#xE73B;" FontSize="14" Foreground="#FF0000" />
+                            <Border x:Name="IndicatorShapeColor" Width="8" Height="8" CornerRadius="4" Background="#FF0000" BorderBrush="#88000000" BorderThickness="1" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <SplitButton.Flyout>
+                            <MenuFlyout>
+                                <MenuFlyoutItem x:Name="MenuShapeRect" Text="Rectangle" Click="ShapeSelect_Click" Tag="Rectangle">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xE73B;" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem x:Name="MenuShapeRoundedRect" Text="Rounded Rectangle" Click="ShapeSelect_Click" Tag="RoundedRectangle">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xE73B;" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem x:Name="MenuShapeEllipse" Text="Circle &amp; Ellipse" Click="ShapeSelect_Click" Tag="Ellipse">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xEA3A;" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem x:Name="MenuShapeArrow" Text="Directional Arrow" Click="ShapeSelect_Click" Tag="Arrow">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xE742;" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem x:Name="MenuShapeLine" Text="Straight Line" Click="ShapeSelect_Click" Tag="Line">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xE76E;" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem x:Name="MenuShapeCallout" Text="Callout Bubble" Click="ShapeSelect_Click" Tag="Callout">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xE768;" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutSeparator />
+                                <MenuFlyoutItem x:Name="MenuShapeColorRed" Text="Red" Click="ShapeColor_Click" Tag="#FF0000">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xF127;" Foreground="#FF0000" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem x:Name="MenuShapeColorBlue" Text="Blue" Click="ShapeColor_Click" Tag="#0078D7">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xF127;" Foreground="#0078D7" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem x:Name="MenuShapeColorGreen" Text="Green" Click="ShapeColor_Click" Tag="#107C41">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xF127;" Foreground="#107C41" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem x:Name="MenuShapeColorYellow" Text="Yellow" Click="ShapeColor_Click" Tag="#FFD700">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xF127;" Foreground="#FFD700" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem x:Name="MenuShapeColorBlack" Text="Black" Click="ShapeColor_Click" Tag="#000000">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xF127;" Foreground="#000000" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem x:Name="MenuShapeColorWhite" Text="White" Click="ShapeColor_Click" Tag="#FFFFFF">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xF127;" Foreground="#FFFFFF" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutSeparator />
+                                <MenuFlyoutItem x:Name="MenuShapeThickness2" Text="Fine (2px)" Click="ShapeSize_Click" Tag="2" />
+                                <MenuFlyoutItem x:Name="MenuShapeThickness4" Text="Medium (4px)" Click="ShapeSize_Click" Tag="4" />
+                                <MenuFlyoutItem x:Name="MenuShapeThickness8" Text="Bold (8px)" Click="ShapeSize_Click" Tag="8" />
+                                <MenuFlyoutItem x:Name="MenuShapeThickness12" Text="Extra Bold (12px)" Click="ShapeSize_Click" Tag="12" />
+                                <MenuFlyoutSeparator />
+                                <ToggleMenuFlyoutItem x:Name="MenuShapeFill" Text="Fill Shape" Click="ShapeFill_Click" />
+                            </MenuFlyout>
+                        </SplitButton.Flyout>
+                    </SplitButton>
+
+                    <!-- Step Numbering Badges Tool (Section 2, SplitButton ①, ②, ③) -->
+                    <SplitButton x:Name="BtnBadgeTool" Height="36" Padding="8,0" Click="ToolBadge_Click">
+                        <StackPanel Orientation="Horizontal" Spacing="5" VerticalAlignment="Center">
+                            <FontIcon x:Name="IconBadgeGlyph" Glyph="&#xE735;" FontSize="14" Foreground="{ThemeResource AppAccentBrush}" />
+                            <Border x:Name="IndicatorBadgeColor" Width="8" Height="8" CornerRadius="4" Background="#0078D7" BorderBrush="#88000000" BorderThickness="1" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <SplitButton.Flyout>
+                            <MenuFlyout>
+                                <MenuFlyoutItem x:Name="MenuBadgeColorAccent" Text="Accent Blue" Click="BadgeColor_Click" Tag="#0078D7">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xF127;" Foreground="#0078D7" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem x:Name="MenuBadgeColorRed" Text="Red" Click="BadgeColor_Click" Tag="#E81123">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xF127;" Foreground="#E81123" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem x:Name="MenuBadgeColorOrange" Text="Orange" Click="BadgeColor_Click" Tag="#FF8C00">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xF127;" Foreground="#FF8C00" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem x:Name="MenuBadgeColorGreen" Text="Green" Click="BadgeColor_Click" Tag="#107C41">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xF127;" Foreground="#107C41" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutItem x:Name="MenuBadgeColorPurple" Text="Purple" Click="BadgeColor_Click" Tag="#881798">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xF127;" Foreground="#881798" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutSeparator />
+                                <MenuFlyoutItem x:Name="MenuBadgeSizeSmall" Text="Small (24px)" Click="BadgeSize_Click" Tag="24" />
+                                <MenuFlyoutItem x:Name="MenuBadgeSizeMedium" Text="Medium (32px)" Click="BadgeSize_Click" Tag="32" />
+                                <MenuFlyoutItem x:Name="MenuBadgeSizeLarge" Text="Large (40px)" Click="BadgeSize_Click" Tag="40" />
+                                <MenuFlyoutSeparator />
+                                <MenuFlyoutItem x:Name="MenuBadgeReset" Text="Reset counter to 1" Click="BadgeReset_Click">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xE777;" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                            </MenuFlyout>
+                        </SplitButton.Flyout>
+                    </SplitButton>
+
                     <!-- Eraser Tool -->
                     <Button x:Name="BtnEraserTool" Width="36" Height="36" Padding="0" Click="ToolEraser_Click">
                         <FontIcon Glyph="&#xE75C;" FontSize="14" />
@@ -239,6 +366,11 @@
                         <FontIcon Glyph="&#xE8C8;" FontSize="14" />
                     </Button>
 
+                    <!-- Native Print Button (Windows Print Dialog & PDF) -->
+                    <Button x:Name="BtnPrint" Width="36" Height="36" Padding="0" Click="ActionPrint_Click">
+                        <FontIcon Glyph="&#xE749;" FontSize="14" />
+                    </Button>
+
                     <!-- Drag & Share button: draggable directly into external apps -->
                     <Button x:Name="BtnShare" Width="36" Height="36" Padding="0"
                             Click="ActionShare_Click"
@@ -251,6 +383,12 @@
                         <FontIcon Glyph="&#xE712;" FontSize="14" />
                         <Button.Flyout>
                             <MenuFlyout>
+                                <MenuFlyoutItem x:Name="MenuPrint" Text="Print" Click="ActionPrint_Click">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xE749;" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
+                                <MenuFlyoutSeparator />
                                 <MenuFlyoutItem x:Name="MenuSettings" Text="Settings" Click="MenuSettings_Click" />
                                 <MenuFlyoutItem x:Name="MenuOpenVault" Text="Vault Gallery" Click="MenuOpenVault_Click" />
                                 <MenuFlyoutSeparator />
@@ -328,6 +466,7 @@
                                           ZoomMode="Enabled"
                                           MinZoomFactor="0.1"
                                           MaxZoomFactor="5.0"
+                                          FlowDirection="LeftToRight"
                                           Visibility="{Binding HasImage, Converter={StaticResource BoolToVisibilityConverter}}">
                                 <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Margin="24">
                                     <Border BorderBrush="{ThemeResource AppBorderBrush}"
@@ -446,13 +585,13 @@
                                                     <Button Click="BtnApplyInTabCrop_Click" Style="{ThemeResource AccentButtonStyle}">
                                                         <StackPanel Orientation="Horizontal" Spacing="4">
                                                             <FontIcon Glyph="&#xE73E;" FontSize="12" />
-                                                            <TextBlock Text="تطبيق القص" FontSize="11" />
+                                                            <TextBlock Text="{x:Bind CropApplyText, Mode=OneWay}" FontSize="11" />
                                                         </StackPanel>
                                                     </Button>
                                                     <Button Click="BtnCancelInTabCrop_Click">
                                                         <StackPanel Orientation="Horizontal" Spacing="4">
                                                             <FontIcon Glyph="&#xE711;" FontSize="12" />
-                                                            <TextBlock Text="إلغاء" FontSize="11" />
+                                                            <TextBlock Text="{x:Bind CropCancelText, Mode=OneWay}" FontSize="11" />
                                                         </StackPanel>
                                                     </Button>
                                                 </StackPanel>
@@ -485,13 +624,13 @@
                                                     <Button Click="BtnApplyInTabBlur_Click" Style="{ThemeResource AccentButtonStyle}">
                                                         <StackPanel Orientation="Horizontal" Spacing="4">
                                                             <FontIcon Glyph="&#xE790;" FontSize="12" />
-                                                            <TextBlock Text="تطبيق التمويه" FontSize="11" />
+                                                            <TextBlock Text="{x:Bind BlurApplyText, Mode=OneWay}" FontSize="11" />
                                                         </StackPanel>
                                                     </Button>
                                                     <Button Click="BtnCancelInTabBlur_Click">
                                                         <StackPanel Orientation="Horizontal" Spacing="4">
                                                             <FontIcon Glyph="&#xE711;" FontSize="12" />
-                                                            <TextBlock Text="إلغاء" FontSize="11" />
+                                                            <TextBlock Text="{x:Bind BlurCancelText, Mode=OneWay}" FontSize="11" />
                                                         </StackPanel>
                                                     </Button>
                                                 </StackPanel>
@@ -514,16 +653,16 @@
                                     <StackPanel Spacing="10" HorizontalAlignment="Center">
                                         <FontIcon Glyph="&#xE722;" FontSize="32" Foreground="{ThemeResource AppSecondaryTextBrush}" HorizontalAlignment="Center" />
 
-                                        <TextBlock Text="انقر فوق «جديد» في الأعلى أو اضغط PrintScreen لأخذ لقطة شاشة"
+                                        <TextBlock Text="{x:Bind LandingSnipHint, Mode=OneWay}"
                                                    FontSize="14" FontWeight="SemiBold"
                                                    Foreground="{ThemeResource AppForegroundBrush}"
                                                    HorizontalAlignment="Center" />
 
-                                        <TextBlock Text="يمكنك أيضاً سحب وإفلات أي صورة إلى هنا لفتحها ومشاركتها"
+                                        <TextBlock Text="{x:Bind LandingDropHint, Mode=OneWay}"
                                                    FontSize="12" Foreground="{ThemeResource AppSecondaryTextBrush}"
                                                    HorizontalAlignment="Center" />
 
-                                        <TextBlock Text="الاختصار العام بالخلفية: Ctrl + B + B أو PrintScreen"
+                                        <TextBlock Text="{x:Bind LandingHotkeyHint, Mode=OneWay}"
                                                    FontSize="11" Foreground="{ThemeResource AppSecondaryTextBrush}"
                                                    Opacity="0.7"
                                                    HorizontalAlignment="Center" />

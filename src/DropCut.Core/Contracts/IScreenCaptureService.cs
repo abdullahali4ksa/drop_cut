@@ -31,7 +31,7 @@ public interface IScreenCaptureService
     byte[] BlurRegion(byte[] sourceBmpBytes, int x, int y, int width, int height, int blockSize = 12);
 
     /// <summary>
-    /// Renders drawing strokes and inking annotations directly onto an existing 32-bit BMP byte stream in memory.
+    /// Renders drawing strokes, vector shapes, and numbered badges directly onto an existing 32-bit BMP byte stream in memory.
     /// </summary>
-    byte[] RenderAnnotations(byte[] sourceBmpBytes, IEnumerable<DropCut.Core.Domain.StrokeRenderData> strokes);
+    byte[] RenderAnnotations(byte[] sourceBmpBytes, IEnumerable<DropCut.Core.Domain.StrokeRenderData> strokes, IEnumerable<DropCut.Core.Domain.BadgeRenderData>? badges = null);
 }

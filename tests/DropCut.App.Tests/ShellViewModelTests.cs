@@ -178,5 +178,9 @@ public class ShellViewModelTests
 
         Assert.False(vm.IsRtl);
         Assert.Equal("Snip 1", vm.Tabs[0].Title);
+        Assert.Equal("Apply Crop", vm.Tabs[0].CropApplyText);
+        Assert.Equal("Cancel", vm.Tabs[0].CropCancelText);
+        Assert.Equal("Apply Blur", vm.Tabs[0].BlurApplyText);
+        Assert.Equal("Click New above or press PrintScreen to capture screen", vm.Tabs[0].LandingSnipHint);
     }
 }

@@ -62,7 +62,7 @@
                         Background="#330078D7">
                     <FontIcon Glyph="&#xE8B9;" FontSize="15" Foreground="White" />
                     <ToolTipService.ToolTip>
-                        <ToolTip Content="قص مستطيل (Rectangular Snip)" />
+                        <ToolTip Content="Rectangular Snip" />
                     </ToolTipService.ToolTip>
                 </Button>
 
@@ -72,7 +72,7 @@
                         Width="40" Height="36" Padding="0">
                     <FontIcon Glyph="&#xE8C0;" FontSize="15" Foreground="White" />
                     <ToolTipService.ToolTip>
-                        <ToolTip Content="قص شكل حر (Freeform Snip)" />
+                        <ToolTip Content="Freeform Snip" />
                     </ToolTipService.ToolTip>
                 </Button>
 
@@ -82,7 +82,7 @@
                         Width="40" Height="36" Padding="0">
                     <FontIcon Glyph="&#xE7C3;" FontSize="15" Foreground="White" />
                     <ToolTipService.ToolTip>
-                        <ToolTip Content="قص نافذة (Window Snip)" />
+                        <ToolTip Content="Window Snip" />
                     </ToolTipService.ToolTip>
                 </Button>
 
@@ -92,7 +92,7 @@
                         Width="40" Height="36" Padding="0">
                     <FontIcon Glyph="&#xE740;" FontSize="15" Foreground="White" />
                     <ToolTipService.ToolTip>
-                        <ToolTip Content="ملء الشاشة (Fullscreen Snip)" />
+                        <ToolTip Content="Fullscreen Snip" />
                     </ToolTipService.ToolTip>
                 </Button>
 
@@ -104,7 +104,7 @@
                         Width="40" Height="36" Padding="0">
                     <FontIcon Glyph="&#xE711;" FontSize="13" Foreground="#FF6B6B" />
                     <ToolTipService.ToolTip>
-                        <ToolTip Content="إلغاء (Escape)" />
+                        <ToolTip Content="Cancel (Escape)" />
                     </ToolTipService.ToolTip>
                 </Button>
             </StackPanel>

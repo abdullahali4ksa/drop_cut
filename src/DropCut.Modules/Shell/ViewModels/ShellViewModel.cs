@@ -153,7 +153,14 @@ public partial class ShellViewModel : ObservableObject
             Workspace = workspaceVm,
             AutoSaveStatus = _localizationService.GetString("Status_Ready"),
             SharePillText = _localizationService.GetString("Action_DragDropPill"),
-            SharePillToolTip = _localizationService.GetString("Action_DragDropPillToolTip")
+            SharePillToolTip = _localizationService.GetString("Action_DragDropPillToolTip"),
+            CropApplyText = _localizationService.GetString("Crop_Apply"),
+            CropCancelText = _localizationService.GetString("Crop_Cancel"),
+            BlurApplyText = _localizationService.GetString("Blur_Apply"),
+            BlurCancelText = _localizationService.GetString("Blur_Cancel"),
+            LandingSnipHint = _localizationService.GetString("Landing_SnipHint"),
+            LandingDropHint = _localizationService.GetString("Landing_DropHint"),
+            LandingHotkeyHint = _localizationService.GetString("Landing_HotkeyHint")
         };
 
         RunOnUi(() =>
@@ -355,14 +362,29 @@ public partial class ShellViewModel : ObservableObject
     {
         var pillText = _localizationService.GetString("Action_DragDropPill");
         var pillToolTip = _localizationService.GetString("Action_DragDropPillToolTip");
+        var cropApply = _localizationService.GetString("Crop_Apply");
+        var cropCancel = _localizationService.GetString("Crop_Cancel");
+        var blurApply = _localizationService.GetString("Blur_Apply");
+        var blurCancel = _localizationService.GetString("Blur_Cancel");
+        var snipHint = _localizationService.GetString("Landing_SnipHint");
+        var dropHint = _localizationService.GetString("Landing_DropHint");
+        var hotkeyHint = _localizationService.GetString("Landing_HotkeyHint");
+
         for (int i = 0; i < Tabs.Count; i++)
         {
-            if (Tabs[i].Title.StartsWith("Snip") || Tabs[i].Title.StartsWith("لقطة") || Tabs[i].Title.StartsWith("Captura"))
+            if (Tabs[i].Title.Contains((i + 1).ToString()) || Tabs[i].Title.StartsWith("Snip") || Tabs[i].Title.StartsWith("Captura"))
             {
                 Tabs[i].Title = _localizationService.GetString("Tab_NewSnippet", i + 1);
             }
             Tabs[i].SharePillText = pillText;
             Tabs[i].SharePillToolTip = pillToolTip;
+            Tabs[i].CropApplyText = cropApply;
+            Tabs[i].CropCancelText = cropCancel;
+            Tabs[i].BlurApplyText = blurApply;
+            Tabs[i].BlurCancelText = blurCancel;
+            Tabs[i].LandingSnipHint = snipHint;
+            Tabs[i].LandingDropHint = dropHint;
+            Tabs[i].LandingHotkeyHint = hotkeyHint;
         }
     }
 }
