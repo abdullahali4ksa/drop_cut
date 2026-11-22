@@ -344,3 +344,16 @@
   2. **Dynamic Multi-Window Auto-Fit Scaling:** Enhanced `AutoFitImageToViewport` with priority-ordered measurement (`ViewportWidth/Height`, `ActualWidth/Height`, `RootAppGrid`, and `AppWindow.Size - margins`) to prevent overflow when the window is small or medium. Scheduled scaling via `DispatcherQueuePriority.Low` after layout passes, and hooked `MainWindow.SizeChanged` to dynamically adapt the image zoom as the user resizes or restores the application window.
   3. **Universal English Default & 100% Clean International UX:** Set default language across `LocalizationService`, `AppSettingsModel`, and `SettingsService` to pure English (`"en"`). Prevented unintentional Arabic leakage (`حول البرنامج`, `اسحبها وشاركها إلينا`, `تم النسخ إلى الحافظة بنجاح`) so foreign users experience a pristine, professional English interface with zero developer-origin indicators, while preserving instant runtime switching to Arabic (or 8 other languages) via Settings.
 - **VERIFICATION:** `dotnet build DropCut.sln -c Release` completes with 0 warnings and 0 errors; all 53 unit tests pass; dual Release MSIX packages (`artifacts/DropCut_v2.0.0.0_x64.msix` and `artifacts/DropCut_v2.0.0.0_arm64.msix`) generated and verified with 100% 5-asset compliance.
+
+### [P08-T009] Microsoft Partner Center v2.0.0.0 Dual-Architecture Validation & `ms-store-submission` Universal Skill (Linear: `JMD-73`)
+- **STATUS:** `DONE`
+- **POLICY_REF:** `docs/PROJECT_RULES.md (Microsoft Store Standards, Policy 10.14 Restricted Capabilities)`
+- **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Zero-Crash Mandate, Full Trust Isolation, Deterministic Multi-Arch Assets)`
+- **DESCRIPTION:** Complete the official upload, validation, and capability justification for DropCut v2.0.0.0 on Microsoft Partner Center, and enshrine the process into a permanent reusable Antigravity skill:
+  1. Uploaded and validated `DropCut_v2.0.0.0_x64.msix` (x64 architecture for Intel/AMD PCs) with 100% asset and manifest compliance.
+  2. Uploaded and validated `DropCut_v2.0.0.0_arm64.msix` (arm64 architecture for Qualcomm Snapdragon X Elite and Surface PCs).
+  3. Formally declared and saved the `runFullTrust` capability justification in Submission Options and Notes for Certification:
+     *"This is a native WinUI 3 desktop application requiring runFullTrust capability to access Windows screen clipping APIs and global hotkeys. DropCut operates 100% offline with zero telemetry, local SQLite storage, and direct OLE drag-and-drop file sharing."*
+  4. Verified all 6 submission sections show **Complete** on Partner Center and that the **Submit for certification** button is active and ready.
+  5. Created and published the official reusable Antigravity skill `ms-store-submission` (`docs/skills/ms-store-submission/SKILL.md`) for all future projects.
+- **VERIFICATION:** Both v2.0.0.0 packages validated on Partner Center; visual evidence confirmed in `final_step_328.png`; all submission sections Complete; skill committed to repository.
