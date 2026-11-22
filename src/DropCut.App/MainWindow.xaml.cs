@@ -2426,20 +2426,66 @@ public sealed partial class MainWindow : Window
                 FontSize = 11,
                 Opacity = 0.8
             };
+
+            ContentDialog? settingsDialogRef = null;
+
             var privacyBtn = new Button
             {
-                Content = _localizationService.GetString("Settings_PrivacyLicenseButton"),
+                Content = new StackPanel
+                {
+                    Orientation = Orientation.Horizontal,
+                    Spacing = 6,
+                    Children =
+                    {
+                        new FontIcon { Glyph = "\uE72E", FontSize = 12 },
+                        new TextBlock { Text = _localizationService.GetString("Settings_PrivacyLicenseButton") }
+                    }
+                },
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 Margin = new Thickness(0, 4, 0, 0)
             };
             privacyBtn.Click += async (s, args) =>
             {
-                await ShowPrivacyAndLicensingDialogAsync();
+                try
+                {
+                    settingsDialogRef?.Hide();
+                    await ShowPrivacyAndLicensingDialogAsync();
+                }
+                catch (Exception) { }
+            };
+
+            var openOnlineBtn = new Button
+            {
+                Content = new StackPanel
+                {
+                    Orientation = Orientation.Horizontal,
+                    Spacing = 6,
+                    Children =
+                    {
+                        new FontIcon { Glyph = "\uE8A7", FontSize = 12 },
+                        new TextBlock { Text = _localizationService.GetString("Privacy_OpenOnlineButton") }
+                    }
+                },
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                Margin = new Thickness(0, 2, 0, 0)
+            };
+            openOnlineBtn.Click += (s, e) =>
+            {
+                try
+                {
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = "https://github.com/abdullahali4ksa/drop_cut/blob/main/PRIVACY_POLICY.md",
+                        UseShellExecute = true
+                    });
+                }
+                catch { }
             };
 
             privacyStack.Children.Add(privacyTitle);
             privacyStack.Children.Add(privacySummary);
             privacyStack.Children.Add(privacyBtn);
+            privacyStack.Children.Add(openOnlineBtn);
             privacyCard.Child = privacyStack;
 
             panel.Children.Add(langLabel);
@@ -2457,6 +2503,7 @@ public sealed partial class MainWindow : Window
                 CloseButtonText = _localizationService.GetString("Tab_Close"),
                 XamlRoot = this.Content.XamlRoot
             };
+            settingsDialogRef = dialog;
 
             var res = await dialog.ShowAsync();
             if (res == ContentDialogResult.Primary)
@@ -2502,6 +2549,11 @@ public sealed partial class MainWindow : Window
     {
         try
         {
+            if (this.Content?.XamlRoot == null)
+            {
+                return;
+            }
+
             var contentStack = new StackPanel { Spacing = 12, MaxWidth = 440 };
 
             // 1. 100% Offline-First
@@ -2667,6 +2719,7 @@ public sealed partial class MainWindow : Window
             if (MenuPrint != null) MenuPrint.Text = _localizationService.GetString("Action_Print");
             if (MenuSettings != null) MenuSettings.Text = _localizationService.GetString("Nav_Settings");
             if (MenuOpenVault != null) MenuOpenVault.Text = _localizationService.GetString("Nav_Vault");
+            if (MenuPrivacy != null) MenuPrivacy.Text = _localizationService.GetString("Privacy_DialogTitle");
             if (MenuAbout != null) MenuAbout.Text = _localizationService.GetString("Nav_About");
 
             if (BtnZoomOut != null) ToolTipService.SetToolTip(BtnZoomOut, _localizationService.GetString("Zoom_Out"));
@@ -2695,6 +2748,18 @@ public sealed partial class MainWindow : Window
             });
         }
         catch (Exception) { }
+    }
+
+    private async void MenuPrivacy_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            await ShowPrivacyAndLicensingDialogAsync();
+        }
+        catch (Exception)
+        {
+            // Zero-Crash Mandate
+        }
     }
 
     private void MenuAbout_Click(object sender, RoutedEventArgs e) =>

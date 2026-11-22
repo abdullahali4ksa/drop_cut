@@ -80,6 +80,21 @@ To ensure zero risk of rejection or account penalty, every project must strictly
 - **High-DPI Vector Scaling:** All assets must be derived from a high-resolution master SVG, with high-quality bicubic interpolation and clean transparency.
 - **Pre-Flight Asset Verification:** The build pipeline must inspect the generated `.msix` or `.msixbundle` ZIP archive to verify the physical presence of all 5 assets before uploading to Partner Center.
 
+### Policy 10.3: Choice & Control (تحكم المستخدم الكامل ومنع التدخل بالنظام)
+- The application must respect user choices and never alter system settings, browser defaults, or file associations without explicit user intent.
+- Clean uninstallation: when the user uninstalls DropCut, Windows cleanly removes all binaries via standard MSIX uninstallation with zero orphaned services or background daemons.
+
+### Policy 10.4: Content & Age Appropriateness (ملاءمة المحتوى والتصنيف العمري)
+- The application content must be appropriate for all ages (IARC 3+ / Everyone). DropCut contains zero offensive, violent, or sensitive material.
+
+### Policy 10.7 & 10.13: Financial Transactions & Advertising Standards (المعاملات المالية وخلو الإعلانات)
+- **100% Ad-Free:** Zero commercial third-party advertising SDKs, banner ads, or tracking cookies.
+- **Fair Commerce:** Single-tier purchase or free download model with zero hidden paywalls or misleading subscriptions.
+
+### Policy 10.9: Performance, Responsiveness & Universal Display Support (الأداء وسرعة الاستجابة)
+- Applications must remain interactive under all loads. No freezing, no unresponsive windows (Not Responding / ANR).
+- High-DPI & Multi-Monitor Support: UI must scale crisply from 100% to 300% DPI across multiple monitors with varying resolutions and orientations.
+
 ### Policy 10.14: Restricted Capabilities Protocol (`runFullTrust`)
 - Modern WinUI 3 desktop applications require the `runFullTrust` capability in `Package.appxmanifest` to access Win32 desktop APIs (e.g. `GraphicsCaptureItem`, GDI+, global hotkeys).
 - **Approved Certification Declaration Template:**  
@@ -88,7 +103,23 @@ To ensure zero risk of rejection or account penalty, every project must strictly
 
 ---
 
-## 3. Zero-Crash Mandate & Anti-Hang Engineering (ميثاق منع الانهيار)
+## 3. Third-Party Library & Dependency Compliance Matrix (مصفوفة تراخيص المكتبات)
+To ensure zero IP risk, zero viral copyleft infection (GPL/AGPL), and 100% commercial Store compliance:
+
+| Package | Version | Author / Vendor | License | Compliance Status |
+| :--- | :--- | :--- | :--- | :--- |
+| `Microsoft.WindowsAppSDK` | 2.5.1 | Microsoft Corporation | MIT License | Approved (Official WinUI 3 runtime) |
+| `Microsoft.Windows.SDK.BuildTools` | 10.0.26100.9169 | Microsoft Corporation | Microsoft SDK License | Approved (MSIX Build tools) |
+| `Microsoft.Windows.SDK.BuildTools.WinApp` | 0.7.0 | Microsoft Corporation | Microsoft SDK License | Approved (WinApp SDK Targets) |
+| `CommunityToolkit.Mvvm` | 8.4.0 | .NET Foundation / Microsoft | MIT License | Approved (Official MVVM toolkit) |
+| `Microsoft.EntityFrameworkCore.Sqlite` | 9.0.2 | Microsoft Corporation | MIT License | Approved (Local SQLite database) |
+| `Microsoft.Extensions.DependencyInjection.Abstractions` | 9.0.2 | Microsoft Corporation | MIT License | Approved (Standard .NET DI) |
+
+> **Audit Verdict:** 100% of dependencies are governed by permissive MIT or Microsoft Official licenses. Zero GPL, zero proprietary copyleft, zero external cloud client SDKs. All processing executes 100% in-process.
+
+---
+
+## 4. Zero-Crash Mandate & Anti-Hang Engineering (ميثاق منع الانهيار)
 To guarantee 100% stability, 0 crashes on user machines, and a perfect rating in the Store:
 
 1. **Triple Global Exception Boundaries**:

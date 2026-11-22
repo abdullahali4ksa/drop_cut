@@ -391,6 +391,11 @@
                                 <MenuFlyoutSeparator />
                                 <MenuFlyoutItem x:Name="MenuSettings" Text="Settings" Click="MenuSettings_Click" />
                                 <MenuFlyoutItem x:Name="MenuOpenVault" Text="Vault Gallery" Click="MenuOpenVault_Click" />
+                                <MenuFlyoutItem x:Name="MenuPrivacy" Text="Privacy &amp; Licensing" Click="MenuPrivacy_Click">
+                                    <MenuFlyoutItem.Icon>
+                                        <FontIcon Glyph="&#xE72E;" />
+                                    </MenuFlyoutItem.Icon>
+                                </MenuFlyoutItem>
                                 <MenuFlyoutSeparator />
                                 <MenuFlyoutItem x:Name="MenuAbout" Text="About DropCut" Click="MenuAbout_Click" />
                             </MenuFlyout>
