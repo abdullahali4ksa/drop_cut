@@ -86,11 +86,10 @@ public sealed partial class SnipOverlayWindow : Window
             if (_desktopBmpBytes is { Length: > 0 })
             {
                 var stream = new InMemoryRandomAccessStream();
-                using (var writer = new DataWriter(stream))
+                using (var netStream = stream.AsStreamForWrite())
                 {
-                    writer.WriteBytes(_desktopBmpBytes);
-                    writer.StoreAsync().AsTask().GetAwaiter().GetResult();
-                    writer.DetachStream();
+                    netStream.Write(_desktopBmpBytes, 0, _desktopBmpBytes.Length);
+                    netStream.Flush();
                 }
 
                 stream.Seek(0);
@@ -98,10 +97,64 @@ public sealed partial class SnipOverlayWindow : Window
                 bmpImg.SetSource(stream);
                 FrozenDesktopImage.Source = bmpImg;
             }
+
+            RootGrid.Loaded += (s, e) => UpdateDimmerCutout(0, 0, 0, 0);
         }
         catch (Exception)
         {
             // Zero-Crash Mandate
+        }
+    }
+
+    private void UpdateDimmerCutout(double x, double y, double w, double h)
+    {
+        try
+        {
+            double totalW = RootGrid.ActualWidth > 0 ? RootGrid.ActualWidth : GetSystemMetrics(SM_CXSCREEN);
+            double totalH = RootGrid.ActualHeight > 0 ? RootGrid.ActualHeight : GetSystemMetrics(SM_CYSCREEN);
+
+            if (w <= 0 || h <= 0)
+            {
+                Canvas.SetLeft(DimmerTop, 0);
+                Canvas.SetTop(DimmerTop, 0);
+                DimmerTop.Width = totalW;
+                DimmerTop.Height = totalH;
+
+                DimmerBottom.Width = 0;
+                DimmerBottom.Height = 0;
+                DimmerLeft.Width = 0;
+                DimmerLeft.Height = 0;
+                DimmerRight.Width = 0;
+                DimmerRight.Height = 0;
+            }
+            else
+            {
+                Canvas.SetLeft(DimmerTop, 0);
+                Canvas.SetTop(DimmerTop, 0);
+                DimmerTop.Width = totalW;
+                DimmerTop.Height = Math.Max(0, y);
+
+                double bottomY = y + h;
+                Canvas.SetLeft(DimmerBottom, 0);
+                Canvas.SetTop(DimmerBottom, bottomY);
+                DimmerBottom.Width = totalW;
+                DimmerBottom.Height = Math.Max(0, totalH - bottomY);
+
+                Canvas.SetLeft(DimmerLeft, 0);
+                Canvas.SetTop(DimmerLeft, y);
+                DimmerLeft.Width = Math.Max(0, x);
+                DimmerLeft.Height = h;
+
+                double rightX = x + w;
+                Canvas.SetLeft(DimmerRight, rightX);
+                Canvas.SetTop(DimmerRight, y);
+                DimmerRight.Width = Math.Max(0, totalW - rightX);
+                DimmerRight.Height = h;
+            }
+        }
+        catch (Exception)
+        {
+            // Protected Zero-Crash boundary
         }
     }
 
@@ -114,10 +167,13 @@ public sealed partial class SnipOverlayWindow : Window
         {
             if (_currentMode == CaptureMode.Fullscreen)
             {
-                CompleteCapture(_desktopBmpBytes, GetSystemMetrics(SM_CXSCREEN), GetSystemMetrics(SM_CYSCREEN));
+                int bmpW = BitConverter.ToInt32(_desktopBmpBytes, 18);
+                int bmpH = Math.Abs(BitConverter.ToInt32(_desktopBmpBytes, 22));
+                CompleteCapture(_desktopBmpBytes, bmpW, bmpH);
                 return;
             }
 
+            try { RootGrid.CapturePointer(e.Pointer); } catch { }
             var pt = e.GetCurrentPoint(RootGrid).Position;
             _startPoint = pt;
             _isSelecting = true;
@@ -129,6 +185,7 @@ public sealed partial class SnipOverlayWindow : Window
             Canvas.SetTop(SelectionBox, pt.Y);
             SelectionBox.Width = 0;
             SelectionBox.Height = 0;
+            UpdateDimmerCutout(pt.X, pt.Y, 0, 0);
         }
         catch (Exception)
         {
@@ -158,7 +215,14 @@ public sealed partial class SnipOverlayWindow : Window
 
             Canvas.SetLeft(DimensionBadge, _lastX);
             Canvas.SetTop(DimensionBadge, Math.Max(10, _lastY - 32));
-            DimensionText.Text = $"{(int)_lastWidth} × {(int)_lastHeight} px";
+
+            int bmpWidth = BitConverter.ToInt32(_desktopBmpBytes, 18);
+            int bmpHeight = Math.Abs(BitConverter.ToInt32(_desktopBmpBytes, 22));
+            double scaleX = RootGrid.ActualWidth > 0 ? (double)bmpWidth / RootGrid.ActualWidth : 1.0;
+            double scaleY = RootGrid.ActualHeight > 0 ? (double)bmpHeight / RootGrid.ActualHeight : 1.0;
+
+            DimensionText.Text = $"{(int)Math.Round(_lastWidth * scaleX)} × {(int)Math.Round(_lastHeight * scaleY)} px";
+            UpdateDimmerCutout(_lastX, _lastY, _lastWidth, _lastHeight);
         }
         catch (Exception)
         {
@@ -170,6 +234,7 @@ public sealed partial class SnipOverlayWindow : Window
     {
         try
         {
+            try { RootGrid.ReleasePointerCapture(e.Pointer); } catch { }
             if (!_isSelecting)
             {
                 return;
@@ -179,19 +244,30 @@ public sealed partial class SnipOverlayWindow : Window
 
             if (_lastWidth > 15 && _lastHeight > 15)
             {
+                int bmpWidth = BitConverter.ToInt32(_desktopBmpBytes, 18);
+                int bmpHeight = Math.Abs(BitConverter.ToInt32(_desktopBmpBytes, 22));
+                double scaleX = RootGrid.ActualWidth > 0 ? (double)bmpWidth / RootGrid.ActualWidth : 1.0;
+                double scaleY = RootGrid.ActualHeight > 0 ? (double)bmpHeight / RootGrid.ActualHeight : 1.0;
+
+                int cropX = (int)Math.Round(_lastX * scaleX);
+                int cropY = (int)Math.Round(_lastY * scaleY);
+                int cropW = (int)Math.Round(_lastWidth * scaleX);
+                int cropH = (int)Math.Round(_lastHeight * scaleY);
+
                 var croppedBytes = _screenCaptureService.CropBitmap(
                     _desktopBmpBytes,
-                    (int)_lastX,
-                    (int)_lastY,
-                    (int)_lastWidth,
-                    (int)_lastHeight);
+                    cropX,
+                    cropY,
+                    cropW,
+                    cropH);
 
-                CompleteCapture(croppedBytes, (int)_lastWidth, (int)_lastHeight);
+                CompleteCapture(croppedBytes, cropW, cropH);
             }
             else
             {
                 SelectionBox.Visibility = Visibility.Collapsed;
                 DimensionBadge.Visibility = Visibility.Collapsed;
+                UpdateDimmerCutout(0, 0, 0, 0);
             }
         }
         catch (Exception)

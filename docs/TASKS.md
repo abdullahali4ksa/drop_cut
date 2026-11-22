@@ -303,3 +303,16 @@
 - **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Cross-Platform Native Binaries, Multi-Target MSBuild)`
 - **DESCRIPTION:** Build native Arm64 target (`-r win-arm64`) alongside x64 (`-r win-x64`) for Snapdragon X Elite and Surface Pro Copilot+ PCs, eliminating emulation overhead and ensuring 100% compliance with Microsoft Store's latest recommendations for Windows on Arm.
 - **VERIFICATION:** Both `DropCut_v2.0.0.0_x64.msix` and `DropCut_v2.0.0.0_arm64.msix` generate cleanly and pass Store pre-submission checks.
+
+### [P08-T006] Rectangular Snip High-DPI Scaling & Multi-Tab Isolation (إصلاح إزاحة القص المستطيل وعزل النوافذ والشفافية) (Linear: `JMD-70`)
+- **STATUS:** `DONE`
+- **POLICY_REF:** `docs/PROJECT_RULES.md (High-DPI Coordinate Math, Clean UI, Microsoft Store Standards)`
+- **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Non-Locking Stream I/O, Safe Try/Catch, Pointer Capture Isolation)`
+- **DESCRIPTION:** Fix coordinate shifting in rectangular snip mode and eliminate recurring transparency/dimmer defects across multi-tab captures:
+  1. Translate WinUI 3 DIP pointer drag coordinates to physical GDI pixel coordinates via dynamic aspect scaling (`(double)bmpWidth / RootGrid.ActualWidth`), ensuring 100% pixel-perfect crop boundaries without leftward offset.
+  2. Implement 4-way dynamic slab cutout dimmer (`DimmerTop`, `DimmerBottom`, `DimmerLeft`, `DimmerRight`) in `SnipOverlayWindow`, leaving the selected capture region with 0% opacity overlay and 100% crystal-clear brightness.
+  3. Increase pre-capture delay to 320ms in `MainWindow` to allow Windows 11 DWM window hide fade animation to complete 100%, preventing semi-transparent ghost captures.
+  4. Scope active visual tree queries (`GetActiveScrollViewer()`, `GetActiveDrawingCanvas()`) strictly to `MainTabView.ContainerFromItem(ViewModel.SelectedTab)`.
+  5. Reset overlay states (`IsCropping`, `IsBlurring`, `IsDrawingMode`) on each new capture tab.
+  6. Eliminate UI thread deadlocks by refactoring bitmap stream conversion to synchronous `AsStreamForWrite()`.
+- **VERIFICATION:** Rectangular snip matches selection exactly with zero pixel shift across 100%-200% DPI; multi-tab captures remain solid without transparency leaks; `dotnet build` passes with 0 warnings/0 errors and 53 unit tests pass.

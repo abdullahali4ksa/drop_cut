@@ -18,8 +18,13 @@
         <!-- 1. Frozen Desktop Background Screenshot -->
         <Image x:Name="FrozenDesktopImage" Stretch="Fill" />
 
-        <!-- 2. Dark translucent dimmer overlay -->
-        <Rectangle x:Name="DimmerOverlay" Fill="#70000000" />
+        <!-- 2. Windows 11 4-way Cutout Dimmer System (Keeps selected rectangle 100% bright & crystal-clear) -->
+        <Canvas x:Name="DimmerCanvas">
+            <Rectangle x:Name="DimmerTop" Fill="#75000000" />
+            <Rectangle x:Name="DimmerBottom" Fill="#75000000" />
+            <Rectangle x:Name="DimmerLeft" Fill="#75000000" />
+            <Rectangle x:Name="DimmerRight" Fill="#75000000" />
+        </Canvas>
 
         <!-- 3. Canvas for active cutout and selection bounding box -->
         <Canvas x:Name="SelectionCanvas">
@@ -27,7 +32,7 @@
             <Border x:Name="SelectionBox"
                     BorderBrush="#0078D7"
                     BorderThickness="2"
-                    Background="#100078D7"
+                    Background="Transparent"
                     Visibility="Collapsed" />
 
             <!-- Dimension badge (e.g. 840 × 460) -->

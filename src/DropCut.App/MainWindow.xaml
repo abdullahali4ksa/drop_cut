@@ -538,7 +538,8 @@
                                             </Border>
 
                                             <!-- Interactive Inking & Annotation Canvas Layer (Active only in Drawing Mode) -->
-                                            <Canvas Background="Transparent"
+                                            <Canvas Tag="InTabDrawingCanvas"
+                                                    Background="Transparent"
                                                     FlowDirection="LeftToRight"
                                                     IsHitTestVisible="{Binding IsDrawingMode}"
                                                     PointerPressed="AnnotationCanvas_PointerPressed"

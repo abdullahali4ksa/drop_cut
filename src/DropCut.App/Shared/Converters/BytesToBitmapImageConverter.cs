@@ -15,16 +15,15 @@ public class BytesToBitmapImageConverter : IValueConverter
         {
             try
             {
-                var bitmapImage = new BitmapImage();
                 var stream = new InMemoryRandomAccessStream();
-                using (var writer = new DataWriter(stream.GetOutputStreamAt(0)))
+                using (var netStream = stream.AsStreamForWrite())
                 {
-                    writer.WriteBytes(bytes);
-                    writer.StoreAsync().AsTask().GetAwaiter().GetResult();
-                    writer.DetachStream();
+                    netStream.Write(bytes, 0, bytes.Length);
+                    netStream.Flush();
                 }
 
                 stream.Seek(0);
+                var bitmapImage = new BitmapImage();
                 bitmapImage.SetSource(stream);
                 return bitmapImage;
             }

@@ -156,6 +156,7 @@ public sealed partial class MainWindow : Window
     private void MainTabView_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
         SetToolMode(ToolType.Hand);
+        _activeDrawingCanvas = GetActiveDrawingCanvas();
         if (ViewModel.SelectedTab?.HasImage == true && ViewModel.SelectedTab.ZoomFactor == 1.0)
         {
             AutoFitImageToViewport(ViewModel.SelectedTab);
@@ -280,7 +281,8 @@ public sealed partial class MainWindow : Window
 
             // Hide main window so desktop is completely clear for the snip
             this.AppWindow.Hide();
-            await Task.Delay(180);
+            // Allow ample time for Windows 11 DWM window fade-out animation to complete 100%
+            await Task.Delay(320);
 
             // Capture pristine full desktop snapshot
             var fullDesktopBmp = await _screenCaptureService.CapturePrimaryScreenAsync();
@@ -329,11 +331,15 @@ public sealed partial class MainWindow : Window
                 tab.ImageWidth = width;
                 tab.ImageHeight = height;
                 tab.IsCropping = false;
+                tab.IsBlurring = false;
+                tab.IsDrawingMode = false;
                 tab.AutoSaveStatus = _localizationService.GetString("Status_Captured", width, height);
 
                 // Version 2.0: Smart Auto-Fit Viewport Scaling (P08-T001)
                 AutoFitImageToViewport(tab);
             }
+
+            _activeDrawingCanvas = GetActiveDrawingCanvas();
 
             // Copy to clipboard immediately like Snipping Tool
             CopyCurrentTabImage();
@@ -1105,8 +1111,43 @@ public sealed partial class MainWindow : Window
         SetToolMode(ToolType.Hand);
     }
 
-    private ScrollViewer? GetActiveScrollViewer() =>
-        FindChildByTag<ScrollViewer>(MainTabView, "TabScrollViewer");
+    private ScrollViewer? GetActiveScrollViewer()
+    {
+        try
+        {
+            if (ViewModel.SelectedTab != null)
+            {
+                var container = MainTabView.ContainerFromItem(ViewModel.SelectedTab);
+                if (container != null)
+                {
+                    var scroll = FindChildByTag<ScrollViewer>(container, "TabScrollViewer");
+                    if (scroll != null) return scroll;
+                }
+            }
+        }
+        catch { }
+
+        return FindChildByTag<ScrollViewer>(MainTabView, "TabScrollViewer");
+    }
+
+    private Canvas? GetActiveDrawingCanvas()
+    {
+        try
+        {
+            if (ViewModel.SelectedTab != null)
+            {
+                var container = MainTabView.ContainerFromItem(ViewModel.SelectedTab);
+                if (container != null)
+                {
+                    var canvas = FindChildByTag<Canvas>(container, "InTabDrawingCanvas");
+                    if (canvas != null) return canvas;
+                }
+            }
+        }
+        catch { }
+
+        return _activeDrawingCanvas;
+    }
 
     private void BtnZoomIn_Click(object sender, RoutedEventArgs e) => ZoomInCurrentTab();
     private void BtnZoomOut_Click(object sender, RoutedEventArgs e) => ZoomOutCurrentTab();
@@ -1455,9 +1496,10 @@ public sealed partial class MainWindow : Window
 
     private void ToolEraser_Click(object sender, RoutedEventArgs e)
     {
-        if (_activeDrawingCanvas != null && _activeDrawingCanvas.Children.Count > 0)
+        var canvas = GetActiveDrawingCanvas() ?? _activeDrawingCanvas;
+        if (canvas != null && canvas.Children.Count > 0)
         {
-            _activeDrawingCanvas.Children.Clear();
+            canvas.Children.Clear();
             _redoStack.Clear();
             NotifyToolChange(_localizationService.GetString("Status_AllCleared"));
         }
@@ -1737,17 +1779,18 @@ public sealed partial class MainWindow : Window
             }
 
             // 3. If currently in Inking / Shapes / Badges mode -> Rasterize annotations!
-            if (tab.ImageBytes is { Length: > 0 } bytes && _activeDrawingCanvas != null && _activeDrawingCanvas.Children.Count > 0)
+            var activeCanvas = GetActiveDrawingCanvas() ?? _activeDrawingCanvas;
+            if (tab.ImageBytes is { Length: > 0 } bytes && activeCanvas != null && activeCanvas.Children.Count > 0)
             {
                 var strokes = new List<StrokeRenderData>();
                 var badges = new List<BadgeRenderData>();
 
-                double cW = _activeDrawingCanvas.ActualWidth > 0 ? _activeDrawingCanvas.ActualWidth : (tab.ImageWidth > 0 ? tab.ImageWidth : 1);
-                double cH = _activeDrawingCanvas.ActualHeight > 0 ? _activeDrawingCanvas.ActualHeight : (tab.ImageHeight > 0 ? tab.ImageHeight : 1);
+                double cW = activeCanvas.ActualWidth > 0 ? activeCanvas.ActualWidth : (tab.ImageWidth > 0 ? tab.ImageWidth : 1);
+                double cH = activeCanvas.ActualHeight > 0 ? activeCanvas.ActualHeight : (tab.ImageHeight > 0 ? tab.ImageHeight : 1);
                 double scaleX = cW > 0 && tab.ImageWidth > 0 ? (double)tab.ImageWidth / cW : 1.0;
                 double scaleY = cH > 0 && tab.ImageHeight > 0 ? (double)tab.ImageHeight / cH : 1.0;
 
-                foreach (var child in _activeDrawingCanvas.Children)
+                foreach (var child in activeCanvas.Children)
                 {
                     if (child is Polyline poly && poly.Points.Count >= 2)
                     {
@@ -1818,7 +1861,7 @@ public sealed partial class MainWindow : Window
                     if (baked != null && baked.Length > 0)
                     {
                         tab.ImageBytes = baked;
-                        _activeDrawingCanvas.Children.Clear();
+                        activeCanvas.Children.Clear();
                         _redoStack.Clear();
                         CopyCurrentTabImage();
                         NotifyToolChange(_localizationService.GetString("Status_Saved"));
@@ -2226,10 +2269,11 @@ public sealed partial class MainWindow : Window
     {
         try
         {
-            if (_activeDrawingCanvas != null && _activeDrawingCanvas.Children.Count > 0)
+            var canvas = GetActiveDrawingCanvas() ?? _activeDrawingCanvas;
+            if (canvas != null && canvas.Children.Count > 0)
             {
-                var last = _activeDrawingCanvas.Children[_activeDrawingCanvas.Children.Count - 1];
-                _activeDrawingCanvas.Children.RemoveAt(_activeDrawingCanvas.Children.Count - 1);
+                var last = canvas.Children[canvas.Children.Count - 1];
+                canvas.Children.RemoveAt(canvas.Children.Count - 1);
                 _redoStack.Push(last);
                 if (last is FrameworkElement fe && fe.Tag is string s && s.StartsWith("Badge_"))
                 {
@@ -2245,10 +2289,11 @@ public sealed partial class MainWindow : Window
     {
         try
         {
-            if (_redoStack.Count > 0 && _activeDrawingCanvas != null)
+            var canvas = GetActiveDrawingCanvas() ?? _activeDrawingCanvas;
+            if (_redoStack.Count > 0 && canvas != null)
             {
                 var item = _redoStack.Pop();
-                _activeDrawingCanvas.Children.Add(item);
+                canvas.Children.Add(item);
                 if (item is FrameworkElement fe && fe.Tag is string s && s.StartsWith("Badge_"))
                 {
                     _nextBadgeNumber++;
