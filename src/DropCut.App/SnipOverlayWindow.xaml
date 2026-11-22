@@ -13,7 +13,7 @@
           PointerMoved="RootGrid_PointerMoved"
           PointerReleased="RootGrid_PointerReleased"
           KeyDown="RootGrid_KeyDown"
-          Background="Black">
+          Background="#01000000">
 
         <!-- 1. Frozen Desktop Background Screenshot -->
         <Image x:Name="FrozenDesktopImage" Stretch="Fill" />

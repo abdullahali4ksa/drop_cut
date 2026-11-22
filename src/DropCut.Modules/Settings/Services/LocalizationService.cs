@@ -169,7 +169,16 @@ public class LocalizationService : ILocalizationService
             ["Color_White"] = "أبيض",
             ["Color_Orange"] = "برتقالي",
             ["Color_Purple"] = "بنفسجي",
-            ["Color_Accent"] = "أزرق النظام" 
+            ["Color_Accent"] = "أزرق النظام",
+            ["Settings_PrivacyLicenseButton"] = "استعراض سياسة الخصوصية والترخيص الكاملة",
+            ["Privacy_DialogTitle"] = "سياسة الخصوصية والتراخيص المعتمدة لمتجر مايكروسوفت",
+            ["Privacy_OfflineFirstHeading"] = "1. التزام الخصوصية التامة (100% Offline-First):",
+            ["Privacy_OfflineFirstBody"] = "تطبيق DropCut يعمل محلياً بنسبة 100% دون أي اتصال بخوادم خارجية أو جمع بيانات أو تتبع إعلاني؛ وكافة اللقطات والبيانات مخزنة محلياً بالكامل على جهازك الشخصي، امتثالاً للبند 10.5 من سياسات مايكروسوفت.",
+            ["Privacy_EulaHeading"] = "2. ترخيص الاستخدام التجاري والتعليمي (EULA):",
+            ["Privacy_EulaBody"] = "ترخيص دائم لمستخدم واحد يمنح الحق القانوني الكامل لتثبيت واستخدام التطبيق على ما يصل إلى 10 أجهزة ويندوز مسجلة بنفس حساب مايكروسوفت الشخصي بدون أي اشتراكات دورية.",
+            ["Privacy_MitHeading"] = "3. الترخيص المفتوح (MIT License):",
+            ["Privacy_MitBody"] = "يمنح المستخدمين حرية الاستخدام والتطوير مع إخلاء كامل للمسؤولية واحتفاظ المطور بحقوق الملكية الفكرية والعلامة التجارية.",
+            ["Privacy_OpenOnlineButton"] = "فتح سياسة الخصوصية على GitHub",
         },
         ["en"] = new Dictionary<string, string>
         {
@@ -308,7 +317,16 @@ public class LocalizationService : ILocalizationService
             ["Color_White"] = "White",
             ["Color_Orange"] = "Orange",
             ["Color_Purple"] = "Purple",
-            ["Color_Accent"] = "Accent Blue" 
+            ["Color_Accent"] = "Accent Blue",
+            ["Settings_PrivacyLicenseButton"] = "View Full Privacy Policy & Licensing",
+            ["Privacy_DialogTitle"] = "Privacy Policy & Official Microsoft Store Licensing",
+            ["Privacy_OfflineFirstHeading"] = "1. 100% Offline-First Privacy Guarantee:",
+            ["Privacy_OfflineFirstBody"] = "DropCut operates 100% locally with zero cloud servers, zero telemetry, and zero user tracking. All screenshots, edits, and preferences remain strictly on your local PC in compliance with Microsoft Store Policy 10.5.",
+            ["Privacy_EulaHeading"] = "2. Commercial & Educational Perpetual License (EULA):",
+            ["Privacy_EulaBody"] = "Single-user perpetual license granting full legal authorization to install and use DropCut on up to 10 Windows devices linked to your Microsoft account with zero recurring fees.",
+            ["Privacy_MitHeading"] = "3. Open-Source MIT License:",
+            ["Privacy_MitBody"] = "Grants freedom to use and develop under the MIT License with full liability disclaimer while retaining developer intellectual property.",
+            ["Privacy_OpenOnlineButton"] = "Open Online Privacy Policy (GitHub)",
         },
         ["es"] = new Dictionary<string, string>
         {
@@ -448,7 +466,16 @@ public class LocalizationService : ILocalizationService
             ["Color_White"] = "Blanco",
             ["Color_Orange"] = "Naranja",
             ["Color_Purple"] = "Púrpura",
-            ["Color_Accent"] = "Azul de acento" 
+            ["Color_Accent"] = "Azul de acento",
+            ["Settings_PrivacyLicenseButton"] = "Ver política de privacidad y licencias",
+            ["Privacy_DialogTitle"] = "Política de privacidad y licencias de Microsoft Store",
+            ["Privacy_OfflineFirstHeading"] = "1. Privacidad 100% local (Offline-First):",
+            ["Privacy_OfflineFirstBody"] = "DropCut funciona 100% localmente sin servidores externos ni rastreo. Todas las capturas se guardan en tu PC según la Política 10.5 de Microsoft Store.",
+            ["Privacy_EulaHeading"] = "2. Licencia perpetua para usuario único (EULA):",
+            ["Privacy_EulaBody"] = "Licencia perpetua válida para hasta 10 dispositivos Windows asociados a tu cuenta de Microsoft sin suscripciones periódicas.",
+            ["Privacy_MitHeading"] = "3. Licencia de código abierto MIT:",
+            ["Privacy_MitBody"] = "Libertad de uso bajo la licencia MIT con exención de responsabilidad.",
+            ["Privacy_OpenOnlineButton"] = "Abrir política de privacidad en GitHub",
         },
         ["hi"] = new Dictionary<string, string>
         {
@@ -588,7 +615,15 @@ public class LocalizationService : ILocalizationService
             ["Zoom_In"] = "ज़ूम इन (Ctrl + +)",
             ["Zoom_Out"] = "ज़ूम आउट (Ctrl + -)",
             ["Zoom_Reset"] = "वास्तविक आकार 100% (Ctrl + 0)",
-
+            ["Settings_PrivacyLicenseButton"] = "गोपनीयता नीति और लाइसेंस देखें",
+            ["Privacy_DialogTitle"] = "गोपनीयता नीति और Microsoft Store लाइसेंस",
+            ["Privacy_OfflineFirstHeading"] = "1. 100% ऑफ़लाइन गोपनीयता गारंटी:",
+            ["Privacy_OfflineFirstBody"] = "DropCut बिना किसी बाहरी सर्वर या ट्रैकिंग के 100% स्थानीय रूप से काम करता है।",
+            ["Privacy_EulaHeading"] = "2. व्यावसायिक और शैक्षिक स्थायी लाइसेंस (EULA):",
+            ["Privacy_EulaBody"] = "एकल उपयोगकर्ता स्थायी लाइसेंस जो 10 Windows डिवाइसों पर उपयोग की अनुमति देता है।",
+            ["Privacy_MitHeading"] = "3. ओपन सोर्स MIT लाइसेंस:",
+            ["Privacy_MitBody"] = "MIT लाइसेंस के तहत उपयोग की पूर्ण स्वतंत्रता।",
+            ["Privacy_OpenOnlineButton"] = "GitHub पर गोपनीयता नीति खोलें",
         },
         ["zh"] = new Dictionary<string, string>
         {
@@ -728,7 +763,15 @@ public class LocalizationService : ILocalizationService
             ["Zoom_In"] = "放大 (Ctrl + +)",
             ["Zoom_Out"] = "缩小 (Ctrl + -)",
             ["Zoom_Reset"] = "原始大小 100% (Ctrl + 0)",
-
+            ["Settings_PrivacyLicenseButton"] = "查看隐私政策与许可协议",
+            ["Privacy_DialogTitle"] = "隐私政策与微软商店官方许可",
+            ["Privacy_OfflineFirstHeading"] = "1. 100% 离线隐私保障:",
+            ["Privacy_OfflineFirstBody"] = "DropCut 100% 本地运行，零外部服务器，零遥测，严格遵守微软商店 Policy 10.5。",
+            ["Privacy_EulaHeading"] = "2. 商业与教育永久许可 (EULA):",
+            ["Privacy_EulaBody"] = "单用户永久许可，允许在绑定同一微软账户的最多 10 台 Windows 设备上使用，无任何订阅费。",
+            ["Privacy_MitHeading"] = "3. 开源 MIT 许可:",
+            ["Privacy_MitBody"] = "在保留开发者版权声明的前提下，享受 MIT 协议的完全使用自由。",
+            ["Privacy_OpenOnlineButton"] = "在 GitHub 打开在线隐私政策",
         },
         ["fr"] = new Dictionary<string, string>
         {
@@ -868,7 +911,15 @@ public class LocalizationService : ILocalizationService
             ["Zoom_In"] = "Zoom avant (Ctrl + +)",
             ["Zoom_Out"] = "Zoom arriere (Ctrl + -)",
             ["Zoom_Reset"] = "Taille reelle 100% (Ctrl + 0)",
-
+            ["Settings_PrivacyLicenseButton"] = "Consulter la politique de confidentialité et licences",
+            ["Privacy_DialogTitle"] = "Politique de confidentialité et licences Microsoft Store",
+            ["Privacy_OfflineFirstHeading"] = "1. Confidentialité 100% hors-ligne (Offline-First):",
+            ["Privacy_OfflineFirstBody"] = "DropCut fonctionne à 100% en local sans serveurs externes ni traçage, conformément à la politique 10.5 de Microsoft Store.",
+            ["Privacy_EulaHeading"] = "2. Licence perpétuelle utilisateur unique (EULA):",
+            ["Privacy_EulaBody"] = "Licence perpétuelle autorisant l'installation sur jusqu'à 10 appareils Windows sans frais récurrents.",
+            ["Privacy_MitHeading"] = "3. Licence open source MIT:",
+            ["Privacy_MitBody"] = "Liberté d'utilisation sous licence MIT avec clause de non-responsabilité.",
+            ["Privacy_OpenOnlineButton"] = "Ouvrir la politique sur GitHub",
         },
         ["de"] = new Dictionary<string, string>
         {
@@ -1008,7 +1059,15 @@ public class LocalizationService : ILocalizationService
             ["Zoom_In"] = "Vergroessern (Ctrl + +)",
             ["Zoom_Out"] = "Verkleinern (Ctrl + -)",
             ["Zoom_Reset"] = "Originalgroesse 100% (Ctrl + 0)",
-
+            ["Settings_PrivacyLicenseButton"] = "Datenschutzrichtlinie & Lizenzierung anzeigen",
+            ["Privacy_DialogTitle"] = "Datenschutzrichtlinie & Microsoft Store Lizenzen",
+            ["Privacy_OfflineFirstHeading"] = "1. 100% Offline-First Datenschutzgarantie:",
+            ["Privacy_OfflineFirstBody"] = "DropCut arbeitet zu 100% lokal ohne externe Server oder Tracking gemäß Microsoft Store Richtlinie 10.5.",
+            ["Privacy_EulaHeading"] = "2. Kommerzielle & Bildungslizenz auf Lebenszeit (EULA):",
+            ["Privacy_EulaBody"] = "Dauerhafte Einzelnutzerlizenz für bis zu 10 Windows-Geräte ohne wiederkehrende Gebühren.",
+            ["Privacy_MitHeading"] = "3. Open-Source-MIT-Lizenz:",
+            ["Privacy_MitBody"] = "Nutzungsfreiheit unter der MIT-Lizenz mit vollständigem Haftungsausschluss.",
+            ["Privacy_OpenOnlineButton"] = "Datenschutzrichtlinie auf GitHub öffnen",
         },
         ["ru"] = new Dictionary<string, string>
         {
@@ -1148,7 +1207,15 @@ public class LocalizationService : ILocalizationService
             ["Zoom_In"] = "Приблизить (Ctrl + +)",
             ["Zoom_Out"] = "Отдалить (Ctrl + -)",
             ["Zoom_Reset"] = "Исходный размер 100% (Ctrl + 0)",
-
+            ["Settings_PrivacyLicenseButton"] = "Просмотреть политику конфиденциальности и лицензии",
+            ["Privacy_DialogTitle"] = "Политика конфиденциальности и лицензии Microsoft Store",
+            ["Privacy_OfflineFirstHeading"] = "1. 100% локальная конфиденциальность (Offline-First):",
+            ["Privacy_OfflineFirstBody"] = "DropCut работает на 100% локально без внешних серверов и отслеживания в соответствии с Политикой 10.5 Microsoft Store.",
+            ["Privacy_EulaHeading"] = "2. Бессрочная лицензия для одного пользователя (EULA):",
+            ["Privacy_EulaBody"] = "Бессрочная лицензия для использования на 10 устройствах Windows без регулярных платежей.",
+            ["Privacy_MitHeading"] = "3. Лицензия с открытым исходным кодом MIT:",
+            ["Privacy_MitBody"] = "Свобода использования по лицензии MIT с отказом от ответственности.",
+            ["Privacy_OpenOnlineButton"] = "Открыть политику на GitHub",
         },
         ["ja"] = new Dictionary<string, string>
         {
@@ -1288,7 +1355,15 @@ public class LocalizationService : ILocalizationService
             ["Zoom_In"] = "拡大 (Ctrl + +)",
             ["Zoom_Out"] = "縮小 (Ctrl + -)",
             ["Zoom_Reset"] = "原寸 100% (Ctrl + 0)",
-
+            ["Settings_PrivacyLicenseButton"] = "プライバシーポリシーとライセンスを表示",
+            ["Privacy_DialogTitle"] = "プライバシーポリシーとMicrosoft Store公式ライセンス",
+            ["Privacy_OfflineFirstHeading"] = "1. 100% オフラインプライバシー保証:",
+            ["Privacy_OfflineFirstBody"] = "DropCutは外部サーバーやテレメトリを一切使用せず、100%ローカルで動作します。",
+            ["Privacy_EulaHeading"] = "2. 商用・教育用永久ライセンス (EULA):",
+            ["Privacy_EulaBody"] = "同一Microsoftアカウントの最大10台のWindowsデバイスで利用可能な永久ライセンスです。",
+            ["Privacy_MitHeading"] = "3. オープンソース MIT ライセンス:",
+            ["Privacy_MitBody"] = "開発者の著作権を保持しつつ、MITライセンスに基づき自由に使用できます。",
+            ["Privacy_OpenOnlineButton"] = "GitHubでプライバシーポリシーを開く",
         },
         ["pt"] = new Dictionary<string, string>
         {
@@ -1428,7 +1503,15 @@ public class LocalizationService : ILocalizationService
             ["Zoom_In"] = "Aumentar zoom (Ctrl + +)",
             ["Zoom_Out"] = "Diminuir zoom (Ctrl + -)",
             ["Zoom_Reset"] = "Tamanho original 100% (Ctrl + 0)",
-
+            ["Settings_PrivacyLicenseButton"] = "Ver política de privacidade e licenças",
+            ["Privacy_DialogTitle"] = "Política de Privacidade e Licenças da Microsoft Store",
+            ["Privacy_OfflineFirstHeading"] = "1. Privacidade 100% Local (Offline-First):",
+            ["Privacy_OfflineFirstBody"] = "O DropCut opera 100% localmente sem servidores externos ou rastreamento, em conformidade com a Política 10.5 da Microsoft Store.",
+            ["Privacy_EulaHeading"] = "2. Licença Perpétua Comercial e Educacional (EULA):",
+            ["Privacy_EulaBody"] = "Licença perpétua para usuário único válida para até 10 dispositivos Windows sem assinaturas periódicas.",
+            ["Privacy_MitHeading"] = "3. Licença de Código Aberto MIT:",
+            ["Privacy_MitBody"] = "Liberdade de uso sob a licença MIT com isenção total de responsabilidade.",
+            ["Privacy_OpenOnlineButton"] = "Abrir Política no GitHub",
         }
     };
 

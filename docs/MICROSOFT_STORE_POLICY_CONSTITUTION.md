@@ -42,18 +42,32 @@ To ensure zero risk of rejection or account penalty, every project must strictly
 - **Zero Obfuscation / Zero Remote Payloads:** All application logic must be compiled deterministically from verifiable source code. Downloading and executing arbitrary unvetted executable code from remote servers is strictly forbidden.
 - **Verified Dependencies:** Only official, maintained, vulnerability-free NuGet packages authored by Microsoft or reputable community foundations (e.g., CommunityToolkit) are allowed.
 
-### Policy 10.5 & 10.14: Personal Information, Privacy & 100% Offline Mandate (الخصوصية المطلقة وحماية البيانات)
-> **Account Suspension Warning:** Privacy violations (such as collecting user data or sending screenshots to external servers without consent) are the #1 reason for developer account bans on Microsoft Partner Center.
-- **100% Offline-First Architecture:** Unless an app is explicitly an online cloud service, all capturing, editing, file processing, and OCR must execute **100% locally on the user's machine**.
-- **Zero Telemetry / Zero Tracking:** No user screen captures, images, annotations, keystrokes, clipboard data, or analytics beacons may ever leave the device.
-- **Mandatory Privacy Policy (`PRIVACY_POLICY.md`):**
-  - Every project must maintain an authoritative, clearly stated `PRIVACY_POLICY.md` at the repository root and in `docs/`.
-  - The live public GitHub link to `PRIVACY_POLICY.md` must be provided in the Microsoft Store listing and in the app's "About" dialog.
-  - The policy must explicitly declare: zero data collection, local storage only, and user ownership of all created files.
-- **Sandbox File System Isolation:**
-  - MSIX install directory (`C:\Program Files\WindowsApps\...`) is strictly read-only.
-  - All temporary files, databases, and logs must be written to `%LocalAppData%\[AppName]\`.
-  - User-facing exported documents must only be written to standard user directories (`%USERPROFILE%\Pictures\[AppName]`, `%USERPROFILE%\Documents`, etc.).
+### Policy 10.5 & 10.14: Personal Information, Privacy & Licensing Mandate (الخصوصية المطلقة وتراخيص المتجر)
+> **Account Suspension Warning & Mandatory Policy 10.5:** Privacy violations or missing in-app privacy policies are the leading cause of certification failure on Microsoft Partner Center. Under Policy 10.5, every application published to the Store MUST provide a clear, accessible privacy policy and license terms inside the app and on the Store listing, even when 100% Offline-First.
+
+1. **Explicit In-App Privacy Commitment:**
+   - The application MUST declare an explicit in-app commitment confirming:
+     > *"تطبيق DropCut يعمل محلياً بنسبة 100% دون أي اتصال بخوادم خارجية أو جمع بيانات أو تتبع إعلاني؛ وكافة اللقطات والبيانات مخزنة محلياً بالكامل على جهازك الشخصي"*
+   - This unequivocal declaration guarantees immediate clearance during Windows App Certification Kit (WACK) security screening and manual Store reviewer audits.
+   - **Interactive In-App Privacy Viewer:** A dedicated *"View Privacy Policy & Licensing"* button inside the Settings dialog opens an interactive dialog presenting all local privacy obligations, telemetry-free guarantees, and licensing terms.
+
+2. **Approved Microsoft Store Licensing Models (سياسة التراخيص الرسمية):**
+   - **Commercial & Educational Perpetual License (EULA - الموصى به لمتجر مايكروسوفت):**
+     *DropCut Single-User Perpetual Educational License (EULA):* A lifetime, single-user perpetual license granting full legal authorization to install and run the application on up to 10 personal Windows devices registered under the same Microsoft account with zero recurring fees, while retaining developer intellectual property and trademarks.
+   - **Open-Source License (الترخيص المفتوح):**
+     *MIT License:* Standard open-source license granting users full freedom of usage and development with complete disclaimer of liability.
+   - License terms must be directly accessible via the interactive in-app Privacy & Licensing dialog.
+
+3. **100% Offline-First Architecture:** Unless an app is explicitly an online cloud service, all capturing, editing, file processing, and OCR must execute **100% locally on the user's machine**.
+4. **Zero Telemetry / Zero Tracking:** No user screen captures, images, annotations, keystrokes, clipboard data, or analytics beacons may ever leave the device.
+5. **Mandatory Privacy Policy (`PRIVACY_POLICY.md`):**
+   - Every project must maintain an authoritative, clearly stated `PRIVACY_POLICY.md` at the repository root and in `docs/`.
+   - The live public GitHub link to `PRIVACY_POLICY.md` must be provided in the Microsoft Store listing and in the app's "About" dialog.
+   - The policy must explicitly declare: zero data collection, local storage only, and user ownership of all created files.
+6. **Sandbox File System Isolation:**
+   - MSIX install directory (`C:\Program Files\WindowsApps\...`) is strictly read-only.
+   - All temporary files, databases, and logs must be written to `%LocalAppData%\[AppName]\`.
+   - User-facing exported documents must only be written to standard user directories (`%USERPROFILE%\Pictures\[AppName]`, `%USERPROFILE%\Documents`, etc.).
 
 ### Policy 10.8: Software Quality & Mandatory Store Visual Assets Checklist (معايير جودة الحزم والشعارات)
 > **Rejection Prevention:** A package will be immediately rejected during upload if any image referenced in `Package.appxmanifest` is missing.

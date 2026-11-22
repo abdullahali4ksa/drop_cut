@@ -135,7 +135,15 @@ public class ScreenCaptureService : IScreenCaptureService
         {
             // BitBlt with CAPTUREBLT to capture translucent/layered Windows 11 Fluent elements
             var rop = SRCCOPY | CAPTUREBLT;
-            BitBlt(memDc, 0, 0, width, height, screenDc, x, y, rop);
+            bool success = BitBlt(memDc, 0, 0, width, height, screenDc, x, y, rop);
+            if (!success)
+            {
+                // Fallback to standard SRCCOPY if CAPTUREBLT is denied or unsupported
+                BitBlt(memDc, 0, 0, width, height, screenDc, x, y, SRCCOPY);
+            }
+
+            // Deselect bitmap from memDc before reading bits via GetDIBits
+            SelectObject(memDc, oldObj);
 
             var bmi = new BITMAPINFO
             {
@@ -143,7 +151,7 @@ public class ScreenCaptureService : IScreenCaptureService
                 {
                     biSize = Marshal.SizeOf<BITMAPINFOHEADER>(),
                     biWidth = width,
-                    biHeight = -height, // Negative height indicates top-down DIB
+                    biHeight = height, // Positive height indicates standard bottom-up DIB
                     biPlanes = 1,
                     biBitCount = 32,
                     biCompression = BI_RGB,
@@ -152,7 +160,7 @@ public class ScreenCaptureService : IScreenCaptureService
             };
 
             var pixelBytes = new byte[width * height * 4];
-            GetDIBits(memDc, bitmap, 0, (uint)height, pixelBytes, ref bmi, DIB_RGB_COLORS);
+            GetDIBits(screenDc, bitmap, 0, (uint)height, pixelBytes, ref bmi, DIB_RGB_COLORS);
 
             // GDI BitBlt does not populate the Alpha channel in 32-bit DIBs.
             // Force Alpha = 255 (0xFF) on all pixels to ensure 100% solid opacity without any transparency.
@@ -162,7 +170,7 @@ public class ScreenCaptureService : IScreenCaptureService
             }
 
             // Construct valid standard 32-bit BMP byte stream
-            var bmpBytes = WrapInBmpContainer(pixelBytes, width, height);
+            var bmpBytes = WrapInBmpContainer(pixelBytes, width, height, isTopDown: false);
             return Task.FromResult(bmpBytes);
         }
         catch
@@ -171,7 +179,6 @@ public class ScreenCaptureService : IScreenCaptureService
         }
         finally
         {
-            SelectObject(memDc, oldObj);
             DeleteObject(bitmap);
             DeleteDC(memDc);
             ReleaseDC(IntPtr.Zero, screenDc);
@@ -326,7 +333,7 @@ public class ScreenCaptureService : IScreenCaptureService
         }
     }
 
-    private static byte[] WrapInBmpContainer(byte[] pixelData, int width, int height)
+    private static byte[] WrapInBmpContainer(byte[] pixelData, int width, int height, bool isTopDown = false)
     {
         const int fileHeaderSize = 14;
         const int infoHeaderSize = 40;
@@ -347,7 +354,7 @@ public class ScreenCaptureService : IScreenCaptureService
         // BITMAPINFOHEADER
         writer.Write((uint)infoHeaderSize);     // Size of header (40)
         writer.Write(width);                    // Width
-        writer.Write(-height);                  // Top-down height
+        writer.Write(isTopDown ? -height : height); // Top-down if requested, default to standard bottom-up
         writer.Write((ushort)1);                // Planes
         writer.Write((ushort)32);               // 32 bits per pixel (BGRA)
         writer.Write((uint)0);                  // Compression (BI_RGB)

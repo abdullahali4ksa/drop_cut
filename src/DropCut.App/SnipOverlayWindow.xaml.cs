@@ -86,13 +86,11 @@ public sealed partial class SnipOverlayWindow : Window
             if (_desktopBmpBytes is { Length: > 0 })
             {
                 var stream = new InMemoryRandomAccessStream();
-                using (var netStream = stream.AsStreamForWrite())
-                {
-                    netStream.Write(_desktopBmpBytes, 0, _desktopBmpBytes.Length);
-                    netStream.Flush();
-                }
-
+                var netStream = stream.AsStreamForWrite();
+                netStream.Write(_desktopBmpBytes, 0, _desktopBmpBytes.Length);
+                netStream.Flush();
                 stream.Seek(0);
+
                 var bmpImg = new BitmapImage();
                 bmpImg.SetSource(stream);
                 FrozenDesktopImage.Source = bmpImg;

@@ -2350,11 +2350,52 @@ public sealed partial class MainWindow : Window
                 IsOn = true
             };
 
+            // 4. Privacy & Licensing Card
+            var privacyCard = new Border
+            {
+                Background = (Brush)Application.Current.Resources["CardBackgroundFillColorDefaultBrush"],
+                BorderBrush = (Brush)Application.Current.Resources["CardStrokeColorDefaultBrush"],
+                BorderThickness = new Thickness(1),
+                CornerRadius = new CornerRadius(8),
+                Padding = new Thickness(12)
+            };
+
+            var privacyStack = new StackPanel { Spacing = 6 };
+            var privacyTitle = new TextBlock
+            {
+                Text = _localizationService.GetString("Settings_PrivacyLicenseButton"),
+                FontWeight = Microsoft.UI.Text.FontWeights.SemiBold,
+                FontSize = 13
+            };
+            var privacySummary = new TextBlock
+            {
+                Text = _localizationService.GetString("Privacy_OfflineFirstBody"),
+                TextWrapping = TextWrapping.Wrap,
+                FontSize = 11,
+                Opacity = 0.8
+            };
+            var privacyBtn = new Button
+            {
+                Content = _localizationService.GetString("Settings_PrivacyLicenseButton"),
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                Margin = new Thickness(0, 4, 0, 0)
+            };
+            privacyBtn.Click += async (s, args) =>
+            {
+                await ShowPrivacyAndLicensingDialogAsync();
+            };
+
+            privacyStack.Children.Add(privacyTitle);
+            privacyStack.Children.Add(privacySummary);
+            privacyStack.Children.Add(privacyBtn);
+            privacyCard.Child = privacyStack;
+
             panel.Children.Add(langLabel);
             panel.Children.Add(langCombo);
             panel.Children.Add(themeLabel);
             panel.Children.Add(themeCombo);
             panel.Children.Add(autoSaveToggle);
+            panel.Children.Add(privacyCard);
 
             var dialog = new ContentDialog
             {
@@ -2398,6 +2439,102 @@ public sealed partial class MainWindow : Window
                 ApplyLocalization();
                 NotifyToolChange(_localizationService.GetString("Settings_SavedSuccess"));
             }
+        }
+        catch (Exception)
+        {
+            // Zero-Crash Mandate
+        }
+    }
+
+    private async Task ShowPrivacyAndLicensingDialogAsync()
+    {
+        try
+        {
+            var contentStack = new StackPanel { Spacing = 12, MaxWidth = 440 };
+
+            // 1. 100% Offline-First
+            contentStack.Children.Add(new TextBlock
+            {
+                Text = _localizationService.GetString("Privacy_OfflineFirstHeading"),
+                FontWeight = Microsoft.UI.Text.FontWeights.Bold,
+                FontSize = 13
+            });
+            contentStack.Children.Add(new TextBlock
+            {
+                Text = _localizationService.GetString("Privacy_OfflineFirstBody"),
+                TextWrapping = TextWrapping.Wrap,
+                FontSize = 12,
+                Opacity = 0.85
+            });
+
+            // 2. EULA
+            contentStack.Children.Add(new TextBlock
+            {
+                Text = _localizationService.GetString("Privacy_EulaHeading"),
+                FontWeight = Microsoft.UI.Text.FontWeights.Bold,
+                FontSize = 13
+            });
+            contentStack.Children.Add(new TextBlock
+            {
+                Text = _localizationService.GetString("Privacy_EulaBody"),
+                TextWrapping = TextWrapping.Wrap,
+                FontSize = 12,
+                Opacity = 0.85
+            });
+
+            // 3. MIT
+            contentStack.Children.Add(new TextBlock
+            {
+                Text = _localizationService.GetString("Privacy_MitHeading"),
+                FontWeight = Microsoft.UI.Text.FontWeights.Bold,
+                FontSize = 13
+            });
+            contentStack.Children.Add(new TextBlock
+            {
+                Text = _localizationService.GetString("Privacy_MitBody"),
+                TextWrapping = TextWrapping.Wrap,
+                FontSize = 12,
+                Opacity = 0.85
+            });
+
+            var onlineBtn = new Button
+            {
+                Content = new StackPanel
+                {
+                    Orientation = Orientation.Horizontal,
+                    Spacing = 6,
+                    Children =
+                    {
+                        new FontIcon { Glyph = "\uE8A7", FontSize = 12 },
+                        new TextBlock { Text = _localizationService.GetString("Privacy_OpenOnlineButton") }
+                    }
+                },
+                HorizontalAlignment = HorizontalAlignment.Stretch,
+                Margin = new Thickness(0, 8, 0, 0)
+            };
+            onlineBtn.Click += (s, e) =>
+            {
+                try
+                {
+                    Process.Start(new ProcessStartInfo
+                    {
+                        FileName = "https://github.com/abdullahali4ksa/drop_cut/blob/main/PRIVACY_POLICY.md",
+                        UseShellExecute = true
+                    });
+                }
+                catch { }
+            };
+            contentStack.Children.Add(onlineBtn);
+
+            var dialog = new ContentDialog
+            {
+                Title = _localizationService.GetString("Privacy_DialogTitle"),
+                Content = new ScrollViewer { Content = contentStack, MaxHeight = 400 },
+                CloseButtonText = _localizationService.GetString("Tab_Close"),
+                XamlRoot = this.Content.XamlRoot
+            };
+
+            await dialog.ShowAsync();
         }
         catch (Exception)
         {

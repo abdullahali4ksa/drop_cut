@@ -316,3 +316,21 @@
   5. Reset overlay states (`IsCropping`, `IsBlurring`, `IsDrawingMode`) on each new capture tab.
   6. Eliminate UI thread deadlocks by refactoring bitmap stream conversion to synchronous `AsStreamForWrite()`.
 - **VERIFICATION:** Rectangular snip matches selection exactly with zero pixel shift across 100%-200% DPI; multi-tab captures remain solid without transparency leaks; `dotnet build` passes with 0 warnings/0 errors and 53 unit tests pass.
+
+### [P08-T007] Zero-Black Screen Capture Robustness & In-App Policy 10.5 Privacy & Licensing Suite (معالجة الشاشة السوداء وتكامل سياسة الخصوصية والتراخيص) (Linear: `JMD-71`)
+- **STATUS:** `DONE`
+- **POLICY_REF:** `docs/PROJECT_RULES.md (Microsoft Store Policy 10.5, 100% Offline-First Architecture, Zero-Crash Engineering)`
+- **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Stream Disposal Isolation, GDI DC Lifecycle, Dual BitBlt Fallback)`
+- **DESCRIPTION:** Eliminate black-screen capture issues and integrate the official Microsoft Store Policy 10.5 privacy and licensing suite:
+  1. Fix critical WinRT stream premature disposal in `BytesToBitmapImageConverter` and `SnipOverlayWindow` where `using (netStream)` closed the underlying `InMemoryRandomAccessStream`, causing `BitmapImage.SetSource()` to fail and render pitch-black canvases.
+  2. Implement dual-tier `BitBlt` capture fallback: attempt `SRCCOPY | CAPTUREBLT` first, and if denied or unsupported by display drivers, seamlessly fallback to standard `SRCCOPY`.
+  3. Ensure GDI bitmap is properly deselected (`SelectObject(memDc, oldObj)`) before invoking `GetDIBits()`, and use positive height for universal driver compatibility.
+  4. Change `SnipOverlayWindow.RootGrid` background from `Black` to `#01000000` to guarantee live desktop visibility through the overlay while maintaining 100% pointer hit-testing.
+  5. Integrate interactive in-app Privacy Policy & Licensing card in the Settings dialog:
+     - 100% Offline-First Commitment (Zero external servers, zero telemetry, local SQLite storage).
+     - Single-User Perpetual Educational License (EULA) for up to 10 devices.
+     - Open-Source MIT License terms.
+     - 1-Click button to launch the official public `PRIVACY_POLICY.md` on GitHub.
+  6. Localize privacy and licensing strings across all 10 supported languages in `LocalizationService`.
+  7. Formally enshrine Policy 10.5 and the licensing models into `docs/MICROSOFT_STORE_POLICY_CONSTITUTION.md`.
+- **VERIFICATION:** `dotnet build` passes with 0 warnings and 0 errors; all 53 unit tests pass; dual x64 and arm64 MSIX packages built and verified with all 5 mandatory Store assets.
