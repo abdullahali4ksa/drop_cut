@@ -18,8 +18,8 @@ public class LocalizationService : ILocalizationService
 
     private static readonly IReadOnlyList<LanguageOption> _supportedLanguages = new List<LanguageOption>
     {
-        new("ar", "العربية", "العربية", true),
         new("en", "English", "English", false),
+        new("ar", "العربية", "العربية", true),
         new("es", "Spanish", "Español", false),
         new("hi", "Hindi", "हिन्दी", false),
         new("zh", "Chinese", "中文", false),
@@ -1525,7 +1525,7 @@ public class LocalizationService : ILocalizationService
     {
         _eventBus = Guard.AgainstNull(eventBus, nameof(eventBus));
         _preferenceRepository = preferenceRepository;
-        _currentLanguageCode = "ar";
+        _currentLanguageCode = "en";
     }
 
     public string GetString(string key)

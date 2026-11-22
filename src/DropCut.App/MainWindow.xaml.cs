@@ -114,16 +114,16 @@ public sealed partial class MainWindow : Window
 
         ApplyLocalization();
 
-        // If Windows OS is non-Arabic, automatically adapt to English or system language so foreign users see clean English
+        // Default to clean English for all users. If Windows OS has a non-English supported language (excluding Arabic unless explicitly chosen in Settings), adapt cleanly.
         try
         {
             var sysCulture = System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName.ToLowerInvariant();
-            if (!sysCulture.Equals("ar", StringComparison.OrdinalIgnoreCase))
+            if (!sysCulture.Equals("ar", StringComparison.OrdinalIgnoreCase) && !sysCulture.Equals("en", StringComparison.OrdinalIgnoreCase))
             {
-                var targetLang = _localizationService.SupportedLanguages.Any(l => l.Code.Equals(sysCulture, StringComparison.OrdinalIgnoreCase))
-                    ? sysCulture
-                    : "en";
-                _ = _localizationService.SetLanguageAsync(targetLang);
+                if (_localizationService.SupportedLanguages.Any(l => l.Code.Equals(sysCulture, StringComparison.OrdinalIgnoreCase)))
+                {
+                    _ = _localizationService.SetLanguageAsync(sysCulture);
+                }
             }
         }
         catch { }
@@ -149,6 +149,9 @@ public sealed partial class MainWindow : Window
             _hotkeyService.Dispose();
         };
 
+        // Listen for window resize to dynamically maintain auto-fit scaling on small/medium/large windows
+        this.SizeChanged += MainWindow_SizeChanged;
+
         // Initialize with Hand tool as default
         SetToolMode(ToolType.Hand);
     }
@@ -157,9 +160,12 @@ public sealed partial class MainWindow : Window
     {
         SetToolMode(ToolType.Hand);
         _activeDrawingCanvas = GetActiveDrawingCanvas();
-        if (ViewModel.SelectedTab?.HasImage == true && ViewModel.SelectedTab.ZoomFactor == 1.0)
+        if (ViewModel.SelectedTab?.HasImage == true)
         {
-            AutoFitImageToViewport(ViewModel.SelectedTab);
+            DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () =>
+            {
+                AutoFitImageToViewport(ViewModel.SelectedTab);
+            });
         }
     }
 
@@ -336,7 +342,11 @@ public sealed partial class MainWindow : Window
                 tab.AutoSaveStatus = _localizationService.GetString("Status_Captured", width, height);
 
                 // Version 2.0: Smart Auto-Fit Viewport Scaling (P08-T001)
-                AutoFitImageToViewport(tab);
+                // Schedule with low priority so layout engine arranges viewport before calculating aspect ratio
+                DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () =>
+                {
+                    AutoFitImageToViewport(tab);
+                });
             }
 
             _activeDrawingCanvas = GetActiveDrawingCanvas();
@@ -1170,22 +1180,50 @@ public sealed partial class MainWindow : Window
     {
         if (tab == null) return;
 
-        DispatcherQueue.TryEnqueue(() =>
+        DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () =>
         {
             try
             {
                 var scroll = GetActiveScrollViewer();
-                if (scroll == null) return;
 
-                double viewW = scroll.ActualWidth > 0 ? scroll.ActualWidth : 1200;
-                double viewH = scroll.ActualHeight > 0 ? scroll.ActualHeight : 800;
+                // Compute real available viewport dimensions across all window states (Small, Medium, Large, Maximized)
+                double viewW = 0;
+                double viewH = 0;
 
-                double availW = Math.Max(200, viewW - 64);
-                double availH = Math.Max(200, viewH - 64);
+                if (scroll != null && scroll.ViewportWidth > 50 && scroll.ViewportHeight > 50)
+                {
+                    viewW = scroll.ViewportWidth;
+                    viewH = scroll.ViewportHeight;
+                }
+                else if (scroll != null && scroll.ActualWidth > 50 && scroll.ActualHeight > 50)
+                {
+                    viewW = scroll.ActualWidth;
+                    viewH = scroll.ActualHeight;
+                }
+                else if (RootAppGrid != null && RootAppGrid.ActualWidth > 50 && RootAppGrid.ActualHeight > 50)
+                {
+                    viewW = RootAppGrid.ActualWidth;
+                    viewH = RootAppGrid.ActualHeight - 120; // Top ribbon + Tab header + Bottom status bar
+                }
+                else if (this.AppWindow.Size.Width > 100 && this.AppWindow.Size.Height > 100)
+                {
+                    viewW = this.AppWindow.Size.Width - 32;
+                    viewH = this.AppWindow.Size.Height - 130;
+                }
+                else
+                {
+                    viewW = 800;
+                    viewH = 500;
+                }
+
+                // Available display area inside the tab with comfortable margin
+                double availW = Math.Max(100, viewW - 24);
+                double availH = Math.Max(100, viewH - 24);
 
                 double imgW = tab.ImageWidth > 0 ? tab.ImageWidth : 1920;
                 double imgH = tab.ImageHeight > 0 ? tab.ImageHeight : 1080;
 
+                // If image is larger than available space, calculate exact fit ratio
                 if (imgW > availW || imgH > availH)
                 {
                     double ratioW = availW / imgW;
@@ -1193,16 +1231,16 @@ public sealed partial class MainWindow : Window
                     double fitRatio = Math.Min(ratioW, ratioH);
 
                     fitRatio = Math.Floor(fitRatio * 100.0) / 100.0;
-                    fitRatio = Math.Clamp(fitRatio, 0.15, 1.0);
+                    fitRatio = Math.Clamp(fitRatio, 0.05, 1.0);
 
                     tab.ZoomFactor = fitRatio;
-                    scroll.ChangeView(null, null, (float)fitRatio);
+                    scroll?.ChangeView(null, null, (float)fitRatio);
                     NotifyToolChange(_localizationService.GetString("Status_AutoFit", (int)(fitRatio * 100)));
                 }
                 else
                 {
                     tab.ZoomFactor = 1.0;
-                    scroll.ChangeView(null, null, 1.0f);
+                    scroll?.ChangeView(null, null, 1.0f);
                 }
             }
             catch (Exception)
@@ -1210,6 +1248,20 @@ public sealed partial class MainWindow : Window
                 // Protected Zero-Crash boundary
             }
         });
+    }
+
+    private void MainWindow_SizeChanged(object sender, Microsoft.UI.Xaml.WindowSizeChangedEventArgs args)
+    {
+        try
+        {
+            var tab = ViewModel.SelectedTab;
+            // Dynamically scale image when user resizes DropCut window (small, medium, large, restored, maximized)
+            if (tab is { HasImage: true } && tab.ZoomFactor < 1.0)
+            {
+                AutoFitImageToViewport(tab);
+            }
+        }
+        catch { }
     }
 
     private void ZoomInCurrentTab()

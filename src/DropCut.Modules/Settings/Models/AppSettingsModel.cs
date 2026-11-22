@@ -5,7 +5,7 @@ namespace DropCut.Modules.Settings.Models;
 /// </summary>
 public class AppSettingsModel
 {
-    public string LanguageCode { get; set; } = "ar";
+    public string LanguageCode { get; set; } = "en";
 
     public string Theme { get; set; } = "System";
 

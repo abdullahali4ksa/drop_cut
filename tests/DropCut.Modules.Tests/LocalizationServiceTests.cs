@@ -27,15 +27,15 @@ public class LocalizationServiceTests
     }
 
     [Fact]
-    public void LocalizationService_DefaultLanguage_IsArabicAndRtl()
+    public void LocalizationService_DefaultLanguage_IsEnglishAndLtr()
     {
         var bus = new InMemoryEventBus();
         var service = new LocalizationService(bus);
 
-        Assert.Equal("ar", service.CurrentLanguageCode);
-        Assert.True(service.IsRtl);
+        Assert.Equal("en", service.CurrentLanguageCode);
+        Assert.False(service.IsRtl);
         Assert.Equal(10, service.SupportedLanguages.Count);
-        Assert.Equal("قلم الرسم", service.GetString("Tool_Pen"));
+        Assert.Equal("Pen", service.GetString("Tool_Pen"));
     }
 
     [Theory]
@@ -76,12 +76,12 @@ public class LocalizationServiceTests
         var bus = new InMemoryEventBus();
         var service = new LocalizationService(bus);
 
-        var arFormatted = service.GetString("Tab_NewSnippet", 5);
-        Assert.Equal("لقطة 5", arFormatted);
-
-        await service.SetLanguageAsync("en");
         var enFormatted = service.GetString("Tab_NewSnippet", 5);
         Assert.Equal("Snip 5", enFormatted);
+
+        await service.SetLanguageAsync("ar");
+        var arFormatted = service.GetString("Tab_NewSnippet", 5);
+        Assert.Equal("لقطة 5", arFormatted);
     }
 
     [Fact]
@@ -93,7 +93,7 @@ public class LocalizationServiceTests
         var settingsService = new SettingsService(repo, locService);
 
         var initial = await settingsService.LoadSettingsAsync();
-        Assert.Equal("ar", initial.LanguageCode);
+        Assert.Equal("en", initial.LanguageCode);
         Assert.Equal(300, initial.DebounceMilliseconds);
 
         var updated = new AppSettingsModel
@@ -127,17 +127,17 @@ public class LocalizationServiceTests
         var vm = new SettingsViewModel(settingsService, locService);
 
         await vm.InitializeAsync();
-        Assert.Equal("ar", vm.SelectedLanguage?.Code);
+        Assert.Equal("en", vm.SelectedLanguage?.Code);
 
-        var enLang = vm.SupportedLanguages.First(l => l.Code == "en");
-        vm.SelectedLanguage = enLang;
+        var arLang = vm.SupportedLanguages.First(l => l.Code == "ar");
+        vm.SelectedLanguage = arLang;
         vm.SelectedTheme = "Dark";
         vm.DebounceMilliseconds = 450;
 
         await vm.SaveAsync();
 
         var loaded = await settingsService.LoadSettingsAsync();
-        Assert.Equal("en", loaded.LanguageCode);
+        Assert.Equal("ar", loaded.LanguageCode);
         Assert.Equal("Dark", loaded.Theme);
         Assert.Equal(450, loaded.DebounceMilliseconds);
     }

@@ -35,8 +35,8 @@ public class ShellViewModelTests
 
         Assert.Single(vm.Tabs);
         Assert.NotNull(vm.SelectedTab);
-        Assert.Equal("لقطة 1", vm.SelectedTab!.Title);
-        Assert.True(vm.IsRtl);
+        Assert.Equal("Snip 1", vm.SelectedTab!.Title);
+        Assert.False(vm.IsRtl);
     }
 
     [Fact]
@@ -48,7 +48,7 @@ public class ShellViewModelTests
 
         Assert.Equal(2, vm.Tabs.Count);
         Assert.Equal(vm.Tabs[1], vm.SelectedTab);
-        Assert.Equal("لقطة 2", vm.SelectedTab!.Title);
+        Assert.Equal("Snip 2", vm.SelectedTab!.Title);
     }
 
     [Fact]
@@ -171,16 +171,16 @@ public class ShellViewModelTests
     {
         var (vm, _, locService) = CreateViewModel();
 
-        Assert.True(vm.IsRtl);
-        Assert.Equal("لقطة 1", vm.Tabs[0].Title);
-
-        await locService.SetLanguageAsync("en");
-
         Assert.False(vm.IsRtl);
         Assert.Equal("Snip 1", vm.Tabs[0].Title);
-        Assert.Equal("Apply Crop", vm.Tabs[0].CropApplyText);
-        Assert.Equal("Cancel", vm.Tabs[0].CropCancelText);
-        Assert.Equal("Apply Blur", vm.Tabs[0].BlurApplyText);
-        Assert.Equal("Click New above or press PrintScreen to capture screen", vm.Tabs[0].LandingSnipHint);
+
+        await locService.SetLanguageAsync("ar");
+
+        Assert.True(vm.IsRtl);
+        Assert.Equal("لقطة 1", vm.Tabs[0].Title);
+        Assert.Equal("تطبيق القص", vm.Tabs[0].CropApplyText);
+        Assert.Equal("إلغاء", vm.Tabs[0].CropCancelText);
+        Assert.Equal("تطبيق التمويه", vm.Tabs[0].BlurApplyText);
+        Assert.Equal("انقر فوق «جديد» في الأعلى أو اضغط PrintScreen لأخذ لقطة شاشة", vm.Tabs[0].LandingSnipHint);
     }
 }

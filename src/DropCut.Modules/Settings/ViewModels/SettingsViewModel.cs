@@ -110,7 +110,7 @@ public partial class SettingsViewModel : ObservableObject
         {
             var settings = new AppSettingsModel
             {
-                LanguageCode = SelectedLanguage?.Code ?? "ar",
+                LanguageCode = SelectedLanguage?.Code ?? "en",
                 Theme = SelectedTheme,
                 AutoSaveEnabled = AutoSaveEnabled,
                 DebounceMilliseconds = DebounceMilliseconds,

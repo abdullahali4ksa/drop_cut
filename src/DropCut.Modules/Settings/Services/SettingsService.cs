@@ -89,7 +89,7 @@ public class SettingsService : ISettingsService
     {
         return new AppSettingsModel
         {
-            LanguageCode = "ar",
+            LanguageCode = "en",
             Theme = "System",
             AutoSaveEnabled = true,
             DebounceMilliseconds = 300,

@@ -170,7 +170,18 @@ public class ScreenCaptureService : IScreenCaptureService
             }
 
             // Construct valid standard 32-bit BMP byte stream
-            var bmpBytes = WrapInBmpContainer(pixelBytes, width, height, isTopDown: false);
+            // GDI GetDIBits with positive biHeight outputs bottom-up scanlines.
+            // Invert the scanline order to top-down so row 0 is the topmost scanline of the screen.
+            var stride = width * 4;
+            var topDownPixels = new byte[pixelBytes.Length];
+            for (int r = 0; r < height; r++)
+            {
+                int srcOffset = (height - 1 - r) * stride;
+                int dstOffset = r * stride;
+                Array.Copy(pixelBytes, srcOffset, topDownPixels, dstOffset, stride);
+            }
+
+            var bmpBytes = WrapInBmpContainer(topDownPixels, width, height, isTopDown: true);
             return Task.FromResult(bmpBytes);
         }
         catch
@@ -231,7 +242,9 @@ public class ScreenCaptureService : IScreenCaptureService
                 croppedPixels[i] = 255;
             }
 
-            return WrapInBmpContainer(croppedPixels, safeWidth, safeHeight);
+            // croppedPixels is ordered top-down (row 0 = top of crop).
+            // Always wrap with isTopDown = true so Windows renders it top-down, right-side up!
+            return WrapInBmpContainer(croppedPixels, safeWidth, safeHeight, isTopDown: true);
         }
         catch
         {
