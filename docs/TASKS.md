@@ -357,3 +357,14 @@
   4. Verified all 6 submission sections show **Complete** on Partner Center and that the **Submit for certification** button is active and ready.
   5. Created and published the official reusable Antigravity skill `ms-store-submission` (`docs/skills/ms-store-submission/SKILL.md`) for all future projects.
 - **VERIFICATION:** Both v2.0.0.0 packages validated on Partner Center; visual evidence confirmed in `final_step_328.png`; all submission sections Complete; skill committed to repository.
+
+### [P08-T010] Official Microsoft Store Worldwide Publication & Live Store Release (Linear: `JMD-74`)
+- **STATUS:** `DONE`
+- **POLICY_REF:** `docs/PROJECT_RULES.md (Microsoft Store Standards, Policy 10.1–10.14 Compliance)`
+- **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Official Microsoft Digital Signature & Worldwide CDN Replication)`
+- **DESCRIPTION:** DropCut officially passed all Microsoft Store automated security screening, technical WACK audits, content compliance, and manual reviewer checks with 100% clearance:
+  1. Product Status changed to **In Microsoft Store** (Live).
+  2. Public Store Listing URL active: `https://apps.microsoft.com/detail/9NV7BZHXBCZ7`
+  3. Direct Windows Store Protocol active: `ms-windows-store://pdp/?productid=9NV7BZHXBCZ7`
+  4. Verified worldwide availability across 240+ countries and regions.
+- **VERIFICATION:** Confirmed live on Partner Center Application Overview and Product Identity (`final_step_337.png`).
