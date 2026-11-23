@@ -158,15 +158,17 @@ public sealed partial class MainWindow : Window
 
     private void MainTabView_SelectionChanged(object sender, SelectionChangedEventArgs e)
     {
-        SetToolMode(ToolType.Hand);
-        _activeDrawingCanvas = GetActiveDrawingCanvas();
-        if (ViewModel.SelectedTab?.HasImage == true)
+        var currentTool = ViewModel.ActiveTool;
+        SetToolMode(currentTool);
+
+        DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () =>
         {
-            DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () =>
+            _activeDrawingCanvas = GetActiveDrawingCanvas();
+            if (ViewModel.SelectedTab?.HasImage == true)
             {
                 AutoFitImageToViewport(ViewModel.SelectedTab);
-            });
-        }
+            }
+        });
     }
 
     public FlowDirection GetFlowDirection(bool isRtl) =>
@@ -279,18 +281,18 @@ public sealed partial class MainWindow : Window
     {
         try
         {
-            if (ViewModel.DelaySeconds > 0)
-            {
-                NotifyToolChange(_localizationService.GetString("Delay_" + ViewModel.DelaySeconds + "s"));
-                await Task.Delay(ViewModel.DelaySeconds * 1000);
-            }
-
-            // Hide main window so desktop is completely clear for the snip
+            // 1. Immediately hide main window from desktop so user has a clean, unobstructed view
             this.AppWindow.Hide();
             // Allow ample time for Windows 11 DWM window fade-out animation to complete 100%
             await Task.Delay(320);
 
-            // Capture pristine full desktop snapshot
+            // 2. If countdown delay is requested (e.g. 3s, 5s, 10s), wait while window remains completely hidden!
+            if (ViewModel.DelaySeconds > 0)
+            {
+                await Task.Delay(ViewModel.DelaySeconds * 1000);
+            }
+
+            // 3. Capture pristine full desktop snapshot
             var fullDesktopBmp = await _screenCaptureService.CapturePrimaryScreenAsync();
 
             var overlay = new SnipOverlayWindow(
@@ -338,7 +340,7 @@ public sealed partial class MainWindow : Window
                 tab.ImageHeight = height;
                 tab.IsCropping = false;
                 tab.IsBlurring = false;
-                tab.IsDrawingMode = false;
+                tab.IsDrawingMode = (ViewModel.ActiveTool != ToolType.Hand && ViewModel.ActiveTool != ToolType.Select);
                 tab.AutoSaveStatus = _localizationService.GetString("Status_Captured", width, height);
 
                 // Version 2.0: Smart Auto-Fit Viewport Scaling (P08-T001)
@@ -346,6 +348,7 @@ public sealed partial class MainWindow : Window
                 DispatcherQueue.TryEnqueue(Microsoft.UI.Dispatching.DispatcherQueuePriority.Low, () =>
                 {
                     AutoFitImageToViewport(tab);
+                    _activeDrawingCanvas = GetActiveDrawingCanvas();
                 });
             }
 
@@ -1150,7 +1153,11 @@ public sealed partial class MainWindow : Window
                 if (container != null)
                 {
                     var canvas = FindChildByTag<Canvas>(container, "InTabDrawingCanvas");
-                    if (canvas != null) return canvas;
+                    if (canvas != null)
+                    {
+                        _activeDrawingCanvas = canvas;
+                        return canvas;
+                    }
                 }
             }
         }

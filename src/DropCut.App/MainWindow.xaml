@@ -544,6 +544,10 @@
 
                                             <!-- Interactive Inking & Annotation Canvas Layer (Active only in Drawing Mode) -->
                                             <Canvas Tag="InTabDrawingCanvas"
+                                                    Width="{Binding ImageWidth}"
+                                                    Height="{Binding ImageHeight}"
+                                                    HorizontalAlignment="Center"
+                                                    VerticalAlignment="Center"
                                                     Background="Transparent"
                                                     FlowDirection="LeftToRight"
                                                     IsHitTestVisible="{Binding IsDrawingMode}"

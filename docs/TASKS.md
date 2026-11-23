@@ -368,3 +368,16 @@
   3. Direct Windows Store Protocol active: `ms-windows-store://pdp/?productid=9NV7BZHXBCZ7`
   4. Verified worldwide availability across 240+ countries and regions.
 - **VERIFICATION:** Confirmed live on Partner Center Application Overview and Product Identity (`final_step_337.png`).
+
+### [P08-T011] Immediate Window Hide on Snip Trigger (Instant & Delay Countdown) and Multi-Tab Pen & Drawing Isolation (Linear: `JMD-75`)
+- **STATUS:** `DONE`
+- **POLICY_REF:** `docs/PROJECT_RULES.md (Architecture, Modular Vertical-Slice, Clean UI, Microsoft Store Standards)`
+- **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Zero-Crash Mandate, Protected Async Void, Safe Try/Catch, Non-Locking I/O)`
+- **DESCRIPTION:** Fix window visibility on snip activation and stabilize inking canvas state on subsequent tabs:
+  1. **Immediate Window Hiding Across All Snip Triggers:** On clicking `+` (New Tab button in TabView), `New Snip` (SplitButton), camera landing button, or hotkeys, `this.AppWindow.Hide()` is invoked immediately BEFORE any countdown delay. Even in delay modes (3s, 5s, 10s), DropCut disappears from the desktop at once so the user has full, unobstructed access to their screen to open menus or arrange windows, and reappears cleanly after capture completes.
+  2. **Multi-Tab Writing & Pen Mode Stabilization:** 
+     - Preserved `ViewModel.ActiveTool` across tab switches in `MainTabView_SelectionChanged` instead of forcibly reverting to Hand mode.
+     - Synchronized `tab.IsDrawingMode = (ViewModel.ActiveTool != ToolType.Hand && ViewModel.ActiveTool != ToolType.Select)` when capturing or copying images into Tab 2 and subsequent tabs, allowing immediate pen writing.
+     - Bound `Width="{Binding ImageWidth}"` and `Height="{Binding ImageHeight}"` explicitly on `InTabDrawingCanvas` so that drawing coordinates on Tab 2 map 1:1 to image pixels with zero offset.
+     - Ensured `GetActiveDrawingCanvas()` dynamically resolves and caches the active tab's canvas without falling back to stale canvases.
+- **VERIFICATION:** `dotnet test DropCut.sln` passes 53/53 tests; window hides immediately in 3s delay mode; drawing with Pen on Tab 2 works immediately without tool resets; release MSIX packages rebuilt.
