@@ -472,3 +472,45 @@
   4. **Strict Zero-Cloud Transport:** Local Bluetooth/Wi-Fi Direct only; zero intermediate relay servers.
 - **VERIFICATION:** Clicking Share opens Windows native sharing flyout; sharing an image from Photos launches DropCut with the image opened in a new tab.
 
+### [v3-Desktop] [P09-T007] Pixel Loupe & Hex Color Picker in More Menu (العدسة المكبرة وناسخ كود الألوان في قائمة المزيد) (Linear: `JMD-82`)
+- **STATUS:** `PROPOSED`
+- **POLICY_REF:** `docs/PROJECT_RULES.md (Architecture, Modular Vertical-Slice, Clean UI, Microsoft Store Standards)`
+- **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Zero-Crash Mandate, Protected Async Void, Safe Try/Catch, Non-Locking I/O)`
+- **DESCRIPTION:** Add a high-precision circular pixel magnification loupe and instant color picker accessible as a secondary utility in the `...` (More options) flyout and global capture settings:
+  1. **UI Placement:** Integrated under the `...` (More options / الثلاث نقاط) flyout in Section 4 of the ribbon and toggled during snip via shortcut (`C`).
+  2. **Magnifier Loupe:** Displays a magnified 8x pixel grid around the cursor during rectangular snip selection.
+  3. **Instant Color Code Readout:** Displays live RGB and Hex code (e.g. `#0078D4`). Pressing `C` or clicking copies the exact hex color code directly to the Windows clipboard.
+- **VERIFICATION:** Toggling Loupe displays pixel grid during snip; pressing `C` copies valid `#RRGGBB` string to clipboard without interfering with snip boundaries.
+
+### [v3-Desktop] [P09-T008] Window Drop Shadow & Social Framing Mockup in More Menu (توليد الظلال الناعمة والخلفيات الجمالية في قائمة المزيد) (Linear: `JMD-83`)
+- **STATUS:** `PROPOSED`
+- **POLICY_REF:** `docs/PROJECT_RULES.md (Architecture, Modular Vertical-Slice, Clean UI, Microsoft Store Standards)`
+- **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Zero-Crash Mandate, Protected Async Void, Safe Try/Catch, Non-Locking I/O)`
+- **DESCRIPTION:** Add a 1-click aesthetic framing and drop-shadow generation tool located in the `...` (More options) dropdown menu:
+  1. **UI Placement:** Secondary command inside `...` (More options) dropdown labeled `Framing & Shadows / الإطار والظلال الجمالية`.
+  2. **Soft Window Shadow:** Automatically pads the captured image with customizable modern drop shadow (Gaussian blur + alpha offset).
+  3. **Aesthetic Gradient Padding:** Wraps the screenshot inside a subtle gradient or solid background card, making it instantly presentation-ready for social media (LinkedIn, X) or documentation without manual Photoshop editing.
+- **VERIFICATION:** Clicking Framing wraps active tab image with clean rounded corners, smooth drop shadow, and aesthetic margin, cleanly rasterized into export PNG.
+
+### [v3-Desktop] [P09-T009] Spotlight & Background Dimming Focus Tool in More Menu (تسليط الضوء وتعتيم الخلفية في قائمة المزيد) (Linear: `JMD-84`)
+- **STATUS:** `PROPOSED`
+- **POLICY_REF:** `docs/PROJECT_RULES.md (Architecture, Modular Vertical-Slice, Clean UI, Microsoft Store Standards)`
+- **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Zero-Crash Mandate, Protected Async Void, Safe Try/Catch, Non-Locking I/O)`
+- **DESCRIPTION:** Add a spotlight focus tool accessible under the `...` (More options) dropdown menu:
+  1. **UI Placement:** Positioned in `...` (More options) dropdown alongside Blur and Redaction tools.
+  2. **Spotlight Effect:** Drawing a rectangle over an area keeps the selected region at 100% full brightness and crispness while smoothly applying a 40% translucent darkening layer over the rest of the screenshot.
+  3. **Focus Guidance:** Directly guides viewer attention to critical buttons, errors, or data fields without cropping out full application context.
+- **VERIFICATION:** Applying spotlight dims peripheral areas by 40% and leaves target box clear; undo/redo stack accurately tracks state.
+
+### [v3-Desktop] [P09-T010] Optional Floating Quick Actions HUD (شريط الأدوات العائم المصغر أثناء القص - معطل افتراضياً) (Linear: `JMD-85`)
+- **STATUS:** `PROPOSED`
+- **POLICY_REF:** `docs/PROJECT_RULES.md (Architecture, Modular Vertical-Slice, Clean UI, Microsoft Store Standards)`
+- **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Zero-Crash Mandate, Protected Async Void, Safe Try/Catch, Non-Locking I/O)`
+- **DESCRIPTION:** Implement an optional floating quick-action HUD around the selection rectangle during desktop snip, configured as **OFF by default** to preserve maximum performance and avoid desktop obstruction:
+  1. **Off by Default:** Kept disabled by default in settings to ensure rectangular snip remains instantaneous and lightweight, avoiding overlay frame persistence after copying.
+  2. **Activation Option:** Can be explicitly enabled in Settings or via `...` (More options) menu for power users desiring in-place quick editing.
+  3. **Floating HUD:** When enabled, renders a micro floating toolbar around the snip rectangle (Quick Copy, Instant Arrow, Quick Redact, Cancel) allowing immediate action before closing overlay.
+  4. **Strict Overhead Guard:** If architectural testing reveals any rendering lag or window occlusion, the feature can be safely isolated or deprecated without affecting core snapping.
+- **VERIFICATION:** Feature remains disabled by default; when toggled on in settings, displays lightweight HUD without leaking handles or causing overlay freezes.
+
+
