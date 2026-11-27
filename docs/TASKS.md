@@ -387,9 +387,10 @@
 ## Phase 9: DropCut v3.0.0.0 Roadmap & Approved Tasks (خارطة طريق الإصدار الثالث المعتمدة)
 
 > **Mandate:** All tasks in Phase 9 are roadmap specifications for Version 3.0.0.0 approved by the developer. In strict accordance with the developer's governance instructions, **no implementation code is to be authored, touched, or executed until explicit authorization ("ابدأ" or "انطلق") is given**.  
+> **Linear Synchronization:** Desktop tasks belong to Linear Project `P-JMD-3` (`DropCut — Windows App`). The WebExtension has been branched into its own independent project `P-JMD-5` (`DropCut — Browser Extension (Chrome, Edge, Firefox)`) tracked via Linear issue `JMD-154` and `docs/BROWSER_EXTENSION_PROJECT.md`.  
 > **Store Compliance Law:** Every approved task strictly adheres to `docs/MICROSOFT_STORE_POLICY_CONSTITUTION.md` and `docs/PROJECT_RULES.md` (100% Offline-First, Zero Cloud Telemetry under Policy 10.5, Zero-Crash Mandate, Modular Vertical-Slice Architecture, and One-Class-Per-File law).
 
-### [P09-T001] Native Lightweight Screen Video & Animated GIF Snipping Engine (تسجيل الفيديو ولقطات الـ GIF الخفيفة محلياً) (Linear: `JMD-76`)
+### [v3-Desktop] [P09-T001] Native Lightweight Screen Video & Animated GIF Snipping Engine (تسجيل الفيديو ولقطات الـ GIF الخفيفة محلياً) (Linear: `JMD-76`)
 - **STATUS:** `PROPOSED`
 - **POLICY_REF:** `docs/PROJECT_RULES.md (Architecture, Modular Vertical-Slice, Clean UI, Microsoft Store Standards)`
 - **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Zero-Crash Mandate, Protected Async Void, Safe Try/Catch, Non-Locking I/O)`
@@ -406,7 +407,7 @@
   5. **Direct Outward Drag-and-Drop:** Once stopped, the generated MP4/GIF immediately populates an active tab with an interactive player, ready to be dragged out directly into WhatsApp Web, Telegram, Discord, or Explorer.
 - **VERIFICATION:** Recording a 5-second snippet generates a valid, playable MP4/GIF file locally without network calls; zero process crashes; passes all Store WACK audits.
 
-### [P09-T002] Long / Panoramic Scrolling Capture Engine (الالتقاط التمريري الطويل لصفحات الويب والمستندات) (Linear: `JMD-77`)
+### [v3-Desktop] [P09-T002] Long / Panoramic Scrolling Capture Engine (الالتقاط التمريري الطويل لصفحات الويب والمستندات) (Linear: `JMD-77`)
 - **STATUS:** `PROPOSED`
 - **POLICY_REF:** `docs/PROJECT_RULES.md (Architecture, Modular Vertical-Slice, Clean UI, Microsoft Store Standards)`
 - **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Zero-Crash Mandate, Protected Async Void, Safe Try/Catch, Non-Locking I/O)`
@@ -421,20 +422,16 @@
   4. **100% Offline-First:** Image stitching runs entirely in local memory with zero cloud processing.
 - **VERIFICATION:** Scrolling through a 5-page PDF or long web article captures a single high-resolution image with aligned text and borders; memory freed immediately upon completion.
 
-### [P09-T003] Cross-Browser Extension Project (Chrome, Edge, Firefox) for Web Snip & Full-Page Scrolling (مشروع ملحق المتصفحات لكروم وإيدج وفايرفوكس) (Linear: `JMD-78`)
-- **STATUS:** `PROPOSED`
-- **POLICY_REF:** `docs/PROJECT_RULES.md (Modular Vertical-Slice, Clean UI, Browser Integration Standards)`
-- **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Local Communication Isolation, Manifest V3 Compliance)`
-- **DESCRIPTION:** Scaffold and build a dedicated cross-browser WebExtension project (`DropCut.BrowserExtension`) supporting Google Chrome, Microsoft Edge, and Mozilla Firefox:
-  1. **Manifest V3 Architecture:** Built with modern WebExtensions standards, zero analytics, zero external scripts, and 100% offline-ready.
-  2. **Capture Capabilities:**
-     - **Visible Viewport Snip:** 1-click capture of the currently displayed browser area.
-     - **Selected Element Snip:** Interactive DOM element inspector to snip specific cards, tweets, charts, or code blocks.
-     - **Full Page Scrolling Capture:** Automated DOM-based scrolling capture for complete web articles without scrollbar interference.
-  3. **Native Desktop Handshake:** Seamless handoff to the desktop DropCut application via custom protocol URI (`dropcut://snip?id=...`) or system clipboard, instantly opening the capture in a new tab for annotation and drag-and-drop sharing.
-- **VERIFICATION:** Extension installs on Chrome, Edge, and Firefox developer modes; clicking "Capture Element" sends the cropped element directly into a new DropCut desktop tab.
+### [v3-Extension] [P09-T003] Cross-Browser Extension Project (Chrome, Edge, Firefox) (مشروع ملحق المتصفحات المستقل) (Linear: `JMD-154`)
+- **STATUS:** `PROPOSED (Independent Sub-Project)`
+- **POLICY_REF:** `docs/BROWSER_EXTENSION_PROJECT.md`
+- **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Manifest V3, 100% Offline-First, Zero Remote Scripts)`
+- **DESCRIPTION:** Dedicated independent sub-project tracked separately under Linear Project **`P-JMD-5`** (`DropCut — Browser Extension (Chrome, Edge, Firefox)`) and documented in detail in `docs/BROWSER_EXTENSION_PROJECT.md`:
+  - Cross-browser Manifest V3 extension for Chrome, Edge, and Firefox.
+  - Viewport snip, interactive DOM element picker, and full-page scrolling capture.
+  - Native desktop bridge to DropCut WinUI 3 desktop app via `dropcut://` scheme and clipboard.
 
-### [P09-T004] Enhanced 100% Local On-Device OCR with Dropdown Actions (نسخ النص وماركداون وجداول) (Linear: `JMD-79`)
+### [v3-Desktop] [P09-T004] Enhanced 100% Local On-Device OCR with Dropdown Actions (نسخ النص وماركداون وجداول) (Linear: `JMD-79`)
 - **STATUS:** `PROPOSED`
 - **POLICY_REF:** `docs/PROJECT_RULES.md (Architecture, Modular Vertical-Slice, Clean UI, Microsoft Store Standards)`
 - **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Zero-Crash Mandate, Protected Async Void, Safe Try/Catch, Non-Locking I/O)`
@@ -450,7 +447,7 @@
   4. **Strict Policy 10.5 Privacy:** Zero telemetry, zero cloud OCR APIs (Azure/Google/AWS); 100% of OCR parsing happens on the local CPU/NPU.
 - **VERIFICATION:** Extracting text from a screenshot of an Excel table yields clean CSV ready to paste into spreadsheets; OCR works in disconnected airplane mode; identical UX to official Snipping Tool.
 
-### [P09-T005] Dedicated Direct "Export to PDF" Pipeline (خيار تصدير مباشر كـ PDF بجوار الطباعة) (Linear: `JMD-80`)
+### [v3-Desktop] [P09-T005] Dedicated Direct "Export to PDF" Pipeline (خيار تصدير مباشر كـ PDF بجوار الطباعة) (Linear: `JMD-80`)
 - **STATUS:** `PROPOSED`
 - **POLICY_REF:** `docs/PROJECT_RULES.md (Windows Integration, Fluent Native Tools, Clean UI)`
 - **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Zero-Crash Mandate, Protected Async Void, Safe Try/Catch, Non-Locking I/O)`
@@ -461,7 +458,7 @@
   4. **Shortcut Support:** Supports global hotkey `Ctrl + Shift + P` or `Ctrl + E` for rapid PDF export.
 - **VERIFICATION:** Clicking "Export to PDF" immediately generates a pristine PDF file matching the image and annotations with zero quality loss and zero spooler hangs.
 
-### [P09-T006] Windows 11 Native Share Button & Nearby Sharing Integration (زر المشاركة ومشاركة الأجهزة القريبة) (Linear: `JMD-81`)
+### [v3-Desktop] [P09-T006] Windows 11 Native Share Button & Nearby Sharing Integration (زر المشاركة ومشاركة الأجهزة القريبة) (Linear: `JMD-81`)
 - **STATUS:** `PROPOSED`
 - **POLICY_REF:** `docs/PROJECT_RULES.md (Architecture, Modular Vertical-Slice, Clean UI, Microsoft Store Standards)`
 - **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Zero-Crash Mandate, Protected Async Void, Safe Try/Catch, Non-Locking I/O)`
