@@ -384,10 +384,10 @@
 
 ---
 
-## Phase 9: DropCut v3.0.0.0 Roadmap & Proposed Tasks (خارطة طريق الإصدار الثالث المقترحة)
+## Phase 9: DropCut v3.0.0.0 Roadmap & Approved Tasks (خارطة طريق الإصدار الثالث المعتمدة)
 
-> **Mandate:** All tasks in Phase 9 are proposed roadmap specifications for Version 3.0.0.0. In strict accordance with the developer's explicit governance instructions, **no implementation code is to be authored, touched, or executed until explicit authorization ("ابدأ" or "انطلق") is given**.  
-> **Store Compliance Law:** Every proposed task strictly adheres to `docs/MICROSOFT_STORE_POLICY_CONSTITUTION.md` and `docs/PROJECT_RULES.md` (100% Offline-First, Zero Cloud Telemetry under Policy 10.5, Zero-Crash Mandate, Modular Vertical-Slice Architecture, and One-Class-Per-File law).
+> **Mandate:** All tasks in Phase 9 are roadmap specifications for Version 3.0.0.0 approved by the developer. In strict accordance with the developer's governance instructions, **no implementation code is to be authored, touched, or executed until explicit authorization ("ابدأ" or "انطلق") is given**.  
+> **Store Compliance Law:** Every approved task strictly adheres to `docs/MICROSOFT_STORE_POLICY_CONSTITUTION.md` and `docs/PROJECT_RULES.md` (100% Offline-First, Zero Cloud Telemetry under Policy 10.5, Zero-Crash Mandate, Modular Vertical-Slice Architecture, and One-Class-Per-File law).
 
 ### [P09-T001] Native Lightweight Screen Video & Animated GIF Snipping Engine (تسجيل الفيديو ولقطات الـ GIF الخفيفة محلياً) (Linear: `JMD-76`)
 - **STATUS:** `PROPOSED`
@@ -421,58 +421,57 @@
   4. **100% Offline-First:** Image stitching runs entirely in local memory with zero cloud processing.
 - **VERIFICATION:** Scrolling through a 5-page PDF or long web article captures a single high-resolution image with aligned text and borders; memory freed immediately upon completion.
 
-### [P09-T003] Enhanced On-Device OCR Table & Code Extraction Suite (استخراج الجداول والأكواد البرمجية بالذكاء الاصطناعي المحلي) (Linear: `JMD-78`)
+### [P09-T003] Cross-Browser Extension Project (Chrome, Edge, Firefox) for Web Snip & Full-Page Scrolling (مشروع ملحق المتصفحات لكروم وإيدج وفايرفوكس) (Linear: `JMD-78`)
+- **STATUS:** `PROPOSED`
+- **POLICY_REF:** `docs/PROJECT_RULES.md (Modular Vertical-Slice, Clean UI, Browser Integration Standards)`
+- **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Local Communication Isolation, Manifest V3 Compliance)`
+- **DESCRIPTION:** Scaffold and build a dedicated cross-browser WebExtension project (`DropCut.BrowserExtension`) supporting Google Chrome, Microsoft Edge, and Mozilla Firefox:
+  1. **Manifest V3 Architecture:** Built with modern WebExtensions standards, zero analytics, zero external scripts, and 100% offline-ready.
+  2. **Capture Capabilities:**
+     - **Visible Viewport Snip:** 1-click capture of the currently displayed browser area.
+     - **Selected Element Snip:** Interactive DOM element inspector to snip specific cards, tweets, charts, or code blocks.
+     - **Full Page Scrolling Capture:** Automated DOM-based scrolling capture for complete web articles without scrollbar interference.
+  3. **Native Desktop Handshake:** Seamless handoff to the desktop DropCut application via custom protocol URI (`dropcut://snip?id=...`) or system clipboard, instantly opening the capture in a new tab for annotation and drag-and-drop sharing.
+- **VERIFICATION:** Extension installs on Chrome, Edge, and Firefox developer modes; clicking "Capture Element" sends the cropped element directly into a new DropCut desktop tab.
+
+### [P09-T004] Enhanced 100% Local On-Device OCR with Dropdown Actions (نسخ النص وماركداون وجداول) (Linear: `JMD-79`)
 - **STATUS:** `PROPOSED`
 - **POLICY_REF:** `docs/PROJECT_RULES.md (Architecture, Modular Vertical-Slice, Clean UI, Microsoft Store Standards)`
 - **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Zero-Crash Mandate, Protected Async Void, Safe Try/Catch, Non-Locking I/O)`
-- **DESCRIPTION:** Deepen the text recognition engine using Windows native offline on-device OCR (`Windows.Media.Ocr.OcrEngine`) to provide advanced structural data extraction:
-  1. **Table Detection & Structured Export:**
-     - Automatically detect horizontal and vertical grid lines, cells, and whitespace alignments.
-     - 1-Click "Copy as Table" with options: CSV, TSV (for instant Excel/Sheets pasting), or Markdown Table.
-  2. **Code Snippet Recognition:**
-     - Recognize code blocks with monospace font heuristics, preserving indentation, brackets, and keywords.
-     - 1-Click "Copy Clean Code" button that strips line numbers and formatting noise.
+- **DESCRIPTION:** Deepen the text recognition engine using Windows native offline on-device OCR (`Windows.Media.Ocr.OcrEngine`) with zero addition to app package size:
+  1. **Zero Package Bloat:** Uses native Windows 10/11 built-in OS OCR components (0 MB added to package size).
+  2. **SplitButton Ribbon UI with Dropdown Actions:**
+     - Primary Icon click initiates text recognition and highlights detected text blocks.
+     - Dropdown menu (`MenuFlyout`) provides dedicated 1-click actions:
+       - **نسخ النص بالكامل (Copy All Text)**
+       - **نسخ بتنسيق ماركداون (Copy as Markdown):** Formats detected headings and lists cleanly.
+       - **نسخ كجدول (Copy as Table):** Parses grid/tabular columns into structured TSV/CSV for instant pasting into Microsoft Excel, Google Sheets, or tables.
   3. **Bilingual Arabic & English Support:** Full support for mixed English-Arabic documents with correct RTL/LTR line ordering.
   4. **Strict Policy 10.5 Privacy:** Zero telemetry, zero cloud OCR APIs (Azure/Google/AWS); 100% of OCR parsing happens on the local CPU/NPU.
-- **VERIFICATION:** Extracting text from a screenshot of an Excel table yields clean CSV ready to paste into spreadsheets; OCR works in disconnected airplane mode.
+- **VERIFICATION:** Extracting text from a screenshot of an Excel table yields clean CSV ready to paste into spreadsheets; OCR works in disconnected airplane mode; identical UX to official Snipping Tool.
 
-### [P09-T004] Voice Note & Audio Memo Annotations (تسجيل الملاحظات الصوتية المرفقة بالشروحات) (Linear: `JMD-79`)
+### [P09-T005] Dedicated Direct "Export to PDF" Pipeline (خيار تصدير مباشر كـ PDF بجوار الطباعة) (Linear: `JMD-80`)
+- **STATUS:** `PROPOSED`
+- **POLICY_REF:** `docs/PROJECT_RULES.md (Windows Integration, Fluent Native Tools, Clean UI)`
+- **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Zero-Crash Mandate, Protected Async Void, Safe Try/Catch, Non-Locking I/O)`
+- **DESCRIPTION:** Add a dedicated "Export to PDF" button and workflow positioned directly next to the Print button (`Ctrl + P`) in the ribbon toolbar:
+  1. **Ribbon UI:** A dedicated PDF export icon (`Glyph="&#xEA90;"` / Document PDF) placed adjacent to Print in Section 4 of the ribbon.
+  2. **Direct Vector/Raster PDF Generation:** Utilizes native `Windows.Data.Pdf` / Win2D rendering to directly generate a clean, high-resolution PDF document (A4 / Letter / Auto-Fit Image Dimensions) without having to go through the complex multi-step Windows Print Spooler dialogue.
+  3. **File Picker & Auto-Save Integration:** Automatically prompts standard Windows `FileSavePicker` defaulted to `.pdf` or exports directly to `FileVault` with 1 click.
+  4. **Shortcut Support:** Supports global hotkey `Ctrl + Shift + P` or `Ctrl + E` for rapid PDF export.
+- **VERIFICATION:** Clicking "Export to PDF" immediately generates a pristine PDF file matching the image and annotations with zero quality loss and zero spooler hangs.
+
+### [P09-T006] Windows 11 Native Share Button & Nearby Sharing Integration (زر المشاركة ومشاركة الأجهزة القريبة) (Linear: `JMD-81`)
 - **STATUS:** `PROPOSED`
 - **POLICY_REF:** `docs/PROJECT_RULES.md (Architecture, Modular Vertical-Slice, Clean UI, Microsoft Store Standards)`
 - **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Zero-Crash Mandate, Protected Async Void, Safe Try/Catch, Non-Locking I/O)`
-- **DESCRIPTION:** Enable users to attach concise voice explanations directly to screenshots for enhanced educational tutorials, bug reports, and design feedback:
-  1. **Local Audio Capture:** Record voice notes via native WASAPI / `Windows.Media.Capture` encoded to lightweight local AAC/M4A.
-  2. **Interactive Audio Pin on Canvas:**
-     - Place an interactive microphone / speaker badge (`Glyph="&#xE720;"`) anywhere on the screenshot canvas.
-     - Clicking the badge plays back the voice note in-app with waveform / playback controls.
-  3. **Export Package Support:** Audio memo bundles seamlessly with the image in native `.dropcut` project packages or exports as a combined video slide (MP4).
-  4. **Zero Cloud Requirement:** Completely offline, preserving privacy and adhering strictly to Store Policy 10.5.
-- **VERIFICATION:** Recording a 10-second explanation places a playable audio badge on the canvas; playing audio is smooth with zero UI freezing.
-
-### [P09-T005] Non-Destructive Multi-Layer Project Files (`.dropcut`) (ملفات مشاريع متعددة الطبقات قابلة لإعادة التحرير) (Linear: `JMD-80`)
-- **STATUS:** `PROPOSED`
-- **POLICY_REF:** `docs/PROJECT_RULES.md (Architecture, Modular Vertical-Slice, Clean UI, Microsoft Store Standards)`
-- **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Zero-Crash Mandate, Protected Async Void, Safe Try/Catch, Non-Locking I/O)`
-- **DESCRIPTION:** Introduce the official native `.dropcut` open file format for non-destructive re-editing:
-  1. **Container Architecture:** An uncompressed or deflate ZIP container containing:
-     - `manifest.json`: Metadata, tab title, timestamp, author, DPI scale factor.
-     - `background.png`: Solid raw captured bitmap.
-     - `layers.json`: Vector descriptors for all annotations (pens, arrows, rectangles, speech bubbles, step badges, blur rects, text).
-     - `audio/`: Any attached voice memos.
-  2. **Non-Destructive Workflow:** Opening a previously saved `.dropcut` file restores all vector elements as fully interactive, movable, and editable objects.
-  3. **Shell File Association:** Register `.dropcut` extension in `Package.appxmanifest` with custom file icon so double-clicking in File Explorer opens DropCut directly.
-- **VERIFICATION:** Saving a tab as `.dropcut`, closing the app, and re-opening the file restores all shapes and badges with full editability and undo history.
-
-### [P09-T006] Windows 11 Nearby Sharing & Share Target Contract (مشاركة الأجهزة القريبة ومستقبل المشاركة) (Linear: `JMD-81`)
-- **STATUS:** `PROPOSED`
-- **POLICY_REF:** `docs/PROJECT_RULES.md (Architecture, Modular Vertical-Slice, Clean UI, Microsoft Store Standards)`
-- **SECURITY_REF:** `docs/PROJECT_RULES.md §Zero-Crash (Zero-Crash Mandate, Protected Async Void, Safe Try/Catch, Non-Locking I/O)`
-- **DESCRIPTION:** Seamlessly integrate DropCut into the broader Windows 11 ecosystem:
-  1. **Windows Nearby Share (المشاركة عن قرب):**
-     - Add a direct Share button invoking Windows 11 native `DataTransferManager.ShowShareUI()`, enabling instant peer-to-peer Wi-Fi/Bluetooth transfer to nearby Windows PCs without internet or cloud storage.
-  2. **Share Target Contract:**
+- **DESCRIPTION:** Integrate a dedicated Share button and support the Windows 11 Nearby Sharing contract:
+  1. **Dedicated Ribbon Share Button:** Add a prominent Share button (`Glyph="&#xE72D;"` / Share) in the header toolbar next to Save and Copy.
+  2. **Windows Nearby Share (المشاركة عن قرب):**
+     - Clicking Share invokes Windows 11 native `DataTransferManager.ShowShareUI()`, enabling instant peer-to-peer Wi-Fi/Bluetooth transfer to nearby Windows PCs without internet or cloud storage.
+  3. **Share Target Contract:**
      - Register DropCut as a Windows Share Target in `Package.appxmanifest` (`windows.shareTarget`).
      - Users can right-click any image in Windows Photos, File Explorer, or Microsoft Edge, click "Share", and pick DropCut to immediately open it for cropping, blurring, or annotation.
-  3. **Strict Zero-Cloud Transport:** Local Bluetooth/Wi-Fi Direct only; zero intermediate relay servers.
+  4. **Strict Zero-Cloud Transport:** Local Bluetooth/Wi-Fi Direct only; zero intermediate relay servers.
 - **VERIFICATION:** Clicking Share opens Windows native sharing flyout; sharing an image from Photos launches DropCut with the image opened in a new tab.
 
